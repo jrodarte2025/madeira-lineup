@@ -139,40 +139,28 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
 // =============================================
 // ROSTER PLAYER CHIP
 // =============================================
-function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, showRemove, onToggleInactive }) {
-  const canInteract = !isDimmed && !isInactive;
+function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, showRemove }) {
+  const canInteract = !isDimmed;
   return (
     <div draggable={canInteract} onDragStart={canInteract ? onDragStart : undefined} onDragEnd={onDragEnd}
       onClick={canInteract ? onClick : undefined}
       style={{
         display: "flex", alignItems: "center", gap: 8,
-        padding: isDimmed || isInactive ? "5px 10px" : "8px 10px", marginBottom: 3, borderRadius: 8,
-        cursor: canInteract ? "grab" : "default", opacity: isDimmed ? 0.28 : isInactive ? 0.4 : 1,
+        padding: isDimmed ? "5px 10px" : "8px 10px", marginBottom: 3, borderRadius: 8,
+        cursor: canInteract ? "grab" : "default", opacity: isDimmed ? 0.28 : 1,
         background: isSelected ? C.orange : "rgba(255,255,255,0.05)",
-        border: isSelected ? "1px solid transparent" : isDimmed || isInactive ? "1px solid transparent" : "1px solid rgba(255,255,255,0.07)",
+        border: isSelected ? "1px solid transparent" : isDimmed ? "1px solid transparent" : "1px solid rgba(255,255,255,0.07)",
         transition: "all 0.15s ease", userSelect: "none",
-        textDecoration: isInactive ? "line-through" : "none",
-        textDecorationColor: isInactive ? "rgba(255,255,255,0.3)" : undefined,
       }}>
       <div style={{
-        width: isDimmed || isInactive ? 24 : 28, height: isDimmed || isInactive ? 24 : 28, borderRadius: "50%",
+        width: isDimmed ? 24 : 28, height: isDimmed ? 24 : 28, borderRadius: "50%",
         background: isSelected ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: fontDisplay, fontSize: isDimmed || isInactive ? 10 : 12, fontWeight: 800, flexShrink: 0, color: C.white,
+        fontFamily: fontDisplay, fontSize: isDimmed ? 10 : 12, fontWeight: 800, flexShrink: 0, color: C.white,
       }}>{player.num}</div>
-      <div style={{ fontSize: isDimmed || isInactive ? 12 : 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
+      <div style={{ fontSize: isDimmed ? 12 : 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
         {player.name}
       </div>
-      {onToggleInactive && !isDimmed && (
-        <button onClick={(e) => { e.stopPropagation(); onToggleInactive(); }} title={isInactive ? "Mark active" : "Mark inactive"}
-          style={{
-            background: isInactive ? "rgba(76,175,80,0.15)" : "rgba(255,165,0,0.12)",
-            border: "none", borderRadius: 4, cursor: "pointer", fontSize: 10, padding: "2px 5px", flexShrink: 0, lineHeight: 1,
-            color: isInactive ? "#66bb6a" : "rgba(255,165,0,0.7)",
-          }}>
-          {isInactive ? "✓" : "✗"}
-        </button>
-      )}
       {showRemove && !isDimmed && (
         <button onClick={(e) => { e.stopPropagation(); onRemove(); }}
           style={{ background: "rgba(255,80,80,0.15)", border: "none", color: "#ff7b7b", borderRadius: 4, cursor: "pointer", fontSize: 12, padding: "2px 6px", flexShrink: 0, lineHeight: 1 }}>×</button>
@@ -182,7 +170,7 @@ function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onD
 }
 
 // =============================================
-// PRINT PITCH — static half for print view
+// PRINT PITCH — ink-friendly version (white bg, navy outlines)
 // =============================================
 function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveIds }) {
   const getPlayer = (id) => roster.find((p) => p.id === id);
@@ -193,73 +181,73 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", minWidth: 0 }}>
       <div style={{
-        fontFamily: fontDisplay, fontSize: 12, fontWeight: 800, letterSpacing: "2px",
-        textTransform: "uppercase", marginBottom: 6, background: C.orange, padding: "3px 16px", borderRadius: 4, color: C.white,
+        fontFamily: fontDisplay, fontSize: 11, fontWeight: 800, letterSpacing: "2px",
+        textTransform: "uppercase", marginBottom: 5, border: `2px solid ${C.orange}`,
+        padding: "2px 14px", borderRadius: 4, color: C.orange,
       }}>{halfLabel}</div>
       <div style={{
-        position: "relative", width: "100%", maxWidth: 260, aspectRatio: "3 / 4",
-        background: "repeating-linear-gradient(to bottom, #338740 0px, #338740 12px, #2E7D39 12px, #2E7D39 24px)",
-        borderRadius: 6, overflow: "hidden", border: `2px solid ${C.navy}`,
+        position: "relative", width: "100%", maxWidth: 240, aspectRatio: "3 / 4",
+        background: "white", borderRadius: 4, overflow: "hidden", border: `1.5px solid ${C.navy}`,
       }}>
-        <PitchSVG lineColor="rgba(255,255,255,0.6)" />
+        <PitchSVG lineColor={C.navy} />
         <div style={{
-          position: "absolute", top: 4, left: "50%", transform: "translateX(-50%)",
-          background: "rgba(0,0,0,0.45)", padding: "2px 8px", borderRadius: 8,
-          fontSize: 7, fontWeight: 700, fontFamily: fontDisplay, letterSpacing: "1px",
-          color: "rgba(255,255,255,0.7)", zIndex: 10,
+          position: "absolute", top: 3, left: "50%", transform: "translateX(-50%)",
+          padding: "1px 8px", borderRadius: 6, border: `1px solid #ccc`,
+          fontSize: 6.5, fontWeight: 700, fontFamily: fontDisplay, letterSpacing: "1px",
+          color: C.navy, zIndex: 10, background: "white",
         }}>{formation}</div>
         {positions.map((pos, idx) => {
           const player = lineup[idx] ? getPlayer(lineup[idx]) : null;
           return (
             <div key={idx} style={{
               position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%, -50%)",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 1, zIndex: 5,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 0, zIndex: 5,
             }}>
               <div style={{
-                width: player ? 28 : 20, height: player ? 28 : 20, borderRadius: "50%",
-                background: player ? C.navy : "rgba(0,0,0,0.15)",
-                border: player ? `2px solid ${C.orange}` : "1.5px dashed rgba(255,255,255,0.3)",
+                width: player ? 24 : 18, height: player ? 24 : 18, borderRadius: "50%",
+                background: "white",
+                border: player ? `2px solid ${C.orange}` : `1px dashed #bbb`,
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: fontDisplay, fontSize: player ? 11 : 6, fontWeight: 800,
-                color: player ? C.orange : "rgba(255,255,255,0.4)",
+                fontFamily: fontDisplay, fontSize: player ? 10 : 5.5, fontWeight: 800,
+                color: player ? C.navy : "#bbb",
               }}>{player ? player.num : pos.label}</div>
               <div style={{
-                fontSize: 6.5, fontWeight: 700, color: C.white, textShadow: "0 1px 3px rgba(0,0,0,0.9)",
-                maxWidth: 52, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase, textAlign: "center",
+                fontSize: 6, fontWeight: 700, color: C.navy,
+                maxWidth: 50, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase, textAlign: "center",
               }}>{player ? player.name.split(" ").slice(-1)[0] : pos.label}</div>
-              {player && <div style={{ fontSize: 5.5, fontWeight: 700, color: C.orange, letterSpacing: "0.8px", textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>{pos.label}</div>}
+              {player && <div style={{ fontSize: 5, fontWeight: 700, color: C.orange, letterSpacing: "0.6px" }}>{pos.label}</div>}
             </div>
           );
         })}
       </div>
 
-      <div style={{ marginTop: 7, width: "100%", maxWidth: 260 }}>
-        <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "1.5px", color: C.navy, textTransform: "uppercase", marginBottom: 3, opacity: 0.6 }}>Bench</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+      <div style={{ marginTop: 5, width: "100%", maxWidth: 240 }}>
+        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: "1.5px", color: C.navy, textTransform: "uppercase", marginBottom: 2, opacity: 0.5 }}>Bench</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
           {benchPlayers.map((p) => (
             <div key={p.id} style={{
-              display: "flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 8,
-              background: `${C.navy}0D`, border: `1px solid ${C.navy}20`, fontSize: 7.5, fontFamily: fontBase, color: C.navy,
+              display: "flex", alignItems: "center", gap: 2, padding: "1px 5px", borderRadius: 6,
+              border: `1px solid #ddd`, fontSize: 7, fontFamily: fontBase, color: C.navy,
             }}>
-              <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7.5 }}>{p.num}</span>
+              <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7 }}>{p.num}</span>
               <span style={{ fontWeight: 600 }}>{p.name}</span>
             </div>
           ))}
-          {benchPlayers.length === 0 && <div style={{ fontSize: 7.5, color: "#999", fontStyle: "italic" }}>All assigned</div>}
+          {benchPlayers.length === 0 && <div style={{ fontSize: 7, color: "#999", fontStyle: "italic" }}>All assigned</div>}
         </div>
       </div>
 
       {inactivePlayers.length > 0 && (
-        <div style={{ marginTop: 5, width: "100%", maxWidth: 260 }}>
-          <div style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginBottom: 3 }}>Inactive</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+        <div style={{ marginTop: 3, width: "100%", maxWidth: 240 }}>
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginBottom: 2 }}>Inactive</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
             {inactivePlayers.map((p) => (
               <div key={p.id} style={{
-                display: "flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 8,
-                background: "#f5f5f5", border: "1px solid #e0e0e0", fontSize: 7.5, fontFamily: fontBase, color: "#999",
+                display: "flex", alignItems: "center", gap: 2, padding: "1px 5px", borderRadius: 6,
+                border: "1px solid #e0e0e0", fontSize: 7, fontFamily: fontBase, color: "#999",
                 textDecoration: "line-through",
               }}>
-                <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7.5 }}>{p.num}</span>
+                <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7 }}>{p.num}</span>
                 <span style={{ fontWeight: 600 }}>{p.name}</span>
               </div>
             ))}
@@ -349,7 +337,21 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
 // =============================================
 function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
   handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive, newName, setNewName, newNum, setNewNum,
-  addPlayer, copyToOtherHalf, clearLineup, activeHalf }) {
+  addPlayer, copyToOtherHalf, clearLineup, activeHalf, inactiveHover, setInactiveHover }) {
+
+  const handleInactiveDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setInactiveHover(true); };
+  const handleInactiveDragLeave = () => setInactiveHover(false);
+  const handleInactiveDrop = (e) => {
+    e.preventDefault();
+    setInactiveHover(false);
+    try {
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      if (data.playerId && data.source !== "inactive") {
+        toggleInactive(data.playerId);
+      }
+    } catch {}
+  };
+
   return (
     <>
       <div style={{ padding: "14px 14px 6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -367,8 +369,7 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
         {availablePlayers.map((p) => (
           <PlayerChip key={p.id} player={p} isSelected={selectedPlayer === p.id} isDimmed={false} isInactive={false}
             onDragStart={(e) => handleDragStart(e, p.id, "roster")} onDragEnd={handleDragEnd}
-            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} showRemove={showEdit}
-            onToggleInactive={showEdit ? () => toggleInactive(p.id) : undefined} />
+            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} showRemove={showEdit} />
         ))}
 
         {onFieldPlayers.length > 0 && (
@@ -378,19 +379,6 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
             </div>
             {onFieldPlayers.map((p) => (
               <PlayerChip key={p.id} player={p} isSelected={false} isDimmed={true} isInactive={false} showRemove={false} />
-            ))}
-          </>
-        )}
-
-        {inactivePlayers.length > 0 && (
-          <>
-            <div style={{ padding: "12px 0 5px", fontSize: 9, fontWeight: 700, color: "rgba(255,120,80,0.5)", letterSpacing: "1.5px", textTransform: "uppercase" }}>
-              Inactive · {inactivePlayers.length}
-            </div>
-            {inactivePlayers.map((p) => (
-              <PlayerChip key={p.id} player={p} isSelected={false} isDimmed={false} isInactive={true} showRemove={showEdit}
-                onRemove={() => removePlayer(p.id)}
-                onToggleInactive={showEdit ? () => toggleInactive(p.id) : undefined} />
             ))}
           </>
         )}
@@ -407,6 +395,55 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
             </div>
           </div>
         )}
+      </div>
+
+      {/* INACTIVE DROP ZONE */}
+      <div
+        onDragOver={handleInactiveDragOver}
+        onDragLeave={handleInactiveDragLeave}
+        onDrop={handleInactiveDrop}
+        style={{
+          margin: "0 10px", padding: inactivePlayers.length > 0 ? "8px 10px" : "10px",
+          borderRadius: 8, minHeight: inactivePlayers.length > 0 ? "auto" : 44,
+          background: inactiveHover ? "rgba(255,120,80,0.15)" : "rgba(255,255,255,0.03)",
+          border: inactiveHover ? `2px dashed ${C.orange}` : inactivePlayers.length > 0 ? "1px solid rgba(255,120,80,0.15)" : "2px dashed rgba(255,255,255,0.08)",
+          transition: "all 0.2s ease",
+          display: "flex", flexDirection: "column", gap: 3,
+        }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: inactivePlayers.length > 0 ? 4 : 0 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={inactiveHover ? C.orange : "rgba(255,120,80,0.5)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1.5px", color: inactiveHover ? C.orange : "rgba(255,120,80,0.5)", textTransform: "uppercase" }}>
+            {inactivePlayers.length > 0 ? `Inactive · ${inactivePlayers.length}` : "Drag here to sit out"}
+          </span>
+        </div>
+        {inactivePlayers.map((p) => (
+          <div key={p.id} draggable
+            onDragStart={(e) => handleDragStart(e, p.id, "inactive")}
+            onDragEnd={handleDragEnd}
+            onClick={() => toggleInactive(p.id)}
+            style={{
+              display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", borderRadius: 6,
+              cursor: "grab", opacity: 0.55,
+              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+              textDecoration: "line-through", textDecorationColor: "rgba(255,255,255,0.2)",
+              transition: "all 0.15s ease", userSelect: "none",
+            }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.08)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: fontDisplay, fontSize: 9, fontWeight: 800, flexShrink: 0, color: C.white,
+            }}>{p.num}</div>
+            <div style={{ fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, color: "rgba(255,255,255,0.5)" }}>
+              {p.name}
+            </div>
+            {showEdit && (
+              <button onClick={(e) => { e.stopPropagation(); removePlayer(p.id); }}
+                style={{ background: "rgba(255,80,80,0.15)", border: "none", color: "#ff7b7b", borderRadius: 4, cursor: "pointer", fontSize: 12, padding: "2px 6px", flexShrink: 0, lineHeight: 1 }}>×</button>
+            )}
+          </div>
+        ))}
       </div>
 
       <div style={{ padding: 10, borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", flexDirection: "column", gap: 5 }}>
@@ -442,6 +479,7 @@ export default function MadeiraLineupPlanner() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("save");
   const [rosterOpen, setRosterOpen] = useState(false);
+  const [inactiveHover, setInactiveHover] = useState(false);
 
   const currentLineup = lineups[activeHalf];
   const positions = FORMATIONS[formation];
@@ -554,8 +592,16 @@ export default function MadeiraLineupPlanner() {
     e.preventDefault();
     try {
       const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-      if (data.source === "roster") assignPlayer(data.playerId, posIndex);
-      else if (typeof data.source === "number") swapPositions(data.source, posIndex);
+      if (data.source === "inactive") {
+        // Reactivate and assign to position
+        toggleInactive(data.playerId);
+        // Use setTimeout so the inactive state clears before assigning
+        setTimeout(() => assignPlayer(data.playerId, posIndex), 0);
+      } else if (data.source === "roster") {
+        assignPlayer(data.playerId, posIndex);
+      } else if (typeof data.source === "number") {
+        swapPositions(data.source, posIndex);
+      }
     } catch {}
     setDragSource(null);
   };
@@ -575,6 +621,7 @@ export default function MadeiraLineupPlanner() {
     roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
     handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive,
     newName, setNewName, newNum, setNewNum, addPlayer, copyToOtherHalf, clearLineup, activeHalf,
+    inactiveHover, setInactiveHover,
   };
 
   return (
@@ -591,9 +638,8 @@ export default function MadeiraLineupPlanner() {
           html, body { margin: 0 !important; padding: 0 !important; }
           .screen-view { display: none !important; }
           .print-view {
-            display: flex !important; flex-direction: column; width: 100%; min-height: 100vh;
-            padding: 16px 22px; background: white !important; font-family: ${fontBase};
-            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important;
+            display: flex !important; flex-direction: column; width: 100%;
+            padding: 12px 18px; background: white !important; font-family: ${fontBase};
           }
           @page { size: portrait; margin: 0.3in; }
         }
@@ -601,48 +647,46 @@ export default function MadeiraLineupPlanner() {
 
       {/* ============ PRINT VIEW ============ */}
       <div className="print-view">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, paddingBottom: 8, borderBottom: `3px solid ${C.navy}` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingBottom: 6, borderBottom: `2px solid ${C.navy}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{
-              width: 30, height: 34, background: C.orange,
-              clipPath: "polygon(50% 0%, 100% 14%, 100% 72%, 50% 100%, 0% 72%, 0% 14%)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 11, fontWeight: 900, color: C.white, fontFamily: fontDisplay,
+              fontFamily: fontDisplay, fontSize: 14, fontWeight: 900, color: C.orange,
+              border: `2px solid ${C.orange}`, borderRadius: 4, padding: "2px 6px", lineHeight: 1,
             }}>M</div>
             <div>
-              <div style={{ fontFamily: fontDisplay, fontSize: 20, fontWeight: 800, color: C.navy, letterSpacing: "-0.3px", lineHeight: 1.1 }}>MADEIRA FC</div>
-              <div style={{ fontFamily: fontBase, fontSize: 8, fontWeight: 600, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginTop: 1 }}>Game Day Lineup Card</div>
+              <div style={{ fontFamily: fontDisplay, fontSize: 18, fontWeight: 800, color: C.navy, letterSpacing: "-0.3px", lineHeight: 1.1 }}>MADEIRA FC</div>
+              <div style={{ fontFamily: fontBase, fontSize: 7, fontWeight: 600, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginTop: 1 }}>Game Day Lineup Card</div>
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontFamily: fontDisplay, fontSize: 13, fontWeight: 700, color: C.navy }}>Formation: {formation}</div>
-            <div style={{ fontFamily: fontBase, fontSize: 9, color: "#999", marginTop: 2 }}>
+            <div style={{ fontFamily: fontDisplay, fontSize: 12, fontWeight: 700, color: C.navy }}>Formation: {formation}</div>
+            <div style={{ fontFamily: fontBase, fontSize: 8, color: "#999", marginTop: 1 }}>
               {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
             </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 14, marginBottom: 12 }}>
+        <div style={{ display: "flex", gap: 12, marginBottom: 8 }}>
           {["vs.", "Time", "Field"].map((label) => (
-            <div key={label} style={{ flex: 1, display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "1px", color: C.navy, textTransform: "uppercase", flexShrink: 0 }}>{label}</span>
-              <div style={{ flex: 1, borderBottom: "1.5px solid #ddd", height: 16 }} />
+            <div key={label} style={{ flex: 1, display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ fontSize: 7.5, fontWeight: 700, letterSpacing: "1px", color: C.navy, textTransform: "uppercase", flexShrink: 0 }}>{label}</span>
+              <div style={{ flex: 1, borderBottom: "1.5px solid #ddd", height: 14 }} />
             </div>
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 20, flex: 1 }}>
+        <div style={{ display: "flex", gap: 16, flex: 1 }}>
           <PrintPitch halfLabel="1st Half" lineup={lineups[1]} positions={positions} roster={roster} formation={formation} inactiveIds={inactiveIds} />
           <PrintPitch halfLabel="2nd Half" lineup={lineups[2]} positions={positions} roster={roster} formation={formation} inactiveIds={inactiveIds} />
         </div>
 
-        <div style={{ marginTop: 10, paddingTop: 6, borderTop: "1.5px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 7, color: "#ccc", letterSpacing: "1px", textTransform: "uppercase" }}>Madeira FC Lineup Planner</div>
-          <div style={{ display: "flex", gap: 14 }}>
+        <div style={{ marginTop: 8, paddingTop: 5, borderTop: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 6.5, color: "#ccc", letterSpacing: "1px", textTransform: "uppercase" }}>Madeira FC Lineup Planner</div>
+          <div style={{ display: "flex", gap: 12 }}>
             {["Score", "Notes"].map((label) => (
               <div key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ fontSize: 7, fontWeight: 700, color: C.navy, letterSpacing: "1px", textTransform: "uppercase" }}>{label}</span>
-                <div style={{ width: label === "Notes" ? 110 : 50, borderBottom: "1.5px solid #ddd", height: 12 }} />
+                <span style={{ fontSize: 6.5, fontWeight: 700, color: C.navy, letterSpacing: "1px", textTransform: "uppercase" }}>{label}</span>
+                <div style={{ width: label === "Notes" ? 100 : 45, borderBottom: "1.5px solid #ddd", height: 10 }} />
               </div>
             ))}
           </div>
