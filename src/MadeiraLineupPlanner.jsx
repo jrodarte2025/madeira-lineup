@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { loadPublishedLineup, savePublishedLineup } from "./firebase";
 
 // =============================================
 // MADEIRA FC — 9v9 LINEUP PLANNER
@@ -378,7 +379,7 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
 // =============================================
 function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
   handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive, newName, setNewName, newNum, setNewNum,
-  addPlayer, copyToOtherHalf, clearLineup, activeHalf, inactiveHover, setInactiveHover }) {
+  addPlayer, copyToOtherHalf, clearLineup, clearAll, activeHalf, inactiveHover, setInactiveHover }) {
 
   const handleInactiveDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setInactiveHover(true); };
   const handleInactiveDragLeave = () => setInactiveHover(false);
@@ -492,7 +493,10 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
           Copy to {activeHalf === 1 ? "2nd" : "1st"} Half
         </button>
         <button onClick={clearLineup} style={{ padding: 7, background: "rgba(255,60,60,0.08)", border: "1px solid rgba(255,60,60,0.15)", borderRadius: 7, color: "rgba(255,100,100,0.7)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: fontBase }}>
-          Clear Lineup
+          Clear {activeHalf === 1 ? "1st" : "2nd"} Half
+        </button>
+        <button onClick={clearAll} style={{ padding: 7, background: "rgba(255,60,60,0.15)", border: "1px solid rgba(255,60,60,0.25)", borderRadius: 7, color: "rgba(255,100,100,0.9)", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: fontBase }}>
+          Clear All
         </button>
       </div>
     </>
@@ -532,6 +536,7 @@ export default function MadeiraLineupPlanner() {
   const [inactiveHover, setInactiveHover] = useState(false);
   const [toast, setToast] = useState(null);
   const [sharedName, setSharedName] = useState(null);
+  const [cloudLoaded, setCloudLoaded] = useState(false);
   const toastTimer = useRef(null);
 
   // --- Persist state to localStorage ---
@@ -547,7 +552,7 @@ export default function MadeiraLineupPlanner() {
     toastTimer.current = setTimeout(() => setToast(null), 2500);
   };
 
-  // Load shared lineup from URL on mount
+  // Load shared lineup from URL on mount, or load published lineup from Firestore
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const encoded = params.get("lineup");
@@ -559,10 +564,22 @@ export default function MadeiraLineupPlanner() {
         setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
         setInactiveIds([...data.inactiveIds]);
         if (data.name) setSharedName(data.name);
-        // Clean URL without reload
         window.history.replaceState({}, "", window.location.pathname);
+        setCloudLoaded(true);
+        return;
       }
     }
+    // No URL share — load published lineup from Firestore
+    loadPublishedLineup().then((data) => {
+      if (data) {
+        if (data.roster) setRoster(data.roster);
+        if (data.formation) setFormation(data.formation);
+        if (data.lineups) setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
+        if (data.inactiveIds) setInactiveIds([...data.inactiveIds]);
+        if (data.name) setSharedName(data.name);
+      }
+      setCloudLoaded(true);
+    });
   }, []);
 
   const currentLineup = lineups[activeHalf];
@@ -609,6 +626,11 @@ export default function MadeiraLineupPlanner() {
   }, [activeHalf]);
 
   const clearLineup = () => setLineups((prev) => ({ ...prev, [activeHalf]: Array(9).fill(null) }));
+  const clearAll = () => {
+    setLineups({ 1: Array(9).fill(null), 2: Array(9).fill(null) });
+    setInactiveIds([]);
+    setSelectedPlayer(null);
+  };
   const copyToOtherHalf = () => {
     const other = activeHalf === 1 ? 2 : 1;
     setLineups((prev) => ({ ...prev, [other]: [...prev[activeHalf]] }));
@@ -644,16 +666,21 @@ export default function MadeiraLineupPlanner() {
   };
 
   // --- SAVE / LOAD ---
-  const saveLineup = (name) => {
-    setSavedLineups((prev) => [...prev, {
+  const saveLineup = async (name) => {
+    const snapshot = {
       name,
       formation,
       lineups: { 1: [...lineups[1]], 2: [...lineups[2]] },
       inactiveIds: [...inactiveIds],
       roster: roster.map((p) => ({ ...p })),
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    }]);
+    };
+    setSavedLineups((prev) => [...prev, snapshot]);
     setModalOpen(false);
+    // Publish to Firestore so all devices see this lineup
+    const ok = await savePublishedLineup(snapshot);
+    if (ok) showToast("Lineup saved & published!");
+    else showToast("Saved locally (cloud sync failed)");
   };
   const loadLineup = (index) => {
     const s = savedLineups[index];
@@ -719,7 +746,7 @@ export default function MadeiraLineupPlanner() {
   const rosterProps = {
     roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
     handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive,
-    newName, setNewName, newNum, setNewNum, addPlayer, copyToOtherHalf, clearLineup, activeHalf,
+    newName, setNewName, newNum, setNewNum, addPlayer, copyToOtherHalf, clearLineup, clearAll, activeHalf,
     inactiveHover, setInactiveHover,
   };
 
