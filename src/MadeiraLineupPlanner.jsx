@@ -506,17 +506,26 @@ export default function MadeiraLineupPlanner() {
   const isMobile = useMediaQuery("(max-width: 767px)");
   const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1024px)");
 
-  const [roster, setRoster] = useState(INITIAL_ROSTER);
-  const [inactiveIds, setInactiveIds] = useState([]);
-  const [formation, setFormation] = useState("3-3-2");
+  // --- localStorage helpers ---
+  const loadStored = (key, fallback) => {
+    try { const v = localStorage.getItem(`madeira_${key}`); return v ? JSON.parse(v) : fallback; }
+    catch { return fallback; }
+  };
+  const saveStored = (key, value) => {
+    try { localStorage.setItem(`madeira_${key}`, JSON.stringify(value)); } catch {}
+  };
+
+  const [roster, setRoster] = useState(() => loadStored("roster", INITIAL_ROSTER));
+  const [inactiveIds, setInactiveIds] = useState(() => loadStored("inactiveIds", []));
+  const [formation, setFormation] = useState(() => loadStored("formation", "3-3-2"));
   const [activeHalf, setActiveHalf] = useState(1);
-  const [lineups, setLineups] = useState({ 1: Array(9).fill(null), 2: Array(9).fill(null) });
+  const [lineups, setLineups] = useState(() => loadStored("lineups", { 1: Array(9).fill(null), 2: Array(9).fill(null) }));
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [dragSource, setDragSource] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const [newName, setNewName] = useState("");
   const [newNum, setNewNum] = useState("");
-  const [savedLineups, setSavedLineups] = useState([]);
+  const [savedLineups, setSavedLineups] = useState(() => loadStored("savedLineups", []));
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("save");
   const [rosterOpen, setRosterOpen] = useState(false);
@@ -524,6 +533,13 @@ export default function MadeiraLineupPlanner() {
   const [toast, setToast] = useState(null);
   const [sharedName, setSharedName] = useState(null);
   const toastTimer = useRef(null);
+
+  // --- Persist state to localStorage ---
+  useEffect(() => saveStored("roster", roster), [roster]);
+  useEffect(() => saveStored("inactiveIds", inactiveIds), [inactiveIds]);
+  useEffect(() => saveStored("formation", formation), [formation]);
+  useEffect(() => saveStored("lineups", lineups), [lineups]);
+  useEffect(() => saveStored("savedLineups", savedLineups), [savedLineups]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -538,10 +554,10 @@ export default function MadeiraLineupPlanner() {
     if (encoded) {
       const data = decodeLineup(encoded);
       if (data) {
+        if (data.roster) setRoster(data.roster);
         setFormation(data.formation);
         setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
         setInactiveIds([...data.inactiveIds]);
-        if (data.roster) setRoster(data.roster);
         if (data.name) setSharedName(data.name);
         // Clean URL without reload
         window.history.replaceState({}, "", window.location.pathname);
@@ -634,12 +650,14 @@ export default function MadeiraLineupPlanner() {
       formation,
       lineups: { 1: [...lineups[1]], 2: [...lineups[2]] },
       inactiveIds: [...inactiveIds],
+      roster: roster.map((p) => ({ ...p })),
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     }]);
     setModalOpen(false);
   };
   const loadLineup = (index) => {
     const s = savedLineups[index];
+    if (s.roster) setRoster(s.roster.map((p) => ({ ...p })));
     setFormation(s.formation);
     setLineups({ 1: [...s.lineups[1]], 2: [...s.lineups[2]] });
     setInactiveIds([...s.inactiveIds]);
@@ -653,7 +671,7 @@ export default function MadeiraLineupPlanner() {
   // --- SHARE ---
   const handleShareSaved = async (index) => {
     const s = savedLineups[index];
-    const result = await shareLineup({ formation: s.formation, lineups: s.lineups, inactiveIds: s.inactiveIds, roster, name: s.name });
+    const result = await shareLineup({ formation: s.formation, lineups: s.lineups, inactiveIds: s.inactiveIds, roster: s.roster || roster, name: s.name });
     if (result === "copied") showToast("Link copied to clipboard!");
     else if (result === "shared") showToast("Lineup shared!");
   };
