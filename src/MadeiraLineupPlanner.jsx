@@ -1,8 +1,44 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 // =============================================
 // MADEIRA FC — 9v9 LINEUP PLANNER
 // =============================================
+
+// =============================================
+// SHARE UTILS — encode/decode lineup state for URL sharing
+// =============================================
+function encodeLineup({ formation, lineups, inactiveIds, roster, name }) {
+  const payload = { f: formation, l: lineups, i: inactiveIds, r: roster, n: name || "" };
+  return btoa(JSON.stringify(payload));
+}
+
+function decodeLineup(encoded) {
+  try {
+    const payload = JSON.parse(atob(encoded));
+    return { formation: payload.f, lineups: payload.l, inactiveIds: payload.i, roster: payload.r, name: payload.n || "" };
+  } catch { return null; }
+}
+
+function buildShareUrl(data) {
+  const base = window.location.origin + window.location.pathname;
+  return `${base}?lineup=${encodeLineup(data)}`;
+}
+
+async function shareLineup(data) {
+  const url = buildShareUrl(data);
+  const title = data.name ? `Madeira FC — ${data.name}` : "Madeira FC Lineup";
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, url });
+      return "shared";
+    } catch (e) {
+      if (e.name === "AbortError") return null;
+    }
+  }
+  await navigator.clipboard.writeText(url);
+  return "copied";
+}
 
 const C = {
   navy: "#1B2A5B",
@@ -261,7 +297,7 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
 // =============================================
 // SAVE / LOAD MODAL
 // =============================================
-function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, onClose, isMobile }) {
+function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, onShare, onClose, isMobile }) {
   const [name, setName] = useState("");
   if (!isOpen) return null;
 
@@ -318,8 +354,13 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
                       {s.formation} · {s.date}
                     </div>
                   </div>
+                  <button onClick={(e) => { e.stopPropagation(); onShare(i); }} title="Share lineup"
+                    style={{ background: "rgba(232,100,32,0.1)", border: "none", color: C.orange, borderRadius: 4, cursor: "pointer", fontSize: 11, padding: "3px 7px", marginLeft: 8, display: "flex", alignItems: "center", gap: 3 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    Share
+                  </button>
                   <button onClick={(e) => { e.stopPropagation(); onDelete(i); }}
-                    style={{ background: "rgba(255,60,60,0.1)", border: "none", color: "rgba(255,100,100,0.6)", borderRadius: 4, cursor: "pointer", fontSize: 11, padding: "3px 7px", marginLeft: 8 }}>
+                    style={{ background: "rgba(255,60,60,0.1)", border: "none", color: "rgba(255,100,100,0.6)", borderRadius: 4, cursor: "pointer", fontSize: 11, padding: "3px 7px" }}>
                     Del
                   </button>
                 </div>
@@ -480,6 +521,33 @@ export default function MadeiraLineupPlanner() {
   const [modalMode, setModalMode] = useState("save");
   const [rosterOpen, setRosterOpen] = useState(false);
   const [inactiveHover, setInactiveHover] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [sharedName, setSharedName] = useState(null);
+  const toastTimer = useRef(null);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2500);
+  };
+
+  // Load shared lineup from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get("lineup");
+    if (encoded) {
+      const data = decodeLineup(encoded);
+      if (data) {
+        setFormation(data.formation);
+        setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
+        setInactiveIds([...data.inactiveIds]);
+        if (data.roster) setRoster(data.roster);
+        if (data.name) setSharedName(data.name);
+        // Clean URL without reload
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, []);
 
   const currentLineup = lineups[activeHalf];
   const positions = FORMATIONS[formation];
@@ -580,6 +648,19 @@ export default function MadeiraLineupPlanner() {
   };
   const deleteLineup = (index) => {
     setSavedLineups((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // --- SHARE ---
+  const handleShareSaved = async (index) => {
+    const s = savedLineups[index];
+    const result = await shareLineup({ formation: s.formation, lineups: s.lineups, inactiveIds: s.inactiveIds, roster, name: s.name });
+    if (result === "copied") showToast("Link copied to clipboard!");
+    else if (result === "shared") showToast("Lineup shared!");
+  };
+  const handleShareCurrent = async () => {
+    const result = await shareLineup({ formation, lineups, inactiveIds, roster, name: "" });
+    if (result === "copied") showToast("Link copied to clipboard!");
+    else if (result === "shared") showToast("Lineup shared!");
   };
 
   // --- DRAG / CLICK ---
@@ -779,6 +860,17 @@ export default function MadeiraLineupPlanner() {
               </svg>
               {!isMobile && "Print"}
             </button>
+
+            <button onClick={handleShareCurrent} style={{
+              padding: isMobile ? "6px 8px" : "7px 12px", borderRadius: 7, border: `1px solid ${C.orange}`,
+              background: "rgba(232,100,32,0.1)", color: C.orange, cursor: "pointer",
+              fontFamily: fontBase, fontSize: isMobile ? 11 : 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              {!isMobile && "Share"}
+            </button>
           </div>
         </div>
 
@@ -905,7 +997,39 @@ export default function MadeiraLineupPlanner() {
 
       {/* SAVE/LOAD MODAL */}
       <SaveLoadModal isOpen={modalOpen} mode={modalMode} savedLineups={savedLineups} isMobile={isMobile}
-        onSave={saveLineup} onLoad={loadLineup} onDelete={deleteLineup} onClose={() => setModalOpen(false)} />
+        onSave={saveLineup} onLoad={loadLineup} onDelete={deleteLineup} onShare={handleShareSaved} onClose={() => setModalOpen(false)} />
+
+      {/* SHARED LINEUP BANNER */}
+      {sharedName && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 60,
+          background: C.orange, color: C.white, padding: "8px 16px",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          fontFamily: fontBase, fontSize: 13, fontWeight: 600,
+        }}>
+          <span>Shared lineup: {sharedName}</span>
+          <button onClick={() => setSharedName(null)} style={{
+            background: "rgba(255,255,255,0.2)", border: "none", color: C.white, borderRadius: 4,
+            cursor: "pointer", fontSize: 11, padding: "2px 8px", fontWeight: 700,
+          }}>Dismiss</button>
+        </div>
+      )}
+
+      {/* TOAST */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 200,
+          background: C.navy, color: C.white, padding: "10px 20px", borderRadius: 10,
+          fontFamily: fontBase, fontSize: 13, fontWeight: 600,
+          boxShadow: "0 8px 30px rgba(0,0,0,0.4)", border: `1px solid ${C.orange}`,
+          display: "flex", alignItems: "center", gap: 8,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          {toast}
+        </div>
+      )}
     </>
   );
 }
