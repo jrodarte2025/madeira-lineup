@@ -730,10 +730,7 @@ export default function MadeiraLineupPlanner() {
       <div className="print-view">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingBottom: 6, borderBottom: `2px solid ${C.navy}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              fontFamily: fontDisplay, fontSize: 14, fontWeight: 900, color: C.orange,
-              border: `2px solid ${C.orange}`, borderRadius: 4, padding: "2px 6px", lineHeight: 1,
-            }}>M</div>
+            <img src="/madeira-fc-logo.png" alt="Madeira FC" style={{ width: 32, height: "auto" }} />
             <div>
               <div style={{ fontFamily: fontDisplay, fontSize: 18, fontWeight: 800, color: C.navy, letterSpacing: "-0.3px", lineHeight: 1.1 }}>MADEIRA FC</div>
               <div style={{ fontFamily: fontBase, fontSize: 7, fontWeight: 600, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginTop: 1 }}>Game Day Lineup Card</div>
@@ -786,14 +783,8 @@ export default function MadeiraLineupPlanner() {
           borderBottom: `1px solid ${C.whiteAlpha}`, flexWrap: "wrap", gap: isMobile ? 8 : 12,
         }}>
           {/* Logo + Title */}
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 14 }}>
-            <div style={{
-              width: isMobile ? 30 : 40, height: isMobile ? 34 : 46,
-              background: `linear-gradient(145deg, ${C.orange}, ${C.orangeLight})`,
-              clipPath: "polygon(50% 0%, 100% 14%, 100% 72%, 50% 100%, 0% 72%, 0% 14%)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: isMobile ? 11 : 15, fontWeight: 900, color: C.navy, fontFamily: fontDisplay,
-            }}>M</div>
+          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
+            <img src="/madeira-fc-logo.png" alt="Madeira FC" style={{ width: isMobile ? 36 : 48, height: "auto" }} />
             <div>
               <h1 style={{ fontFamily: fontDisplay, fontSize: isMobile ? 16 : 21, fontWeight: 800, letterSpacing: "-0.3px", lineHeight: 1.1 }}>MADEIRA FC</h1>
               <div style={{ fontSize: isMobile ? 8 : 10, color: "rgba(255,255,255,0.4)", letterSpacing: "2.5px", fontWeight: 700, textTransform: "uppercase", marginTop: 1 }}>Lineup Planner</div>
