@@ -58,7 +58,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Touch drag-and-drop engine (custom touch events) + mobile chip strip above field
+- [~] 03-01-PLAN.md — Touch drag-and-drop engine (custom touch events) + mobile chip strip above field (awaiting verification)
 - [ ] 03-02-PLAN.md — Controls below field (formation, half toggle, actions), roster management modal, minimal header
 
 ## Progress
@@ -70,4 +70,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
 | 2. Drag-and-Drop Completion | 2/2 | Complete    | 2026-03-16 |
-| 3. Mobile UX Overhaul | 0/2 | Not started | - |
+| 3. Mobile UX Overhaul | 0/2 | In progress | - |
