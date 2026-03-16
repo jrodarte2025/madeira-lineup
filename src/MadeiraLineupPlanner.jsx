@@ -99,8 +99,8 @@ const INITIAL_ROSTER = [
 
 const FORMATIONS = {
   "3-3-2": [
-    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
-    { label: "RB", x: 78, y: 73 }, { label: "LM", x: 22, y: 51 }, { label: "CM", x: 50, y: 54 },
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 69 }, { label: "CB", x: 50, y: 72 },
+    { label: "RB", x: 78, y: 69 }, { label: "LM", x: 22, y: 51 }, { label: "CM", x: 50, y: 54 },
     { label: "RM", x: 78, y: 51 }, { label: "LS", x: 36, y: 30 }, { label: "RS", x: 64, y: 30 },
   ],
   "3-2-3": [
