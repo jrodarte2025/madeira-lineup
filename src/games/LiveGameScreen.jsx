@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useParams } from "react-router";
-import { loadGame, updateGameStatus, updateGameScore, appendGameEvent } from "../firebase";
+import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents } from "../firebase";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
-import { calcMinutes, abbreviateName } from "../shared/utils";
+import { calcMinutes, abbreviateName, getPositionGroup } from "../shared/utils";
 import PitchSVG from "../shared/PitchSVG";
 import FieldPosition from "../shared/FieldPosition";
 import GameHeader from "./GameHeader";
+import StatBar from "./StatBar";
+import EventsFeed from "./EventsFeed";
 
 // =============================================
 // LIVE GAME SCREEN — orchestrator
@@ -170,6 +172,9 @@ export default function LiveGameScreen() {
   touchDragStateRef.current = touchDragState;
   const activateTimerRef = useRef(null);
   const pendingDragRef = useRef(null);
+
+  // --- Stat selection state ---
+  const [selectedPlayerId, setSelectedPlayerId] = useState(null);
 
   // --- UI state ---
   const [loading, setLoading] = useState(true);
@@ -427,6 +432,7 @@ export default function LiveGameScreen() {
     });
 
     setGameStatus("halftime");
+    setSelectedPlayerId(null);
     setDisplaySeconds(0);
     updateGameStatus(gameId, "halftime");
   }, [gameId, stopTimer, releaseWakeLock]);
@@ -484,6 +490,7 @@ export default function LiveGameScreen() {
     });
 
     setGameStatus("completed");
+    setSelectedPlayerId(null);
     setDisplaySeconds(0);
     updateGameStatus(gameId, "completed");
     clearGameStorage();
@@ -847,6 +854,80 @@ export default function LiveGameScreen() {
   }, [displayMinute, playerIntervals, halfIntervals, fieldPositions, benchPlayers]);
 
   // ---------------------------------------------------------------------------
+  // Stat recording handlers
+  // ---------------------------------------------------------------------------
+  const isActiveHalfForStats = gameStatus === "1st-half" || gameStatus === "2nd-half";
+
+  const handlePlayerSelect = useCallback((player) => {
+    if (!isActiveHalfForStats) return;
+    setSelectedPlayerId((prev) => (prev === player.id ? null : player.id));
+  }, [isActiveHalfForStats]);
+
+  // Determine the selected player's position group
+  const selectedPositionGroup = useMemo(() => {
+    if (!selectedPlayerId) return null;
+    const slot = fieldPositions.find(({ player }) => player?.id === selectedPlayerId);
+    if (!slot) return null;
+    return getPositionGroup(slot.pos.label);
+  }, [selectedPlayerId, fieldPositions]);
+
+  // Selected player's abbreviated name for StatBar label
+  const selectedPlayerName = useMemo(() => {
+    if (!selectedPlayerId) return "";
+    const slot = fieldPositions.find(({ player }) => player?.id === selectedPlayerId);
+    return slot?.player ? abbreviateName(slot.player.name) : "";
+  }, [selectedPlayerId, fieldPositions]);
+
+  const handleStatTap = useCallback((statKey) => {
+    if (!selectedPlayerId || !isActiveHalfForStats) return;
+    const slot = fieldPositions.find(({ player }) => player?.id === selectedPlayerId);
+    if (!slot?.player) return;
+
+    const currentHalf = gameStatus === "1st-half" ? 1 : 2;
+    const event = {
+      id: crypto.randomUUID(),
+      type: "stat",
+      playerId: selectedPlayerId,
+      playerName: abbreviateName(slot.player.name),
+      stat: statKey,
+      half: currentHalf,
+      t: Date.now(),
+    };
+
+    setEvents((prev) => {
+      const updated = [...prev, event];
+      saveStored("events", updated);
+      return updated;
+    });
+
+    appendGameEvent(gameId, event); // fire-and-forget
+  }, [selectedPlayerId, isActiveHalfForStats, fieldPositions, gameStatus, gameId]);
+
+  const handleUndo = useCallback((eventId) => {
+    setEvents((prev) => {
+      const updated = prev.filter((e) => e.id !== eventId);
+      saveStored("events", updated);
+      replaceGameEvents(gameId, updated); // fire-and-forget
+      return updated;
+    });
+  }, [gameId]);
+
+  // Stat badge counts — per field player for current half only
+  const currentHalf = gameStatus === "1st-half" ? 1 : gameStatus === "2nd-half" ? 2 : null;
+
+  const statCounts = useMemo(() => {
+    const counts = {};
+    if (!currentHalf) return counts;
+    events.forEach((e) => {
+      if (e.type === "stat" && e.half === currentHalf) {
+        counts[e.playerId] = (counts[e.playerId] || 0) + 1;
+      }
+    });
+    return counts;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events.length, currentHalf]);
+
+  // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   if (loading) {
@@ -1066,8 +1147,9 @@ export default function LiveGameScreen() {
                     ? String(playerMinutes[player.id] ?? 0)
                     : null
                 }
-                isSelected={false}
-                statCount={0}
+                isSelected={!!player && player.id === selectedPlayerId}
+                statCount={player ? (statCounts[player.id] || 0) : 0}
+                onClick={isActiveHalfForStats && player ? () => handlePlayerSelect(player) : undefined}
                 onDragStart={isInteractive ? (e) => handleFieldDragStart(idx, e) : undefined}
                 onDragEnd={handleDragEnd}
                 onDragOver={isInteractive ? handleFieldDragOver : undefined}
@@ -1081,9 +1163,22 @@ export default function LiveGameScreen() {
           </div>
         </div>
 
-        {/* Bottom reserved area for Plans 05-04 */}
-        <div style={{ height: 0 }} />
+        {/* Events feed below pitch */}
+        <EventsFeed events={events} onUndo={handleUndo} />
+
+        {/* Stat bar spacer — prevents pitch from being obscured by fixed StatBar */}
+        <div style={{ height: isActiveHalfForStats ? 80 : 0 }} />
       </div>
+
+      {/* Stat bar — fixed at bottom, visible during active halves */}
+      {isActiveHalfForStats && (
+        <StatBar
+          positionGroup={selectedPositionGroup}
+          playerName={selectedPlayerName}
+          onStatTap={handleStatTap}
+          disabled={false}
+        />
+      )}
 
       {/* Touch drag ghost element */}
       {touchDragState.isDragging && touchDragState.player && createPortal(
