@@ -40,10 +40,10 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 ### Game Lifecycle
 
-- [ ] **GAME-01**: Coach can create a game with opponent name and date, linked to current lineup
+- [x] **GAME-01**: Coach can create a game with opponent name and date, linked to current lineup
 - [ ] **GAME-02**: Game screen loads as a separate view with the linked lineup on a pitch
 - [ ] **GAME-03**: Coach can start a half with a single tap; 25-minute timer counts down and auto-stops
-- [ ] **GAME-04**: Timer uses timestamp-based elapsed time (not setInterval ticks) for accuracy
+- [x] **GAME-04**: Timer uses timestamp-based elapsed time (not setInterval ticks) for accuracy
 - [ ] **GAME-05**: Screen Wake Lock prevents phone from sleeping during active game
 - [ ] **GAME-06**: Game state is mirrored to localStorage for crash recovery
 
@@ -52,16 +52,16 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 - [ ] **SUB-01**: Dragging a field player to bench (or vice versa) during a game logs a substitution event
 - [ ] **SUB-02**: Per-player minutes tracked automatically (starts on sub-in, pauses on sub-out)
 - [ ] **SUB-03**: Running minute count (to the minute) displayed on each player's field circle during game
-- [ ] **SUB-04**: Minutes calculated as intersection of on-field intervals with active half intervals
+- [x] **SUB-04**: Minutes calculated as intersection of on-field intervals with active half intervals
 
 ### Stat Tracking
 
 - [ ] **STAT-01**: Tapping a player on the pitch selects them and shows a StatBar with position-group buttons
-- [ ] **STAT-02**: Stat buttons are position-aware (GK/DEF/MID/FWD each get different stat options)
+- [x] **STAT-02**: Stat buttons are position-aware (GK/DEF/MID/FWD each get different stat options)
 - [ ] **STAT-03**: Stat buttons are color-coded (orange=offensive, teal=defensive, gray=neutral)
 - [ ] **STAT-04**: Each button tap records a stat event with playerId, stat type, half, and timestamp
 - [ ] **STAT-05**: Stat badge count shown on each player's field circle for current half
-- [ ] **STAT-06**: Recent events feed (last 3-5 events) displayed near StatBar with single-tap undo
+- [x] **STAT-06**: Recent events feed (last 3-5 events) displayed near StatBar with single-tap undo
 
 ### Post-Game
 
@@ -116,22 +116,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-01 | Phase 4 | Complete |
 | INFRA-02 | Phase 4 | Complete |
 | INFRA-03 | Phase 4 | Complete |
-| GAME-01 | Phase 5 | Pending |
+| GAME-01 | Phase 5 | Complete |
 | GAME-02 | Phase 5 | Pending |
 | GAME-03 | Phase 5 | Pending |
-| GAME-04 | Phase 5 | Pending |
+| GAME-04 | Phase 5 | Complete |
 | GAME-05 | Phase 5 | Pending |
 | GAME-06 | Phase 5 | Pending |
 | SUB-01 | Phase 5 | Pending |
 | SUB-02 | Phase 5 | Pending |
 | SUB-03 | Phase 5 | Pending |
-| SUB-04 | Phase 5 | Pending |
+| SUB-04 | Phase 5 | Complete |
 | STAT-01 | Phase 5 | Pending |
-| STAT-02 | Phase 5 | Pending |
+| STAT-02 | Phase 5 | Complete |
 | STAT-03 | Phase 5 | Pending |
 | STAT-04 | Phase 5 | Pending |
 | STAT-05 | Phase 5 | Pending |
-| STAT-06 | Phase 5 | Pending |
+| STAT-06 | Phase 5 | Complete |
 | POST-01 | Phase 6 | Pending |
 | POST-02 | Phase 6 | Pending |
 | POST-03 | Phase 6 | Pending |
