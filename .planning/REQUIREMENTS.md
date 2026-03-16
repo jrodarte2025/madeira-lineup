@@ -79,8 +79,8 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 ### Data Storage
 
-- [ ] **DATA-01**: Game documents stored in Firestore games collection with events embedded
-- [ ] **DATA-02**: Season stats stored in Firestore with denormalized player totals for fast reads
+- [x] **DATA-01**: Game documents stored in Firestore games collection with events embedded
+- [x] **DATA-02**: Season stats stored in Firestore with denormalized player totals for fast reads
 - [ ] **DATA-03**: All game state mirrored to localStorage during active games
 
 ## Future Requirements
@@ -140,8 +140,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEASON-01 | Phase 7 | Pending |
 | SEASON-02 | Phase 7 | Pending |
 | SEASON-03 | Phase 7 | Pending |
-| DATA-01 | Phase 4 | Pending |
-| DATA-02 | Phase 4 | Pending |
+| DATA-01 | Phase 4 | Complete |
+| DATA-02 | Phase 4 | Complete |
 | DATA-03 | Phase 5 | Pending |
 
 **Coverage:**

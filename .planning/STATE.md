@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
-status: planning
-stopped_at: Phase 4 context gathered
-last_updated: "2026-03-16T16:56:34.396Z"
-last_activity: 2026-03-16 — v2.0 roadmap created
+status: in-progress
+stopped_at: Completed 04-03-PLAN.md (game CRUD and season stats data layer)
+last_updated: "2026-03-16T17:05:00Z"
+last_activity: 2026-03-16 — Completed Phase 4 Plan 03
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
-  percent: 0
+  total_plans: 8
+  completed_plans: 6
+  percent: 25
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 4 of 7 (App Shell + Data Foundation)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-03-16 — v2.0 roadmap created
+Plan: 3 of 3 in current phase (plan 03 complete)
+Status: In progress
+Last activity: 2026-03-16 — Completed 04-03 game CRUD and season stats data layer
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 25%
 
 ## Accumulated Context
 
@@ -47,6 +47,10 @@ v2.0 decisions (pending):
 - Firestore: embedded events array in game doc (NOT subcollection per event)
 - Two new deps only: react-router-dom v7, html-to-image v1.11.13
 
+v2.0 decisions (04-03):
+- updateSeasonStats uses dotted-path keys with setDoc merge to avoid overwriting unrelated player stats
+- appendGameEvent uses arrayUnion for atomic array append — no read-modify-write race conditions
+
 ### Pending Todos
 
 None.
@@ -58,6 +62,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T16:56:34.394Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-app-shell-data-foundation/04-CONTEXT.md
+Last session: 2026-03-16T17:05:00Z
+Stopped at: Completed 04-03-PLAN.md
+Resume file: .planning/phases/04-app-shell-data-foundation/04-03-SUMMARY.md
