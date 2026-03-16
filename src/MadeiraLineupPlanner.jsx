@@ -179,7 +179,7 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
         textAlign: "center", textShadow: "0 1px 4px rgba(0,0,0,0.9)",
         maxWidth: compact ? 68 : 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
       }}>{has ? abbreviateName(player.name) : pos.label}</div>
-      {has && <div style={{ fontSize: compact ? 7 : 10, fontWeight: 700, color: C.white, letterSpacing: "1.2px", textShadow: "0 1px 3px rgba(0,0,0,0.9)", opacity: 0.85 }}>{pos.label}</div>}
+      {has && <div style={{ fontSize: compact ? 7 : 10, fontWeight: 700, color: C.orange, letterSpacing: "1.2px", WebkitTextStroke: "0.5px rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.9)" }}>{pos.label}</div>}
     </div>
   );
 }
