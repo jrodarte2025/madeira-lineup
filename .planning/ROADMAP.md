@@ -1,22 +1,14 @@
-# Roadmap: Madeira FC Lineup Planner — UX Improvements
+# Roadmap: Madeira FC Lineup Planner
 
-## Overview
+## Milestones
 
-Three phases of polish that make the lineup planner feel natural on every device. Phase 1 sharpens how player names appear on the field and bench. Phase 2 completes drag-and-drop so coaches can move players in any direction without workarounds. Phase 3 rebuilds the mobile layout so phone use at practice is as good as desktop use at home — without touching the desktop experience.
+- ✅ **v1.0 — UX Improvements** - Phases 1-3 (shipped 2026-03-16)
+- 🚧 **v2.0 — Live Game Tracking & Stats** - Phases 4-7 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [x] **Phase 1: Display Polish** - Sharpen player name formatting and field position sizing (completed 2026-03-16)
-- [x] **Phase 2: Drag-and-Drop Completion** - Complete all drag-and-drop interactions (bench removal and bench-to-field swap) (completed 2026-03-16)
-- [x] **Phase 3: Mobile UX Overhaul** - Rebuild mobile layout and touch targets; preserve desktop (completed 2026-03-16)
-
-## Phase Details
+<details>
+<summary>✅ v1.0 — UX Improvements (Phases 1-3) — SHIPPED 2026-03-16</summary>
 
 ### Phase 1: Display Polish
 **Goal**: Players are immediately readable on the field and bench at a glance
@@ -61,13 +53,104 @@ Plans:
 - [x] 03-01-PLAN.md — Touch drag-and-drop engine (custom touch events) + mobile chip strip above field
 - [x] 03-02-PLAN.md — Mobile layout reorganization, roster modal, bench scrubber, PWA, Firestore auto-sync
 
+</details>
+
+---
+
+### 🚧 v2.0 — Live Game Tracking & Stats (In Progress)
+
+**Milestone Goal:** Transform the lineup planner into a live game management tool with automatic timers, position-aware stat tracking, post-game summaries, and season-long player statistics.
+
+**Phase Numbering:**
+- Integer phases (4, 5, 6, 7): v2.0 planned work
+- Decimal phases (4.1, 4.2): Urgent insertions (marked with INSERTED)
+
+- [ ] **Phase 4: App Shell + Data Foundation** - Extract shared components, add tab navigation, lock Firestore schema before any game code
+- [ ] **Phase 5: Live Game** - Complete game-day loop: game creation, drift-proof timer, substitutions, minute tracking, stat logging, events feed
+- [ ] **Phase 6: Post-Game Summary + Exports** - Stats table, CSV download, shareable link, and image export card
+- [ ] **Phase 7: Season Dashboard + Player Profiles** - Running tallies across all games and per-player season history
+
+## Phase Details
+
+### Phase 4: App Shell + Data Foundation
+**Goal**: The app has tab navigation and a locked Firestore schema — both prerequisites that make all subsequent game features possible
+**Depends on**: Phase 3 (v1.0 complete)
+**Requirements**: INFRA-01, INFRA-02, INFRA-03, DATA-01, DATA-02
+**Success Criteria** (what must be TRUE):
+  1. Three tabs (Lineup, Games, Stats) are visible at the bottom of the screen and navigate between views
+  2. The existing lineup builder works identically inside the Lineup tab — no v1.0 regressions
+  3. Shared constants (STAT_TYPES, POSITION_GROUP, STAT_COLORS) are extracted into reusable files and importable by game and stats components
+  4. A game document can be written to and read from Firestore games collection with embedded events array (verified in Firestore console)
+  5. Denormalized season stats document structure exists in Firestore and accepts player total updates
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: App.jsx shell + TabBar + stub Games and Stats tabs + react-router-dom wiring
+- [ ] 04-02: Extract shared/constants.js and shared/statUtils.js; confirm v1.0 lineup still works
+- [ ] 04-03: Expand firebase.js with game CRUD; define and test Firestore schema
+
+### Phase 5: Live Game
+**Goal**: A coach can run a complete game from kickoff to final whistle — timer counts down, substitutions log player minutes, and tapping any player records a stat — all without losing data on a phone reload
+**Depends on**: Phase 4
+**Requirements**: GAME-01, GAME-02, GAME-03, GAME-04, GAME-05, GAME-06, SUB-01, SUB-02, SUB-03, SUB-04, STAT-01, STAT-02, STAT-03, STAT-04, STAT-05, STAT-06, DATA-03
+**Success Criteria** (what must be TRUE):
+  1. Coach creates a game with opponent name and date, linked to the current lineup, and the game screen opens showing that lineup on a pitch
+  2. Tapping Start Game begins a 25-minute countdown; the timer auto-stops at 0:00 and prompts for second half; tapping Start 2nd Half starts another 25-minute countdown that auto-stops
+  3. If the phone is locked or reloaded mid-game, the coach sees a resume prompt and the game continues from exactly where it left off
+  4. Dragging a player on/off the field during a game logs a substitution; each player's field circle shows their current running minute count
+  5. Tapping a player shows position-appropriate stat buttons (GK/DEF/MID/FWD each get their own set); tapping a button records the stat and increments the badge on that player's circle
+  6. The last 3-5 game events are visible in a feed; any single event can be undone with one tap
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: GameSetupModal + GameTab + game creation flow + Firestore write
+- [ ] 05-02: LiveGameScreen — drift-proof timer (Date.now diff), Screen Wake Lock, localStorage crash buffer + resume prompt
+- [ ] 05-03: Substitution handling — drag events during game mode log subs, per-player minute tracking with halftime intersection calculation, minute display on field circles
+- [ ] 05-04: StatBar — position-aware stat buttons, color coding, stat badge counts on field circles, recent events feed + single-tap undo
+
+### Phase 6: Post-Game Summary + Exports
+**Goal**: When the final whistle blows, the coach has a complete game record they can review, download, and share in one tap
+**Depends on**: Phase 5
+**Requirements**: POST-01, POST-02, POST-03, POST-04, POST-05
+**Success Criteria** (what must be TRUE):
+  1. After the second half auto-stops, a summary appears showing every player's stat counts and minutes played in a table
+  2. Tapping Export CSV downloads a file with one row per player and columns for each stat type
+  3. Tapping Share Link copies a URL that anyone can open to view the read-only game summary
+  4. Tapping Share Image generates and downloads (or shares via the system share sheet) a summary card suitable for group chat
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: PostGameSummary component — stats table, per-player minutes, score
+- [ ] 06-02: CSV export (native Blob pattern) + shareable link (public Firestore read + URL route)
+- [ ] 06-03: Image export via html-to-image — summary card, Web Share API with fallback
+
+### Phase 7: Season Dashboard + Player Profiles
+**Goal**: Coaches can see how every player has performed across all games of the season, with per-player drill-down
+**Depends on**: Phase 6
+**Requirements**: SEASON-01, SEASON-02, SEASON-03
+**Success Criteria** (what must be TRUE):
+  1. The Stats tab shows a dashboard with every player's season totals (minutes, goals, assists, and other tracked stats) aggregated across all completed games
+  2. Tapping a player on the dashboard opens their profile showing a game-by-game breakdown of their stats and minutes
+  3. Finalizing a game immediately updates the season totals — the dashboard reflects the new game without any manual step
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01: StatsTab season dashboard — denormalized totals from Firestore, sortable columns
+- [ ] 07-02: PlayerProfile view — game-by-game history, statUtils.aggregateAcrossGames()
+- [ ] 07-03: Season totals write on game finalize — SEASON-03 trigger, denormalized playerStats update
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+v1.0: 1 → 2 → 3 (complete)
+v2.0: 4 → 5 → 6 → 7
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
-| 2. Drag-and-Drop Completion | 2/2 | Complete    | 2026-03-16 |
-| 3. Mobile UX Overhaul | 2/2 | Complete    | 2026-03-16 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Display Polish | v1.0 | 1/1 | Complete | 2026-03-16 |
+| 2. Drag-and-Drop Completion | v1.0 | 2/2 | Complete | 2026-03-16 |
+| 3. Mobile UX Overhaul | v1.0 | 2/2 | Complete | 2026-03-16 |
+| 4. App Shell + Data Foundation | v2.0 | 0/3 | Not started | - |
+| 5. Live Game | v2.0 | 0/4 | Not started | - |
+| 6. Post-Game Summary + Exports | v2.0 | 0/3 | Not started | - |
+| 7. Season Dashboard + Player Profiles | v2.0 | 0/3 | Not started | - |

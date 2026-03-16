@@ -113,42 +113,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| GAME-01 | — | Pending |
-| GAME-02 | — | Pending |
-| GAME-03 | — | Pending |
-| GAME-04 | — | Pending |
-| GAME-05 | — | Pending |
-| GAME-06 | — | Pending |
-| SUB-01 | — | Pending |
-| SUB-02 | — | Pending |
-| SUB-03 | — | Pending |
-| SUB-04 | — | Pending |
-| STAT-01 | — | Pending |
-| STAT-02 | — | Pending |
-| STAT-03 | — | Pending |
-| STAT-04 | — | Pending |
-| STAT-05 | — | Pending |
-| STAT-06 | — | Pending |
-| POST-01 | — | Pending |
-| POST-02 | — | Pending |
-| POST-03 | — | Pending |
-| POST-04 | — | Pending |
-| POST-05 | — | Pending |
-| SEASON-01 | — | Pending |
-| SEASON-02 | — | Pending |
-| SEASON-03 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
+| INFRA-01 | Phase 4 | Pending |
+| INFRA-02 | Phase 4 | Pending |
+| INFRA-03 | Phase 4 | Pending |
+| GAME-01 | Phase 5 | Pending |
+| GAME-02 | Phase 5 | Pending |
+| GAME-03 | Phase 5 | Pending |
+| GAME-04 | Phase 5 | Pending |
+| GAME-05 | Phase 5 | Pending |
+| GAME-06 | Phase 5 | Pending |
+| SUB-01 | Phase 5 | Pending |
+| SUB-02 | Phase 5 | Pending |
+| SUB-03 | Phase 5 | Pending |
+| SUB-04 | Phase 5 | Pending |
+| STAT-01 | Phase 5 | Pending |
+| STAT-02 | Phase 5 | Pending |
+| STAT-03 | Phase 5 | Pending |
+| STAT-04 | Phase 5 | Pending |
+| STAT-05 | Phase 5 | Pending |
+| STAT-06 | Phase 5 | Pending |
+| POST-01 | Phase 6 | Pending |
+| POST-02 | Phase 6 | Pending |
+| POST-03 | Phase 6 | Pending |
+| POST-04 | Phase 6 | Pending |
+| POST-05 | Phase 6 | Pending |
+| SEASON-01 | Phase 7 | Pending |
+| SEASON-02 | Phase 7 | Pending |
+| SEASON-03 | Phase 7 | Pending |
+| DATA-01 | Phase 4 | Pending |
+| DATA-02 | Phase 4 | Pending |
+| DATA-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30 ⚠️
+- Mapped to phases: 30
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-15*
-*Last updated: 2026-03-16 after v2.0 milestone definition*
+*Last updated: 2026-03-16 — traceability populated after v2.0 roadmap creation*
