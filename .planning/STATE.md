@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-16T19:30:33.998Z"
-last_activity: 2026-03-16 — Completed 04-03 game CRUD and season stats data layer
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-03-16T19:38:22.050Z"
+last_activity: 2026-03-16 — Completed 05-03 substitutions + minute tracking
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 13
-  completed_plans: 11
-  percent: 85
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 5 of 7 (Live Game Tracking & Stats)
-Plan: 2 of 5 in current phase (plan 02 complete)
+Plan: 3 of 5 in current phase (plan 03 complete)
 Status: In progress
-Last activity: 2026-03-16 — Completed 05-02 LiveGameScreen with timer, state machine, crash recovery
+Last activity: 2026-03-16 — Completed 05-03 substitutions + minute tracking
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 92%
 
 ## Accumulated Context
 
@@ -64,6 +64,7 @@ v2.0 decisions (04-03):
 - [Phase 05-live-game]: FORMATIONS imported statically to avoid async-in-then anti-pattern
 - [Phase 05-live-game]: Crash recovery checks madeira_activeGameId on mount; if matches gameId, skips Firestore load and restores from localStorage
 - [Phase 05-live-game]: halfIntervals + playerIntervals built in 05-02 so Plans 05-03/05-04 can consume without refactor
+- [Phase 05-live-game]: calcMinutes uses interval intersection math; displayMinute state avoids 60fps recalc; handleSubstitution captures outgoingPlayer before setState
 
 ### Pending Todos
 
@@ -76,6 +77,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T19:30:33.996Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-16T19:38:22.048Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None

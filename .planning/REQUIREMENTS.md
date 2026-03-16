@@ -49,9 +49,9 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 ### Substitution & Minutes
 
-- [ ] **SUB-01**: Dragging a field player to bench (or vice versa) during a game logs a substitution event
-- [ ] **SUB-02**: Per-player minutes tracked automatically (starts on sub-in, pauses on sub-out)
-- [ ] **SUB-03**: Running minute count (to the minute) displayed on each player's field circle during game
+- [x] **SUB-01**: Dragging a field player to bench (or vice versa) during a game logs a substitution event
+- [x] **SUB-02**: Per-player minutes tracked automatically (starts on sub-in, pauses on sub-out)
+- [x] **SUB-03**: Running minute count (to the minute) displayed on each player's field circle during game
 - [x] **SUB-04**: Minutes calculated as intersection of on-field intervals with active half intervals
 
 ### Stat Tracking
@@ -122,9 +122,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GAME-04 | Phase 5 | Complete |
 | GAME-05 | Phase 5 | Complete |
 | GAME-06 | Phase 5 | Complete |
-| SUB-01 | Phase 5 | Pending |
-| SUB-02 | Phase 5 | Pending |
-| SUB-03 | Phase 5 | Pending |
+| SUB-01 | Phase 5 | Complete |
+| SUB-02 | Phase 5 | Complete |
+| SUB-03 | Phase 5 | Complete |
 | SUB-04 | Phase 5 | Complete |
 | STAT-01 | Phase 5 | Pending |
 | STAT-02 | Phase 5 | Complete |
