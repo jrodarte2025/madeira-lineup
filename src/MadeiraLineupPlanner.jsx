@@ -1089,7 +1089,7 @@ export default function MadeiraLineupPlanner() {
         {/* HEADER */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: isMobile ? "10px 12px" : "14px 24px",
+          padding: isMobile ? "6px 12px" : "14px 24px",
           borderBottom: `1px solid ${C.whiteAlpha}`, flexWrap: "wrap", gap: isMobile ? 8 : 12,
         }}>
           {/* Logo + Title */}
@@ -1180,26 +1180,26 @@ export default function MadeiraLineupPlanner() {
 
         {/* MOBILE CONTROLS — below header, above pitch */}
         {isMobile && (
-          <div style={{ padding: "8px 12px 0", display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ padding: "5px 12px 0", display: "flex", flexDirection: "column", gap: 5 }}>
             {/* Row 1: Roster button + Half toggle */}
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
               <button onClick={() => setRosterOpen(true)} style={{
-                padding: "8px 12px", borderRadius: 8, border: `1px solid ${C.orange}`,
+                padding: "5px 10px", borderRadius: 7, border: `1px solid ${C.orange}`,
                 background: "rgba(232,100,32,0.12)", color: C.orange, cursor: "pointer",
                 fontFamily: fontDisplay, fontSize: 11, fontWeight: 700, letterSpacing: "0.5px",
-                display: "flex", alignItems: "center", gap: 5, minHeight: 40, flexShrink: 0,
+                display: "flex", alignItems: "center", gap: 5, minHeight: 34, flexShrink: 0,
               }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 ROSTER
               </button>
-              <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 3, flex: 1 }}>
+              <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3, flex: 1 }}>
                 {[1, 2].map((h) => (
                   <button key={h} onClick={() => { setActiveHalf(h); setSelectedPlayer(null); }} style={{
-                    padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                    padding: "5px 0", borderRadius: 5, border: "none", cursor: "pointer",
                     fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
                     background: activeHalf === h ? C.orange : "transparent",
                     color: activeHalf === h ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
-                    minHeight: 40,
+                    minHeight: 34,
                   }}>{h === 1 ? "1ST HALF" : "2ND HALF"}</button>
                 ))}
               </div>
@@ -1208,17 +1208,17 @@ export default function MadeiraLineupPlanner() {
             {/* Row 2: Save, Load, Print, Share */}
             <div style={{ display: "flex", gap: 4 }}>
               <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
-                flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)",
+                flex: 1, padding: "5px 0", borderRadius: 7, border: "1px solid rgba(255,255,255,0.15)",
                 background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save
               </button>
               <button onClick={() => { setModalMode("load"); setModalOpen(true); }} style={{
-                flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)",
+                flex: 1, padding: "5px 0", borderRadius: 7, border: "1px solid rgba(255,255,255,0.15)",
                 background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 Load
@@ -1229,9 +1229,9 @@ export default function MadeiraLineupPlanner() {
                 )}
               </button>
               <button onClick={handlePrint} style={{
-                flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)",
+                flex: 1, padding: "5px 0", borderRadius: 7, border: "1px solid rgba(255,255,255,0.15)",
                 background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
@@ -1239,9 +1239,9 @@ export default function MadeiraLineupPlanner() {
                 Print
               </button>
               <button onClick={handleShareCurrent} style={{
-                flex: 1, padding: "8px 0", borderRadius: 8, border: `1px solid ${C.orange}`,
+                flex: 1, padding: "5px 0", borderRadius: 7, border: `1px solid ${C.orange}`,
                 background: "rgba(232,100,32,0.1)", color: C.orange, cursor: "pointer",
-                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
               }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
@@ -1251,14 +1251,14 @@ export default function MadeiraLineupPlanner() {
             </div>
 
             {/* Row 3: Formation selector */}
-            <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 3 }}>
+            <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3 }}>
               {Object.keys(FORMATIONS).map((f) => (
                 <button key={f} onClick={() => setFormation(f)} style={{
-                  padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                  padding: "5px 0", borderRadius: 5, border: "none", cursor: "pointer",
                   fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
                   background: formation === f ? C.orange : "transparent",
                   color: formation === f ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
-                  minHeight: 38,
+                  minHeight: 34,
                 }}>{f}</button>
               ))}
             </div>
@@ -1277,15 +1277,15 @@ export default function MadeiraLineupPlanner() {
           )}
 
           {/* PITCH */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: isMobile ? "flex-start" : "center", padding: isMobile ? 10 : 20, overflow: "auto" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: isMobile ? "flex-start" : "center", padding: isMobile ? "6px 10px" : 20, overflow: "auto" }}>
 
             {/* MOBILE BENCH — labeled bench with scroll indicator */}
             {isMobile && (
-              <div style={{ width: "100%", maxWidth: 360, marginBottom: 8, flexShrink: 0 }}>
+              <div style={{ width: "100%", maxWidth: 360, marginBottom: 4, flexShrink: 0 }}>
                 {/* Bench label */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
-                  marginBottom: 4, padding: "0 4px",
+                  marginBottom: 2, padding: "0 4px",
                 }}>
                   <span style={{
                     fontSize: 9, fontWeight: 700, letterSpacing: "2px", color: "rgba(255,255,255,0.35)",
@@ -1312,9 +1312,9 @@ export default function MadeiraLineupPlanner() {
                   }}
                   style={{
                     width: "100%",
-                    minHeight: 52,
+                    minHeight: 44,
                     display: "flex", alignItems: "center",
-                    padding: "6px 8px",
+                    padding: "4px 8px",
                     borderRadius: 10,
                     background: touchDragState.overTarget === "chipstrip"
                       ? "rgba(232,100,32,0.15)"
@@ -1367,8 +1367,8 @@ export default function MadeiraLineupPlanner() {
                 {availablePlayers.length > 3 && (
                   <div
                     style={{
-                      height: 36, marginTop: 6,
-                      borderRadius: 18,
+                      height: 24, marginTop: 4,
+                      borderRadius: 12,
                       background: "rgba(255,255,255,0.06)",
                       border: "1px solid rgba(255,255,255,0.08)",
                       position: "relative", overflow: "hidden",
@@ -1419,8 +1419,8 @@ export default function MadeiraLineupPlanner() {
                     </div>
                     {/* Thumb */}
                     <div style={{
-                      position: "absolute", top: 4, bottom: 4,
-                      width: "28%", minWidth: 48,
+                      position: "absolute", top: 3, bottom: 3,
+                      width: "28%", minWidth: 44,
                       left: `${chipScrollPct * 72}%`,
                       borderRadius: 14,
                       background: `linear-gradient(135deg, ${C.orange}, rgba(232,100,32,0.7))`,
