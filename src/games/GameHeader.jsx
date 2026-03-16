@@ -1,5 +1,4 @@
 import { useRef, useCallback } from "react";
-import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 
 // =============================================
@@ -98,8 +97,8 @@ export default function GameHeader({
   onEndHalf,
   onStartSecondHalf,
   onEndGame,
+  onBack,
 }) {
-  const navigate = useNavigate();
   const timerStr = getTimerDisplay(gameStatus, displaySeconds);
   const isStoppage =
     (gameStatus === "1st-half" || gameStatus === "2nd-half") &&
@@ -135,7 +134,7 @@ export default function GameHeader({
       >
         {/* Back button */}
         <div
-          onClick={() => navigate("/games")}
+          onClick={onBack}
           style={{
             position: "absolute",
             left: 8,

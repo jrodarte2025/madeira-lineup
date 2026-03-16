@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents } from "../firebase";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
 import { calcMinutes, abbreviateName, getPositionGroup } from "../shared/utils";
@@ -127,6 +127,7 @@ function BenchChip({ player, minuteCount, onClick, isSubSelected }) {
 // ---------------------------------------------------------------------------
 export default function LiveGameScreen() {
   const { id: gameId } = useParams();
+  const navigate = useNavigate();
 
   // --- Game state ---
   const [gameStatus, setGameStatus] = useState("setup");
@@ -809,6 +810,7 @@ export default function LiveGameScreen() {
         onEndHalf={handleEndHalf}
         onStartSecondHalf={handleStartSecondHalf}
         onEndGame={handleEndGame}
+        onBack={() => navigate("/games")}
       />
 
       {/* Resume banner */}
