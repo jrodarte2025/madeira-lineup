@@ -599,7 +599,7 @@ export default function MadeiraLineupPlanner() {
 
   // Load shared lineup from URL on mount, or load published lineup from Firestore
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
     const encoded = params.get("lineup");
     if (encoded) {
       const data = decodeLineup(encoded);

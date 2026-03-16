@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import MadeiraLineupPlanner from './MadeiraLineupPlanner.jsx'
+import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <MadeiraLineupPlanner />
+    <App />
   </StrictMode>,
 )
