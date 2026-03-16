@@ -750,6 +750,20 @@ export default function LiveGameScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events.length, currentHalf]);
 
+  // Spread field positions to use full pitch height (formations are designed for half-pitch)
+  const spreadPositions = useMemo(() => {
+    if (fieldPositions.length === 0) return [];
+    const ys = fieldPositions.map(({ pos }) => pos.y);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const range = maxY - minY || 1;
+    // Remap from original range to 8%–92% of pitch
+    return fieldPositions.map(({ pos, player }) => ({
+      pos: { ...pos, y: 8 + ((pos.y - minY) / range) * 84 },
+      player,
+    }));
+  }, [fieldPositions]);
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -771,20 +785,6 @@ export default function LiveGameScreen() {
       </div>
     );
   }
-
-  // Spread field positions to use full pitch height (formations are designed for half-pitch)
-  const spreadPositions = useMemo(() => {
-    if (fieldPositions.length === 0) return [];
-    const ys = fieldPositions.map(({ pos }) => pos.y);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    const range = maxY - minY || 1;
-    // Remap from original range to 8%–92% of pitch
-    return fieldPositions.map(({ pos, player }) => ({
-      pos: { ...pos, y: 8 + ((pos.y - minY) / range) * 84 },
-      player,
-    }));
-  }, [fieldPositions]);
 
   const HEADER_HEIGHT = 94;
   const BENCH_HEIGHT = 64;
