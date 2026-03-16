@@ -47,7 +47,7 @@ completed: 2026-03-15
 - **Duration:** ~5 min
 - **Started:** 2026-03-15T00:00:00Z
 - **Completed:** 2026-03-15 (paused at checkpoint)
-- **Tasks:** 1 of 2 complete (Task 2 is human-verify checkpoint)
+- **Tasks:** 2 of 2 complete (Task 2 human-verify: all 17 items approved)
 - **Files modified:** 1
 
 ## Accomplishments
@@ -61,6 +61,7 @@ completed: 2026-03-15
 Each task was committed atomically:
 
 1. **Task 1: Expand handlePositionClick for swap and field-to-field click interactions** - `836402e` (feat)
+2. **Task 2: Verify all drag and click interactions** - human-verify checkpoint (approved by user, no code changes)
 
 ## Files Created/Modified
 - `src/MadeiraLineupPlanner.jsx` - Rewrote handlePositionClick (lines 771-795) to branch on bench vs field source
@@ -84,8 +85,9 @@ None - no external service configuration required.
 ## Next Phase Readiness
 - All click interaction paths implemented and build verified
 - Awaiting human verification (Task 2 checkpoint) of all 17 drag and click scenarios in the browser
-- Once verified, Phase 2 (Drag-Drop Completion) is complete and Phase 3 (Mobile) can begin
+- All 17 drag and click scenarios verified and approved by user
+- Phase 2 (Drag-Drop Completion) is complete — Phase 3 (Mobile) can begin
 
 ---
 *Phase: 02-drag-drop-completion*
-*Completed: 2026-03-15*
+*Completed: 2026-03-16*
