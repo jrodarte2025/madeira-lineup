@@ -13,7 +13,7 @@ Three phases of polish that make the lineup planner feel natural on every device
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Display Polish** - Sharpen player name formatting and field position sizing (completed 2026-03-16)
-- [ ] **Phase 2: Drag-and-Drop Completion** - Complete all drag-and-drop interactions (bench removal and bench-to-field swap)
+- [x] **Phase 2: Drag-and-Drop Completion** - Complete all drag-and-drop interactions (bench removal and bench-to-field swap) (completed 2026-03-16)
 - [ ] **Phase 3: Mobile UX Overhaul** - Rebuild mobile layout and touch targets; preserve desktop
 
 ## Phase Details
@@ -39,7 +39,7 @@ Plans:
   1. Dragging a field player to the bench removes them from their position (spot becomes empty)
   2. Dragging a bench player onto an occupied field position swaps them — bench player goes to field, field player goes to bench
   3. Dragging a bench player onto an empty field position assigns them to that spot
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 02-01-PLAN.md — Drag-and-drop logic (field-to-bench removal, bench-to-field swap) and visual drag feedback
@@ -64,5 +64,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
-| 2. Drag-and-Drop Completion | 1/2 | In Progress|  |
+| 2. Drag-and-Drop Completion | 2/2 | Complete   | 2026-03-16 |
 | 3. Mobile UX Overhaul | 0/TBD | Not started | - |

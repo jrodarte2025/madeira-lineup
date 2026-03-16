@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-drag-drop-completion/02-01-PLAN.md
-last_updated: "2026-03-16T02:29:33.841Z"
+stopped_at: "Checkpoint: 02-02 Task 2 human-verify pending"
+last_updated: "2026-03-16T02:32:14.819Z"
 last_activity: 2026-03-15 — Phase 1 Display Polish complete (1/1 plans)
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 100
 ---
 
@@ -67,6 +67,8 @@ Recent decisions affecting current work:
 - 01-01: GK y-position moved from 89 to 93 to fix CB overlap
 - [Phase 02-drag-drop-completion]: Bench-to-occupied swap uses assignPlayer overwrite — no extra logic needed
 - [Phase 02-drag-drop-completion]: rosterHover only activates for field-sourced drags to avoid misleading bench-to-bench highlight
+- [Phase 02-drag-drop-completion]: handlePositionClick detects source via currentLineup.indexOf(selectedPlayer) — avoids separate state tracking
+- [Phase 02-drag-drop-completion]: Double-click remove compatible with new click logic: first click deselects same-position, then dblclick fires removeFromPosition
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T02:29:33.839Z
-Stopped at: Completed 02-drag-drop-completion/02-01-PLAN.md
+Last session: 2026-03-16T02:32:04.598Z
+Stopped at: Checkpoint: 02-02 Task 2 human-verify pending
 Resume file: None
