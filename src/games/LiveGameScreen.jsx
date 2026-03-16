@@ -322,9 +322,10 @@ export default function LiveGameScreen() {
         if (lineup) {
           const { formation, lineups, roster } = lineup;
           const positionDefs = FORMATIONS[formation] || [];
+          // lineups is keyed by half number ("1","2"), not formation name
           const lineupArray =
-            lineups && lineups[formation]
-              ? lineups[formation]
+            lineups && lineups["1"]
+              ? lineups["1"]
               : Array.isArray(lineups)
               ? lineups
               : [];
