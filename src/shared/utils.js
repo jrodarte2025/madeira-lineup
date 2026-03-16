@@ -1,6 +1,20 @@
 import { useState, useEffect } from "react";
 
 // =============================================
+// POSITION GROUP RESOLVER
+// Maps formation position labels to position group (GK/DEF/MID/FWD)
+// =============================================
+export function getPositionGroup(label) {
+  if (!label) return "MID";
+  const upper = label.toUpperCase();
+  if (upper === "GK") return "GK";
+  if (["LB", "CB", "RB", "LCB", "RCB"].includes(upper)) return "DEF";
+  if (["LM", "CM", "RM", "LCM", "RCM"].includes(upper)) return "MID";
+  if (["LS", "RS", "LW", "CF", "RW", "ST"].includes(upper)) return "FWD";
+  return "MID";
+}
+
+// =============================================
 // NAME ABBREVIATION UTILITY
 // =============================================
 export function abbreviateName(name) {

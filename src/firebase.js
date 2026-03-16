@@ -3,6 +3,7 @@ import {
   getFirestore,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   collection,
   addDoc,
@@ -10,6 +11,8 @@ import {
   arrayUnion,
   serverTimestamp,
   increment,
+  query,
+  orderBy,
 } from "firebase/firestore";
 
 // =============================================================
@@ -149,6 +152,38 @@ export async function appendGameEvent(gameId, event) {
     return true;
   } catch (err) {
     console.error("Failed to append game event:", err);
+    return false;
+  }
+}
+
+/**
+ * Returns all games ordered by createdAt descending.
+ * @returns {Promise<Array<Object>>} Array of game objects with id, or [] on failure.
+ */
+export async function listGames() {
+  try {
+    const q = query(gamesCol, orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.warn("Failed to list games:", err);
+    return [];
+  }
+}
+
+/**
+ * Replaces the entire events array on a game document.
+ * Used for undo functionality (arrayRemove can't match objects by equality from arrayUnion).
+ * @param {string} gameId
+ * @param {Array<Object>} events  Full replacement events array
+ * @returns {Promise<boolean>}
+ */
+export async function replaceGameEvents(gameId, events) {
+  try {
+    await updateDoc(doc(db, "games", gameId), { events });
+    return true;
+  } catch (err) {
+    console.error("Failed to replace game events:", err);
     return false;
   }
 }

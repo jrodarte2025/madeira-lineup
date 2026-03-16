@@ -71,11 +71,22 @@ export const POSITION_GROUP = {
 
 // =============================================
 // STAT TYPES — grouped by category
+// Legacy — use POSITION_STATS for Phase 5+
 // =============================================
 export const STAT_TYPES = {
   offensive: ["goal", "assist", "shot"],
   defensive: ["tackle", "clearance", "save"],
   neutral: ["foul"],
+};
+
+// =============================================
+// POSITION STATS — stat list keyed by position group (Phase 5+)
+// =============================================
+export const POSITION_STATS = {
+  GK: ["save", "distribution", "clearance", "fifty_fifty"],
+  DEF: ["tackle", "interception", "clearance", "block", "fifty_fifty"],
+  MID: ["goal", "assist", "great_pass", "shot_on_target", "tackle", "interception", "fifty_fifty"],
+  FWD: ["goal", "assist", "great_pass", "shot_on_target", "fifty_fifty"],
 };
 
 // =============================================
@@ -85,11 +96,38 @@ export const STAT_COLORS = {
   // Offensive
   goal: C.statOffensive,
   assist: C.statOffensive,
-  shot: C.statOffensive,
+  great_pass: C.statOffensive,
+  shot_on_target: C.statOffensive,
   // Defensive
-  tackle: C.statDefensive,
-  clearance: C.statDefensive,
   save: C.statDefensive,
+  tackle: C.statDefensive,
+  interception: C.statDefensive,
+  clearance: C.statDefensive,
+  block: C.statDefensive,
   // Neutral
+  fifty_fifty: C.statNeutral,
+  distribution: C.statNeutral,
+  // Legacy
+  shot: C.statOffensive,
   foul: C.statNeutral,
+};
+
+// =============================================
+// STAT LABELS — maps snake_case stat keys to display labels
+// =============================================
+export const STAT_LABELS = {
+  goal: "Goal",
+  assist: "Assist",
+  great_pass: "Great Pass",
+  shot_on_target: "Shot on Target",
+  save: "Save",
+  tackle: "Tackle",
+  interception: "Interception",
+  clearance: "Clearance",
+  block: "Block",
+  fifty_fifty: "50/50 Won",
+  distribution: "Distribution",
+  // Legacy
+  shot: "Shot",
+  foul: "Foul",
 };
