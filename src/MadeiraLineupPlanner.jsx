@@ -229,7 +229,7 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
 // =============================================
 function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
   handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive, newName, setNewName, newNum, setNewNum,
-  addPlayer, copyToOtherHalf, clearLineup, clearAll, activeHalf, inactiveHover, setInactiveHover }) {
+  addPlayer, clearAll, inactiveHover, setInactiveHover }) {
 
   const handleInactiveDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setInactiveHover(true); };
   const handleInactiveDragLeave = () => setInactiveHover(false);
@@ -339,14 +339,8 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
       </div>
 
       <div style={{ padding: 10, borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", flexDirection: "column", gap: 5 }}>
-        <button onClick={copyToOtherHalf} style={{ padding: 7, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, color: "rgba(255,255,255,0.55)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: fontBase }}>
-          Copy to {activeHalf === 1 ? "2nd" : "1st"} Half
-        </button>
-        <button onClick={clearLineup} style={{ padding: 7, background: "rgba(255,60,60,0.08)", border: "1px solid rgba(255,60,60,0.15)", borderRadius: 7, color: "rgba(255,100,100,0.7)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: fontBase }}>
-          Clear {activeHalf === 1 ? "1st" : "2nd"} Half
-        </button>
         <button onClick={clearAll} style={{ padding: 7, background: "rgba(255,60,60,0.15)", border: "1px solid rgba(255,60,60,0.25)", borderRadius: 7, color: "rgba(255,100,100,0.9)", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: fontBase }}>
-          Clear All
+          Clear Lineup
         </button>
       </div>
     </>
@@ -552,8 +546,7 @@ export default function MadeiraLineupPlanner() {
   const [roster, setRoster] = useState(() => loadStored("roster", INITIAL_ROSTER));
   const [inactiveIds, setInactiveIds] = useState(() => loadStored("inactiveIds", []));
   const [formation, setFormation] = useState(() => loadStored("formation", "3-3-2"));
-  const [activeHalf, setActiveHalf] = useState(1);
-  const [lineups, setLineups] = useState(() => loadStored("lineups", { 1: Array(9).fill(null), 2: Array(9).fill(null) }));
+  const [lineup, setLineup] = useState(() => loadStored("lineup", Array(9).fill(null)));
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [dragSource, setDragSource] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
@@ -577,7 +570,7 @@ export default function MadeiraLineupPlanner() {
   useEffect(() => saveStored("roster", roster), [roster]);
   useEffect(() => saveStored("inactiveIds", inactiveIds), [inactiveIds]);
   useEffect(() => saveStored("formation", formation), [formation]);
-  useEffect(() => saveStored("lineups", lineups), [lineups]);
+  useEffect(() => saveStored("lineup", lineup), [lineup]);
   useEffect(() => saveStored("savedLineups", savedLineups), [savedLineups]);
 
   // --- Auto-sync working state to Firestore after cloud load ---
@@ -586,10 +579,10 @@ export default function MadeiraLineupPlanner() {
     if (!cloudLoaded) return;
     if (cloudSyncTimer.current) clearTimeout(cloudSyncTimer.current);
     cloudSyncTimer.current = setTimeout(() => {
-      savePublishedLineup({ formation, lineups, inactiveIds, roster }).catch(() => {});
+      savePublishedLineup({ formation, lineup, inactiveIds, roster }).catch(() => {});
     }, 1500);
     return () => { if (cloudSyncTimer.current) clearTimeout(cloudSyncTimer.current); };
-  }, [cloudLoaded, formation, lineups, inactiveIds, roster]);
+  }, [cloudLoaded, formation, lineup, inactiveIds, roster]);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -606,7 +599,7 @@ export default function MadeiraLineupPlanner() {
       if (data) {
         if (data.roster) setRoster(data.roster);
         setFormation(data.formation);
-        setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
+        setLineup([...data.lineup]);
         setInactiveIds([...data.inactiveIds]);
         if (data.name) setSharedName(data.name);
         window.history.replaceState({}, "", window.location.pathname);
@@ -619,16 +612,17 @@ export default function MadeiraLineupPlanner() {
       if (data) {
         if (data.roster) setRoster(data.roster);
         if (data.formation) setFormation(data.formation);
-        if (data.lineups) setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
+        // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
+        if (data.lineup) setLineup([...data.lineup]);
+        else if (data.lineups) setLineup([...(data.lineups["1"] || Array(9).fill(null))]);
         if (data.inactiveIds) setInactiveIds([...data.inactiveIds]);
       }
       setCloudLoaded(true);
     });
   }, []);
 
-  const currentLineup = lineups[activeHalf];
   const positions = FORMATIONS[formation];
-  const assignedIds = currentLineup.filter(Boolean);
+  const assignedIds = lineup.filter(Boolean);
   const availablePlayers = roster.filter((p) => !assignedIds.includes(p.id) && !inactiveIds.includes(p.id));
   const onFieldPlayers = roster.filter((p) => assignedIds.includes(p.id));
   const inactivePlayers = roster.filter((p) => inactiveIds.includes(p.id));
@@ -649,37 +643,31 @@ export default function MadeiraLineupPlanner() {
   // --- LINEUP ACTIONS ---
   const assignPlayer = useCallback((playerId, posIndex) => {
     if (inactiveIds.includes(playerId)) return;
-    setLineups((prev) => {
-      const next = { ...prev };
-      const arr = [...next[activeHalf]];
+    setLineup((prev) => {
+      const arr = [...prev];
       const existingPos = arr.indexOf(playerId);
       if (existingPos !== -1) arr[existingPos] = null;
       arr[posIndex] = playerId;
-      next[activeHalf] = arr;
-      return next;
+      return arr;
     });
     setSelectedPlayer(null);
-  }, [activeHalf, inactiveIds]);
+  }, [inactiveIds]);
 
   const swapPositions = useCallback((fromIdx, toIdx) => {
-    setLineups((prev) => {
-      const next = { ...prev };
-      const arr = [...next[activeHalf]];
+    setLineup((prev) => {
+      const arr = [...prev];
       [arr[fromIdx], arr[toIdx]] = [arr[toIdx], arr[fromIdx]];
-      next[activeHalf] = arr;
-      return next;
+      return arr;
     });
-  }, [activeHalf]);
+  }, []);
 
   const removeFromPosition = useCallback((posIndex) => {
-    setLineups((prev) => {
-      const next = { ...prev };
-      const arr = [...next[activeHalf]];
+    setLineup((prev) => {
+      const arr = [...prev];
       arr[posIndex] = null;
-      next[activeHalf] = arr;
-      return next;
+      return arr;
     });
-  }, [activeHalf]);
+  }, []);
 
   // Touch drag-and-drop (mobile only — HTML5 drag API does not fire on touch screens)
   const { touchDragState, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useTouchDrag({
@@ -688,15 +676,10 @@ export default function MadeiraLineupPlanner() {
     removeFromPosition,
   });
 
-  const clearLineup = () => setLineups((prev) => ({ ...prev, [activeHalf]: Array(9).fill(null) }));
   const clearAll = () => {
-    setLineups({ 1: Array(9).fill(null), 2: Array(9).fill(null) });
+    setLineup(Array(9).fill(null));
     setInactiveIds([]);
     setSelectedPlayer(null);
-  };
-  const copyToOtherHalf = () => {
-    const other = activeHalf === 1 ? 2 : 1;
-    setLineups((prev) => ({ ...prev, [other]: [...prev[activeHalf]] }));
   };
 
   // --- INACTIVE ---
@@ -705,10 +688,7 @@ export default function MadeiraLineupPlanner() {
       if (prev.includes(playerId)) {
         return prev.filter((id) => id !== playerId);
       } else {
-        setLineups((prevL) => ({
-          1: prevL[1].map((id) => (id === playerId ? null : id)),
-          2: prevL[2].map((id) => (id === playerId ? null : id)),
-        }));
+        setLineup((prevL) => prevL.map((id) => (id === playerId ? null : id)));
         return [...prev, playerId];
       }
     });
@@ -728,7 +708,7 @@ export default function MadeiraLineupPlanner() {
     if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
     setRoster((prev) => prev.filter((p) => p.id !== playerId));
     setInactiveIds((prev) => prev.filter((id) => id !== playerId));
-    setLineups((prev) => ({ 1: prev[1].map((id) => (id === playerId ? null : id)), 2: prev[2].map((id) => (id === playerId ? null : id)) }));
+    setLineup((prev) => prev.map((id) => (id === playerId ? null : id)));
   };
 
   // --- SAVE / LOAD ---
@@ -736,7 +716,7 @@ export default function MadeiraLineupPlanner() {
     const snapshot = {
       name,
       formation,
-      lineups: { 1: [...lineups[1]], 2: [...lineups[2]] },
+      lineup: [...lineup],
       inactiveIds: [...inactiveIds],
       roster: roster.map((p) => ({ ...p })),
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
@@ -752,7 +732,9 @@ export default function MadeiraLineupPlanner() {
     const s = savedLineups[index];
     if (s.roster) setRoster(s.roster.map((p) => ({ ...p })));
     setFormation(s.formation);
-    setLineups({ 1: [...s.lineups[1]], 2: [...s.lineups[2]] });
+    // Support both new shape (lineup: [...]) and legacy saved (lineups: {"1": [...]})
+    if (s.lineup) setLineup([...s.lineup]);
+    else if (s.lineups) setLineup([...(s.lineups["1"] || Array(9).fill(null))]);
     setInactiveIds([...s.inactiveIds]);
     setSelectedPlayer(null);
     setModalOpen(false);
@@ -764,12 +746,14 @@ export default function MadeiraLineupPlanner() {
   // --- SHARE ---
   const handleShareSaved = async (index) => {
     const s = savedLineups[index];
-    const result = await shareLineup({ formation: s.formation, lineups: s.lineups, inactiveIds: s.inactiveIds, roster: s.roster || roster, name: s.name });
+    // Support both new shape and legacy saved lineups
+    const shareData = s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null);
+    const result = await shareLineup({ formation: s.formation, lineup: shareData, inactiveIds: s.inactiveIds, roster: s.roster || roster, name: s.name });
     if (result === "copied") showToast("Link copied to clipboard!");
     else if (result === "shared") showToast("Lineup shared!");
   };
   const handleShareCurrent = async () => {
-    const result = await shareLineup({ formation, lineups, inactiveIds, roster, name: "" });
+    const result = await shareLineup({ formation, lineup, inactiveIds, roster, name: "" });
     if (result === "copied") showToast("Link copied to clipboard!");
     else if (result === "shared") showToast("Lineup shared!");
   };
@@ -820,12 +804,12 @@ export default function MadeiraLineupPlanner() {
   const handlePositionClick = (posIndex) => {
     if (!selectedPlayer) {
       // No selection — select the field player at this position (if any)
-      if (currentLineup[posIndex]) setSelectedPlayer(currentLineup[posIndex]);
+      if (lineup[posIndex]) setSelectedPlayer(lineup[posIndex]);
       return;
     }
 
     // A player is selected — determine source
-    const selectedPosIndex = currentLineup.indexOf(selectedPlayer);
+    const selectedPosIndex = lineup.indexOf(selectedPlayer);
     const isSelectedOnField = selectedPosIndex !== -1;
 
     if (isSelectedOnField) {
@@ -854,7 +838,7 @@ export default function MadeiraLineupPlanner() {
   const rosterProps = {
     roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
     handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive,
-    newName, setNewName, newNum, setNewNum, addPlayer, copyToOtherHalf, clearLineup, clearAll, activeHalf,
+    newName, setNewName, newNum, setNewNum, addPlayer, clearAll,
     inactiveHover, setInactiveHover,
     rosterHover,
   };
@@ -908,9 +892,8 @@ export default function MadeiraLineupPlanner() {
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 16, flex: 1 }}>
-          <PrintPitch halfLabel="1st Half" lineup={lineups[1]} positions={positions} roster={roster} formation={formation} inactiveIds={inactiveIds} />
-          <PrintPitch halfLabel="2nd Half" lineup={lineups[2]} positions={positions} roster={roster} formation={formation} inactiveIds={inactiveIds} />
+        <div style={{ display: "flex", justifyContent: "center", flex: 1 }}>
+          <PrintPitch halfLabel="Starting Lineup" lineup={lineup} positions={positions} roster={roster} formation={formation} inactiveIds={inactiveIds} />
         </div>
 
         <div style={{ marginTop: 8, paddingTop: 5, borderTop: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -963,17 +946,6 @@ export default function MadeiraLineupPlanner() {
           {/* Controls — desktop only in header */}
           {!isMobile && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3 }}>
-                {[1, 2].map((h) => (
-                  <button key={h} onClick={() => { setActiveHalf(h); setSelectedPlayer(null); }} style={{
-                    padding: "7px 18px", borderRadius: 7, border: "none", cursor: "pointer",
-                    fontFamily: fontDisplay, fontWeight: 700, fontSize: 12,
-                    background: activeHalf === h ? C.orange : "transparent",
-                    color: activeHalf === h ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
-                  }}>{h === 1 ? "1ST" : "2ND"}</button>
-                ))}
-              </div>
-
               <div style={{ display: "flex", gap: 3 }}>
                 <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
                   padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
@@ -1026,7 +998,7 @@ export default function MadeiraLineupPlanner() {
         {/* MOBILE CONTROLS — below header, above pitch */}
         {isMobile && (
           <div style={{ padding: "5px 12px 0", display: "flex", flexDirection: "column", gap: 5 }}>
-            {/* Row 1: Roster button + Half toggle */}
+            {/* Row 1: Roster button + Formation selector */}
             <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
               <button onClick={() => setRosterOpen(true)} style={{
                 padding: "5px 10px", borderRadius: 7, border: `1px solid ${C.orange}`,
@@ -1037,15 +1009,15 @@ export default function MadeiraLineupPlanner() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 ROSTER
               </button>
-              <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3, flex: 1 }}>
-                {[1, 2].map((h) => (
-                  <button key={h} onClick={() => { setActiveHalf(h); setSelectedPlayer(null); }} style={{
+              <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3, flex: 1 }}>
+                {Object.keys(FORMATIONS).map((f) => (
+                  <button key={f} onClick={() => setFormation(f)} style={{
                     padding: "5px 0", borderRadius: 5, border: "none", cursor: "pointer",
                     fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
-                    background: activeHalf === h ? C.orange : "transparent",
-                    color: activeHalf === h ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
+                    background: formation === f ? C.orange : "transparent",
+                    color: formation === f ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
                     minHeight: 34,
-                  }}>{h === 1 ? "1ST HALF" : "2ND HALF"}</button>
+                  }}>{f}</button>
                 ))}
               </div>
             </div>
@@ -1095,18 +1067,6 @@ export default function MadeiraLineupPlanner() {
               </button>
             </div>
 
-            {/* Row 3: Formation selector */}
-            <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3 }}>
-              {Object.keys(FORMATIONS).map((f) => (
-                <button key={f} onClick={() => setFormation(f)} style={{
-                  padding: "5px 0", borderRadius: 5, border: "none", cursor: "pointer",
-                  fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
-                  background: formation === f ? C.orange : "transparent",
-                  color: formation === f ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
-                  minHeight: 34,
-                }}>{f}</button>
-              ))}
-            </div>
           </div>
         )}
 
@@ -1301,9 +1261,9 @@ export default function MadeiraLineupPlanner() {
                 background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", padding: "4px 14px",
                 borderRadius: 20, fontSize: isMobile ? 9 : 10, fontWeight: 700, fontFamily: fontDisplay,
                 letterSpacing: "1.2px", color: "rgba(255,255,255,0.65)", zIndex: 10, whiteSpace: "nowrap",
-              }}>{formation} · {activeHalf === 1 ? "1ST" : "2ND"} HALF</div>
+              }}>{formation}</div>
               {positions.map((pos, idx) => {
-                const player = currentLineup[idx] ? getPlayer(currentLineup[idx]) : null;
+                const player = lineup[idx] ? getPlayer(lineup[idx]) : null;
                 const isTouchDragOver = touchDragState.overTarget === `field-${idx}`;
                 return (
                   <FieldPosition key={`${formation}-${idx}`} pos={pos} player={player}

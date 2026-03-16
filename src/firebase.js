@@ -47,11 +47,11 @@ export async function loadPublishedLineup() {
   }
 }
 
-export async function savePublishedLineup({ formation, lineups, inactiveIds, roster, name }) {
+export async function savePublishedLineup({ formation, lineup, inactiveIds, roster, name }) {
   try {
     await setDoc(PUBLISHED_DOC, {
       formation,
-      lineups,
+      lineup,
       inactiveIds,
       roster,
       name: name || "",

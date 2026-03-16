@@ -295,11 +295,12 @@ export default function LiveGameScreen() {
         let resolvedBenchPlayers = [];
 
         if (lineup) {
-          const { formation, lineups, roster } = lineup;
+          const { formation, lineup: lineupData, lineups, roster } = lineup;
           const positionDefs = FORMATIONS[formation] || [];
-          // lineups is keyed by half number ("1","2"), not formation name
-          const lineupArray =
-            lineups && lineups["1"]
+          // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
+          const lineupArray = Array.isArray(lineupData)
+            ? lineupData
+            : lineups && lineups["1"]
               ? lineups["1"]
               : Array.isArray(lineups)
               ? lineups

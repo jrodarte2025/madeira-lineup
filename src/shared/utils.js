@@ -70,15 +70,18 @@ export function useMediaQuery(query) {
 // =============================================
 // LINEUP ENCODE / DECODE — for URL sharing
 // =============================================
-export function encodeLineup({ formation, lineups, inactiveIds, roster, name }) {
-  const payload = { f: formation, l: lineups, i: inactiveIds, r: roster, n: name || "" };
+export function encodeLineup({ formation, lineup, inactiveIds, roster, name }) {
+  const payload = { f: formation, l: lineup, i: inactiveIds, r: roster, n: name || "" };
   return btoa(JSON.stringify(payload));
 }
 
 export function decodeLineup(encoded) {
   try {
     const payload = JSON.parse(atob(encoded));
-    return { formation: payload.f, lineups: payload.l, inactiveIds: payload.i, roster: payload.r, name: payload.n || "" };
+    // Fallback for old share URLs: if lineup is an object (keyed by half), read half 1
+    let lineup = payload.l;
+    if (lineup && !Array.isArray(lineup)) lineup = lineup["1"] || Array(9).fill(null);
+    return { formation: payload.f, lineup, inactiveIds: payload.i, roster: payload.r, name: payload.n || "" };
   } catch { return null; }
 }
 

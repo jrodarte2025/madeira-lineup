@@ -12,7 +12,7 @@ function TabBar() {
   const tabStyle = {
     flex: 1,
     textAlign: "center",
-    padding: "10px 0 8px",
+    padding: "14px 0 calc(10px + env(safe-area-inset-bottom, 0px))",
     fontFamily: fontDisplay,
     fontWeight: 700,
     fontSize: 14,
@@ -76,7 +76,7 @@ function AppShell() {
   const isGameScreen = /^\/games\/.+/.test(location.pathname);
 
   return (
-    <div style={isGameScreen ? undefined : { paddingBottom: 56 }}>
+    <div style={isGameScreen ? undefined : { paddingBottom: 64 }}>
       <Routes>
         <Route path="/" element={<Navigate to="/lineup" replace />} />
         <Route path="/lineup" element={<MadeiraLineupPlanner />} />
