@@ -749,6 +749,7 @@ export default function MadeiraLineupPlanner() {
   const toastTimer = useRef(null);
   const chipStripRef = useRef(null);
   const [chipScrollPct, setChipScrollPct] = useState(0);
+  const scrubberDragRef = useRef(null); // { startX, startScrollLeft }
 
   // --- Persist state to localStorage ---
   useEffect(() => saveStored("roster", roster), [roster]);
@@ -1021,6 +1022,7 @@ export default function MadeiraLineupPlanner() {
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        [data-drop-id="chipstrip"]::-webkit-scrollbar { display: none; }
         .screen-view { display: flex; flex-direction: column; }
         .print-view { display: none; }
         @media print {
@@ -1322,6 +1324,8 @@ export default function MadeiraLineupPlanner() {
                       : "1px solid rgba(255,255,255,0.08)",
                     transition: "background 0.15s ease, border 0.15s ease",
                     overflowX: "auto",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
                     gap: 6,
                     WebkitOverflowScrolling: "touch",
                   }}>
@@ -1359,40 +1363,82 @@ export default function MadeiraLineupPlanner() {
                   )}
                 </div>
 
-                {/* Scroll indicator — full width, reflects scroll position */}
+                {/* Scrubber — primary scroll control for bench */}
                 {availablePlayers.length > 3 && (
-                  <div style={{
-                    display: "flex", alignItems: "center",
-                    gap: 8, marginTop: 6, padding: "0 2px",
-                  }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: chipScrollPct > 0.02 ? 1 : 0.25 }}>
-                      <polyline points="15 18 9 12 15 6"/>
-                    </svg>
-                    <div
-                      style={{
-                        height: 4, flex: 1, borderRadius: 2,
-                        background: "rgba(255,255,255,0.08)",
-                        position: "relative", overflow: "hidden",
-                      }}
-                      onClick={(e) => {
-                        if (!chipStripRef.current) return;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const pct = (e.clientX - rect.left) / rect.width;
-                        const maxScroll = chipStripRef.current.scrollWidth - chipStripRef.current.clientWidth;
-                        chipStripRef.current.scrollTo({ left: pct * maxScroll, behavior: "smooth" });
-                      }}
-                    >
-                      <div style={{
-                        position: "absolute", top: 0, height: "100%",
-                        width: "30%", minWidth: 20,
-                        left: `${chipScrollPct * 70}%`,
-                        borderRadius: 2, background: C.orange, opacity: 0.7,
-                        transition: "left 0.1s ease-out",
-                      }} />
+                  <div
+                    style={{
+                      height: 36, marginTop: 6,
+                      borderRadius: 18,
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      position: "relative", overflow: "hidden",
+                      cursor: "grab",
+                      touchAction: "none",
+                    }}
+                    onTouchStart={(e) => {
+                      if (!chipStripRef.current) return;
+                      const touch = e.touches[0];
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      scrubberDragRef.current = {
+                        startX: touch.clientX,
+                        trackWidth: rect.width,
+                        startScrollLeft: chipStripRef.current.scrollLeft,
+                        maxScroll: chipStripRef.current.scrollWidth - chipStripRef.current.clientWidth,
+                      };
+                    }}
+                    onTouchMove={(e) => {
+                      if (!scrubberDragRef.current || !chipStripRef.current) return;
+                      e.preventDefault();
+                      const touch = e.touches[0];
+                      const { startX, trackWidth, startScrollLeft, maxScroll } = scrubberDragRef.current;
+                      const dx = touch.clientX - startX;
+                      const scrollDelta = (dx / trackWidth) * maxScroll;
+                      chipStripRef.current.scrollLeft = Math.max(0, Math.min(maxScroll, startScrollLeft + scrollDelta));
+                    }}
+                    onTouchEnd={() => { scrubberDragRef.current = null; }}
+                    onTouchCancel={() => { scrubberDragRef.current = null; }}
+                    onClick={(e) => {
+                      if (!chipStripRef.current) return;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const pct = (e.clientX - rect.left) / rect.width;
+                      const maxScroll = chipStripRef.current.scrollWidth - chipStripRef.current.clientWidth;
+                      chipStripRef.current.scrollTo({ left: pct * maxScroll, behavior: "smooth" });
+                    }}
+                  >
+                    {/* Track label */}
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      pointerEvents: "none",
+                    }}>
+                      <span style={{
+                        fontSize: 9, fontWeight: 700, letterSpacing: "1.5px",
+                        color: "rgba(255,255,255,0.18)", textTransform: "uppercase",
+                        fontFamily: fontDisplay, userSelect: "none",
+                      }}>SWIPE TO SCROLL</span>
                     </div>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: chipScrollPct < 0.98 ? 1 : 0.25 }}>
-                      <polyline points="9 18 15 12 9 6"/>
-                    </svg>
+                    {/* Thumb */}
+                    <div style={{
+                      position: "absolute", top: 4, bottom: 4,
+                      width: "28%", minWidth: 48,
+                      left: `${chipScrollPct * 72}%`,
+                      borderRadius: 14,
+                      background: `linear-gradient(135deg, ${C.orange}, rgba(232,100,32,0.7))`,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                      transition: scrubberDragRef.current ? "none" : "left 0.1s ease-out",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      pointerEvents: "none",
+                    }}>
+                      {/* Grip dots */}
+                      <div style={{ display: "flex", gap: 3 }}>
+                        {[0,1,2].map(i => (
+                          <div key={i} style={{
+                            width: 3, height: 3, borderRadius: "50%",
+                            background: "rgba(255,255,255,0.6)",
+                          }} />
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
