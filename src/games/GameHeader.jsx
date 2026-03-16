@@ -1,4 +1,5 @@
 import { useRef, useCallback } from "react";
+import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 
 // =============================================
@@ -7,51 +8,44 @@ import { C, fontBase, fontDisplay } from "../shared/constants";
 
 function ScoreButton({ value, side, onScoreChange }) {
   const longPressRef = useRef(null);
+  const handledRef = useRef(false);
 
-  const handleTouchStart = useCallback(() => {
+  const handlePointerDown = useCallback((e) => {
+    e.preventDefault(); // prevent text selection
+    handledRef.current = false;
     longPressRef.current = setTimeout(() => {
       longPressRef.current = null;
+      handledRef.current = true;
       onScoreChange(side, -1);
     }, 500);
   }, [side, onScoreChange]);
 
-  const handleTouchEnd = useCallback(() => {
+  const handlePointerUp = useCallback((e) => {
+    e.preventDefault();
     if (longPressRef.current) {
       clearTimeout(longPressRef.current);
       longPressRef.current = null;
+    }
+    if (!handledRef.current) {
       onScoreChange(side, 1);
     }
+    handledRef.current = false;
   }, [side, onScoreChange]);
 
-  const handleMouseDown = useCallback(() => {
-    longPressRef.current = setTimeout(() => {
-      longPressRef.current = null;
-      onScoreChange(side, -1);
-    }, 500);
-  }, [side, onScoreChange]);
-
-  const handleMouseUp = useCallback(() => {
-    if (longPressRef.current) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-      onScoreChange(side, 1);
-    }
-  }, [side, onScoreChange]);
-
-  const handleMouseLeave = useCallback(() => {
+  const handlePointerCancel = useCallback(() => {
     if (longPressRef.current) {
       clearTimeout(longPressRef.current);
       longPressRef.current = null;
     }
+    handledRef.current = false;
   }, []);
 
   return (
     <div
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
+      onPointerLeave={handlePointerCancel}
       style={{
         fontFamily: fontDisplay,
         fontSize: 40,
@@ -61,6 +55,7 @@ function ScoreButton({ value, side, onScoreChange }) {
         textAlign: "center",
         cursor: "pointer",
         userSelect: "none",
+        WebkitUserSelect: "none",
         lineHeight: 1,
         padding: "4px 8px",
         borderRadius: 8,
@@ -90,7 +85,6 @@ function getTimerDisplay(gameStatus, displaySeconds) {
   if (gameStatus === "setup") return "25:00";
   if (gameStatus === "halftime") return "HALFTIME";
   if (gameStatus === "completed") return "FULL TIME";
-  // 1st-half or 2nd-half
   if (displaySeconds < 1500) return formatCountdown(displaySeconds);
   return formatStoppage(displaySeconds);
 }
@@ -105,6 +99,7 @@ export default function GameHeader({
   onStartSecondHalf,
   onEndGame,
 }) {
+  const navigate = useNavigate();
   const timerStr = getTimerDisplay(gameStatus, displaySeconds);
   const isStoppage =
     (gameStatus === "1st-half" || gameStatus === "2nd-half") &&
@@ -134,9 +129,30 @@ export default function GameHeader({
           alignItems: "center",
           justifyContent: "center",
           gap: 0,
-          padding: "8px 16px 4px",
+          padding: "6px 12px 2px",
+          position: "relative",
         }}
       >
+        {/* Back button */}
+        <div
+          onClick={() => navigate("/games")}
+          style={{
+            position: "absolute",
+            left: 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            cursor: "pointer",
+            padding: "6px 8px",
+            color: "rgba(255,255,255,0.5)",
+            fontSize: 20,
+            lineHeight: 1,
+            userSelect: "none",
+            WebkitUserSelect: "none",
+          }}
+        >
+          ‹
+        </div>
+
         {/* Home score */}
         <ScoreButton
           value={score.home}
@@ -158,9 +174,9 @@ export default function GameHeader({
           <div
             style={{
               fontFamily: fontBase,
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: 600,
-              color: "rgba(255,255,255,0.45)",
+              color: "rgba(255,255,255,0.4)",
               letterSpacing: "0.5px",
               textTransform: "uppercase",
             }}
@@ -170,9 +186,9 @@ export default function GameHeader({
           <div
             style={{
               fontFamily: fontBase,
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 700,
-              color: "rgba(255,255,255,0.7)",
+              color: "rgba(255,255,255,0.65)",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -197,15 +213,15 @@ export default function GameHeader({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 12,
-          padding: "2px 16px 8px",
+          gap: 10,
+          padding: "0 12px 6px",
         }}
       >
         <div
           style={{
             fontFamily: fontDisplay,
             fontSize:
-              gameStatus === "halftime" || gameStatus === "completed" ? 18 : 28,
+              gameStatus === "halftime" || gameStatus === "completed" ? 16 : 24,
             fontWeight: 800,
             color:
               gameStatus === "halftime"
@@ -217,7 +233,7 @@ export default function GameHeader({
                 : C.white,
             letterSpacing: "1px",
             lineHeight: 1,
-            minWidth: 80,
+            minWidth: 70,
             textAlign: "center",
           }}
         >
@@ -233,11 +249,10 @@ export default function GameHeader({
               borderRadius: 8,
               color: C.white,
               fontFamily: fontBase,
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 700,
-              padding: "6px 14px",
+              padding: "5px 12px",
               cursor: "pointer",
-              letterSpacing: "0.3px",
             }}
           >
             End Half
@@ -253,11 +268,10 @@ export default function GameHeader({
               borderRadius: 8,
               color: C.white,
               fontFamily: fontBase,
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 700,
-              padding: "6px 14px",
+              padding: "5px 12px",
               cursor: "pointer",
-              letterSpacing: "0.3px",
             }}
           >
             Start 2nd Half
@@ -273,11 +287,10 @@ export default function GameHeader({
               borderRadius: 8,
               color: C.white,
               fontFamily: fontBase,
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 700,
-              padding: "6px 14px",
+              padding: "5px 12px",
               cursor: "pointer",
-              letterSpacing: "0.3px",
             }}
           >
             Full Time!

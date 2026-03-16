@@ -703,13 +703,33 @@ export default function LiveGameScreen() {
     });
 
     appendGameEvent(gameId, event); // fire-and-forget
+
+    // Auto-increment home score when recording a goal
+    if (statKey === "goal") {
+      setScore((prev) => {
+        const newScore = { ...prev, home: prev.home + 1 };
+        updateGameScore(gameId, newScore);
+        return newScore;
+      });
+    }
   }, [selectedPlayerId, isActiveHalfForStats, fieldPositions, gameStatus, gameId]);
 
   const handleUndo = useCallback((eventId) => {
     setEvents((prev) => {
+      const removed = prev.find((e) => e.id === eventId);
       const updated = prev.filter((e) => e.id !== eventId);
       saveStored("events", updated);
       replaceGameEvents(gameId, updated); // fire-and-forget
+
+      // Decrement home score when undoing a goal
+      if (removed && removed.type === "stat" && removed.stat === "goal") {
+        setScore((s) => {
+          const newScore = { ...s, home: Math.max(0, s.home - 1) };
+          updateGameScore(gameId, newScore);
+          return newScore;
+        });
+      }
+
       return updated;
     });
   }, [gameId]);
@@ -751,9 +771,22 @@ export default function LiveGameScreen() {
     );
   }
 
-  // Estimate header height: ~110px (score row + timer row + safe area)
-  const HEADER_HEIGHT = 110;
-  const BENCH_HEIGHT = 72;
+  // Spread field positions to use full pitch height (formations are designed for half-pitch)
+  const spreadPositions = useMemo(() => {
+    if (fieldPositions.length === 0) return [];
+    const ys = fieldPositions.map(({ pos }) => pos.y);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const range = maxY - minY || 1;
+    // Remap from original range to 8%–92% of pitch
+    return fieldPositions.map(({ pos, player }) => ({
+      pos: { ...pos, y: 8 + ((pos.y - minY) / range) * 84 },
+      player,
+    }));
+  }, [fieldPositions]);
+
+  const HEADER_HEIGHT = 94;
+  const BENCH_HEIGHT = 64;
 
   return (
     <div
@@ -812,8 +845,8 @@ export default function LiveGameScreen() {
             alignItems: "center",
             overflowX: "auto",
             overflowY: "hidden",
-            padding: "0 12px",
-            gap: 4,
+            padding: "0 8px",
+            gap: 2,
             borderBottom: "1px solid rgba(255,255,255,0.08)",
             background: "rgba(0,0,0,0.2)",
             flexShrink: 0,
@@ -904,7 +937,7 @@ export default function LiveGameScreen() {
           )}
 
           {/* Pitch */}
-          <div style={{ position: "relative", width: "100%", height: "100%", minHeight: 340 }}>
+          <div style={{ position: "relative", width: "100%", height: "100%", minHeight: 420 }}>
             {/* Green pitch background */}
             <div
               style={{
@@ -916,7 +949,7 @@ export default function LiveGameScreen() {
             <PitchSVG />
 
             {/* Field positions */}
-            {fieldPositions.map(({ pos, player }, idx) => (
+            {spreadPositions.map(({ pos, player }, idx) => (
               <FieldPosition
                 key={idx}
                 pos={pos}
@@ -940,8 +973,8 @@ export default function LiveGameScreen() {
         {/* Events feed below pitch */}
         <EventsFeed events={events} onUndo={handleUndo} />
 
-        {/* Stat bar spacer — prevents pitch from being obscured by fixed StatBar */}
-        <div style={{ height: isActiveHalfForStats ? 80 : 0 }} />
+        {/* Stat bar spacer — only when a player is selected and stat bar visible */}
+        <div style={{ height: isActiveHalfForStats && selectedPlayerId ? 60 : 0 }} />
       </div>
 
       {/* Stat bar — fixed at bottom, visible during active halves */}
