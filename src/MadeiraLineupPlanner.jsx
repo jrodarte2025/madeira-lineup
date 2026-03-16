@@ -747,6 +747,8 @@ export default function MadeiraLineupPlanner() {
   const [sharedName, setSharedName] = useState(null);
   const [cloudLoaded, setCloudLoaded] = useState(false);
   const toastTimer = useRef(null);
+  const chipStripRef = useRef(null);
+  const [chipScrollPct, setChipScrollPct] = useState(0);
 
   // --- Persist state to localStorage ---
   useEffect(() => saveStored("roster", roster), [roster]);
@@ -1296,10 +1298,16 @@ export default function MadeiraLineupPlanner() {
 
                 {/* Chips container */}
                 <div
+                  ref={chipStripRef}
                   data-drop-id="chipstrip"
                   onTouchMove={handleTouchMove}
                   onTouchEnd={(e) => handleTouchEnd(e, null)}
                   onTouchCancel={handleTouchCancel}
+                  onScroll={(e) => {
+                    const el = e.target;
+                    const maxScroll = el.scrollWidth - el.clientWidth;
+                    setChipScrollPct(maxScroll > 0 ? el.scrollLeft / maxScroll : 0);
+                  }}
                   style={{
                     width: "100%",
                     minHeight: 52,
@@ -1351,26 +1359,38 @@ export default function MadeiraLineupPlanner() {
                   )}
                 </div>
 
-                {/* Scroll indicator */}
+                {/* Scroll indicator — full width, reflects scroll position */}
                 {availablePlayers.length > 3 && (
                   <div style={{
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    gap: 6, marginTop: 4, padding: "2px 0",
+                    display: "flex", alignItems: "center",
+                    gap: 8, marginTop: 6, padding: "0 2px",
                   }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: chipScrollPct > 0.02 ? 1 : 0.25 }}>
                       <polyline points="15 18 9 12 15 6"/>
                     </svg>
-                    <div style={{
-                      height: 3, flex: 1, maxWidth: 80, borderRadius: 2,
-                      background: "rgba(255,255,255,0.08)",
-                      position: "relative", overflow: "hidden",
-                    }}>
+                    <div
+                      style={{
+                        height: 4, flex: 1, borderRadius: 2,
+                        background: "rgba(255,255,255,0.08)",
+                        position: "relative", overflow: "hidden",
+                      }}
+                      onClick={(e) => {
+                        if (!chipStripRef.current) return;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const pct = (e.clientX - rect.left) / rect.width;
+                        const maxScroll = chipStripRef.current.scrollWidth - chipStripRef.current.clientWidth;
+                        chipStripRef.current.scrollTo({ left: pct * maxScroll, behavior: "smooth" });
+                      }}
+                    >
                       <div style={{
-                        position: "absolute", top: 0, left: 0, height: "100%", width: "40%",
-                        borderRadius: 2, background: C.orange, opacity: 0.6,
+                        position: "absolute", top: 0, height: "100%",
+                        width: "30%", minWidth: 20,
+                        left: `${chipScrollPct * 70}%`,
+                        borderRadius: 2, background: C.orange, opacity: 0.7,
+                        transition: "left 0.1s ease-out",
                       }} />
                     </div>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: chipScrollPct < 0.98 ? 1 : 0.25 }}>
                       <polyline points="9 18 15 12 9 6"/>
                     </svg>
                   </div>
