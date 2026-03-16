@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { createPortal } from "react-dom";
 import { useParams } from "react-router";
 import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents } from "../firebase";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
@@ -55,17 +54,10 @@ const clearGameStorage = () => {
 // ---------------------------------------------------------------------------
 // Bench chip for the horizontal bench strip
 // ---------------------------------------------------------------------------
-function BenchChip({ player, minuteCount, draggable, onDragStart, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver, onClick, isSubSelected }) {
+function BenchChip({ player, minuteCount, onClick, isSubSelected }) {
   return (
     <div
-      data-drop-id={`bench-${player.id}`}
-      draggable={draggable}
-      onDragStart={draggable ? onDragStart : undefined}
       onClick={onClick}
-      onTouchStart={draggable ? onTouchStart : undefined}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -74,12 +66,11 @@ function BenchChip({ player, minuteCount, draggable, onDragStart, onTouchStart, 
         padding: "4px 6px",
         minWidth: 48,
         flexShrink: 0,
-        cursor: draggable ? "grab" : "pointer",
+        cursor: "pointer",
         borderRadius: 8,
-        border: isSubSelected ? `2px solid ${C.orange}` : isTouchDragOver ? `2px solid ${C.orange}` : "2px solid transparent",
-        background: isSubSelected ? "rgba(232,100,32,0.25)" : isTouchDragOver ? "rgba(232,100,32,0.15)" : "transparent",
+        border: isSubSelected ? `2px solid ${C.orange}` : "2px solid transparent",
+        background: isSubSelected ? "rgba(232,100,32,0.25)" : "transparent",
         transition: "all 0.15s ease",
-        touchAction: "none",
         userSelect: "none",
       }}
     >
@@ -154,28 +145,8 @@ export default function LiveGameScreen() {
   const startTsRef = useRef(null);
   const rafRef = useRef(null);
 
-  // --- Drag state (desktop HTML5) ---
-  const [dragSource, setDragSource] = useState(null);
-  // dragSource shape: { type: "field"|"bench", idx: number|null, playerId: string, player: object }
-
   // --- Tap-to-sub state (tap bench player, then tap field position to swap) ---
   const [subSource, setSubSource] = useState(null); // bench player selected for sub
-
-  // --- Touch drag state ---
-  const [touchDragState, setTouchDragState] = useState({
-    isDragging: false,
-    playerId: null,
-    player: null,
-    source: null, // { type: "field"|"bench", idx: number|null }
-    ghostX: 0,
-    ghostY: 0,
-    overTarget: null,
-  });
-
-  const touchDragStateRef = useRef(touchDragState);
-  touchDragStateRef.current = touchDragState;
-  const activateTimerRef = useRef(null);
-  const pendingDragRef = useRef(null);
 
   // --- Stat selection state ---
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
@@ -650,197 +621,7 @@ export default function LiveGameScreen() {
   );
 
   // ---------------------------------------------------------------------------
-  // Desktop HTML5 drag handlers
-  // ---------------------------------------------------------------------------
   const isInteractive = gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime";
-
-  const handleFieldDragStart = useCallback((idx, e) => {
-    const player = fieldPositions[idx]?.player;
-    if (!player || !isInteractive) return;
-    setDragSource({ type: "field", idx, playerId: player.id, player });
-    e.dataTransfer.effectAllowed = "move";
-  }, [fieldPositions, isInteractive]);
-
-  const handleBenchDragStart = useCallback((player, e) => {
-    if (!player || !isInteractive) return;
-    setDragSource({ type: "bench", idx: null, playerId: player.id, player });
-    e.dataTransfer.effectAllowed = "move";
-  }, [isInteractive]);
-
-  const handleFieldDragOver = useCallback((e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }, []);
-
-  const handleFieldDrop = useCallback((targetIdx, e) => {
-    e.preventDefault();
-    if (!dragSource || !isInteractive) {
-      setDragSource(null);
-      return;
-    }
-    handleSubstitution(dragSource, targetIdx);
-    setDragSource(null);
-  }, [dragSource, isInteractive, handleSubstitution]);
-
-  const handleBenchStripDragOver = useCallback((e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  }, []);
-
-  const handleBenchStripDrop = useCallback((e) => {
-    e.preventDefault();
-    if (!dragSource || !isInteractive) {
-      setDragSource(null);
-      return;
-    }
-    if (dragSource.type === "field" && dragSource.idx !== null) {
-      handleBenchDrop(dragSource.idx);
-    }
-    setDragSource(null);
-  }, [dragSource, isInteractive, handleBenchDrop]);
-
-  const handleDragEnd = useCallback(() => {
-    setDragSource(null);
-  }, []);
-
-  // ---------------------------------------------------------------------------
-  // Touch drag handlers (inline, same pattern as MadeiraLineupPlanner)
-  // ---------------------------------------------------------------------------
-
-  const handleTouchStart = useCallback((sourceInfo, player, e) => {
-    if (!isInteractive || !player) return;
-    pendingDragRef.current = {
-      sourceInfo,
-      player,
-      startX: e.touches[0].clientX,
-      startY: e.touches[0].clientY,
-    };
-
-    activateTimerRef.current = setTimeout(() => {
-      const pending = pendingDragRef.current;
-      if (!pending) return;
-      setTouchDragState({
-        isDragging: true,
-        playerId: pending.player.id,
-        player: pending.player,
-        source: pending.sourceInfo,
-        ghostX: pending.startX,
-        ghostY: pending.startY,
-        overTarget: null,
-      });
-    }, 150);
-  }, [isInteractive]);
-
-  const handleTouchMove = useCallback((e) => {
-    if (!touchDragStateRef.current.isDragging && pendingDragRef.current) {
-      const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - pendingDragRef.current.startX);
-      const dy = Math.abs(touch.clientY - pendingDragRef.current.startY);
-      const moved = dx > 8 || dy > 8;
-      if (moved) {
-        if (dx > dy) {
-          // Horizontal swipe — cancel drag
-          clearTimeout(activateTimerRef.current);
-          activateTimerRef.current = null;
-          pendingDragRef.current = null;
-          return;
-        } else {
-          // Vertical drag — activate early
-          clearTimeout(activateTimerRef.current);
-          activateTimerRef.current = null;
-          const pending = pendingDragRef.current;
-          setTouchDragState({
-            isDragging: true,
-            playerId: pending.player.id,
-            player: pending.player,
-            source: pending.sourceInfo,
-            ghostX: touch.clientX,
-            ghostY: touch.clientY,
-            overTarget: null,
-          });
-        }
-      }
-      return;
-    }
-    if (!touchDragStateRef.current.isDragging) return;
-    e.preventDefault();
-
-    const touch = e.touches[0];
-    const clientX = touch.clientX;
-    const clientY = touch.clientY;
-
-    const el = document.elementFromPoint(clientX, clientY);
-    let overTarget = null;
-    if (el) {
-      let node = el;
-      while (node && node !== document.body) {
-        if (node.dataset && node.dataset.dropId) {
-          overTarget = node.dataset.dropId;
-          break;
-        }
-        node = node.parentElement;
-      }
-    }
-
-    setTouchDragState((prev) => ({ ...prev, ghostX: clientX, ghostY: clientY, overTarget }));
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (activateTimerRef.current) {
-      clearTimeout(activateTimerRef.current);
-      activateTimerRef.current = null;
-    }
-
-    const state = touchDragStateRef.current;
-    pendingDragRef.current = null;
-
-    if (!state.isDragging) {
-      setTouchDragState({
-        isDragging: false, playerId: null, player: null, source: null,
-        ghostX: 0, ghostY: 0, overTarget: null,
-      });
-      return;
-    }
-
-    const { source, overTarget } = state;
-
-    if (overTarget && overTarget.startsWith("field-")) {
-      const targetIdx = parseInt(overTarget.replace("field-", ""), 10);
-      if (source) {
-        handleSubstitution(source, targetIdx);
-      }
-    } else if (overTarget === "bench-strip") {
-      if (source && source.type === "field" && source.idx !== null) {
-        handleBenchDrop(source.idx);
-      }
-    }
-
-    setTouchDragState({
-      isDragging: false, playerId: null, player: null, source: null,
-      ghostX: 0, ghostY: 0, overTarget: null,
-    });
-  }, [handleSubstitution, handleBenchDrop]);
-
-  const handleTouchCancel = useCallback(() => {
-    if (activateTimerRef.current) {
-      clearTimeout(activateTimerRef.current);
-      activateTimerRef.current = null;
-    }
-    pendingDragRef.current = null;
-    setTouchDragState({
-      isDragging: false, playerId: null, player: null, source: null,
-      ghostX: 0, ghostY: 0, overTarget: null,
-    });
-  }, []);
-
-  // Prevent page scroll during active touch drag
-  useEffect(() => {
-    const preventScroll = (e) => {
-      if (touchDragStateRef.current.isDragging) e.preventDefault();
-    };
-    document.addEventListener("touchmove", preventScroll, { passive: false });
-    return () => document.removeEventListener("touchmove", preventScroll);
-  }, []);
 
   // ---------------------------------------------------------------------------
   // Live minute calculations — recompute once per minute (when displayMinute changes)
@@ -974,11 +755,6 @@ export default function LiveGameScreen() {
   const HEADER_HEIGHT = 110;
   const BENCH_HEIGHT = 72;
 
-  const isFieldBeingDraggedOver = (idx) => {
-    if (dragSource) return true; // highlight all during desktop drag
-    return touchDragState.overTarget === `field-${idx}`;
-  };
-
   return (
     <div
       style={{
@@ -1030,9 +806,6 @@ export default function LiveGameScreen() {
       <div style={{ paddingTop: HEADER_HEIGHT, flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Bench strip */}
         <div
-          data-drop-id="bench-strip"
-          onDragOver={isInteractive ? handleBenchStripDragOver : undefined}
-          onDrop={isInteractive ? handleBenchStripDrop : undefined}
           style={{
             height: BENCH_HEIGHT,
             display: "flex",
@@ -1042,15 +815,10 @@ export default function LiveGameScreen() {
             padding: "0 12px",
             gap: 4,
             borderBottom: "1px solid rgba(255,255,255,0.08)",
-            background: dragSource?.type === "field"
-              ? "rgba(232,100,32,0.08)"
-              : touchDragState.overTarget === "bench-strip" && touchDragState.source?.type === "field"
-              ? "rgba(232,100,32,0.08)"
-              : "rgba(0,0,0,0.2)",
+            background: "rgba(0,0,0,0.2)",
             flexShrink: 0,
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
-            transition: "background 0.15s ease",
           }}
         >
           {benchPlayers.length === 0 ? (
@@ -1070,14 +838,7 @@ export default function LiveGameScreen() {
                 key={player.id}
                 player={player}
                 minuteCount={playerMinutes[player.id] || 0}
-                draggable={isInteractive}
-                onDragStart={(e) => handleBenchDragStart(player, e)}
                 onClick={() => handleBenchTap(player)}
-                onTouchStart={(e) => handleTouchStart({ type: "bench", idx: null }, player, e)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchCancel}
-                isTouchDragOver={touchDragState.overTarget === `bench-${player.id}`}
                 isSubSelected={subSource?.id === player.id}
               />
             ))
@@ -1163,8 +924,6 @@ export default function LiveGameScreen() {
                 idx={idx}
                 isHighlighted={isInteractive && !player}
                 compact={false}
-                dragSource={dragSource}
-                isTouchDragOver={touchDragState.overTarget === `field-${idx}`}
                 minuteDisplay={
                   (gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime" || gameStatus === "completed") && player
                     ? String(playerMinutes[player.id] ?? 0)
@@ -1173,14 +932,6 @@ export default function LiveGameScreen() {
                 isSelected={!!player && player.id === selectedPlayerId}
                 statCount={player ? (statCounts[player.id] || 0) : 0}
                 onClick={isInteractive ? () => handleFieldTap(idx) : undefined}
-                onDragStart={isInteractive ? (e) => handleFieldDragStart(idx, e) : undefined}
-                onDragEnd={handleDragEnd}
-                onDragOver={isInteractive ? handleFieldDragOver : undefined}
-                onDrop={isInteractive ? (e) => handleFieldDrop(idx, e) : undefined}
-                onTouchStart={isInteractive ? (e) => handleTouchStart({ type: "field", idx }, player, e) : undefined}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onTouchCancel={handleTouchCancel}
               />
             ))}
           </div>
@@ -1203,36 +954,6 @@ export default function LiveGameScreen() {
         />
       )}
 
-      {/* Touch drag ghost element */}
-      {touchDragState.isDragging && touchDragState.player && createPortal(
-        <div
-          style={{
-            position: "fixed",
-            left: touchDragState.ghostX - 18,
-            top: touchDragState.ghostY - 18,
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: `linear-gradient(145deg, ${C.navy}, ${C.navyLight})`,
-            border: `2.5px solid ${C.orange}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: fontDisplay,
-            fontWeight: 800,
-            fontSize: 14,
-            color: C.orange,
-            pointerEvents: "none",
-            zIndex: 9999,
-            opacity: 0.85,
-            boxShadow: `0 4px 16px rgba(0,0,0,0.5), 0 0 12px 3px rgba(232,100,32,0.4)`,
-            transform: "scale(1.15)",
-          }}
-        >
-          {touchDragState.player.num}
-        </div>,
-        document.body
-      )}
     </div>
   );
 }
