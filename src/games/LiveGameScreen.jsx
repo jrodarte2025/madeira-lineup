@@ -789,8 +789,7 @@ export default function LiveGameScreen() {
     );
   }
 
-  const HEADER_HEIGHT = 60;
-  const BENCH_HEIGHT = 72;
+  const HEADER_HEIGHT = 56;
 
   return (
     <div
@@ -840,52 +839,75 @@ export default function LiveGameScreen() {
         </div>
       )}
 
-      {/* Content below fixed header */}
-      <div style={{ paddingTop: HEADER_HEIGHT, flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Bench strip */}
-        <div
-          style={{
-            height: BENCH_HEIGHT,
-            display: "flex",
-            alignItems: "center",
-            overflowX: "auto",
-            overflowY: "hidden",
-            padding: "0 12px",
-            gap: 4,
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(0,0,0,0.25)",
-            flexShrink: 0,
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-          }}
-        >
-          {benchPlayers.length === 0 ? (
-            <div
-              style={{
-                fontFamily: fontBase,
-                fontSize: 12,
-                color: "rgba(255,255,255,0.25)",
-                fontStyle: "italic",
-              }}
-            >
-              No bench players
-            </div>
-          ) : (
-            benchPlayers.map((player) => (
-              <BenchChip
-                key={player.id}
-                player={player}
-                minuteCount={playerMinutes[player.id] || 0}
-                onClick={() => handleBenchTap(player)}
-                isSubSelected={subSource?.id === player.id}
-              />
-            ))
-          )}
+      {/* Scrollable content below fixed header */}
+      <div style={{
+        paddingTop: HEADER_HEIGHT,
+        flex: 1,
+        overflowY: "auto",
+        overflowX: "hidden",
+        WebkitOverflowScrolling: "touch",
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        {/* Bench section */}
+        <div style={{
+          flexShrink: 0,
+          padding: "6px 12px 4px",
+          background: "rgba(0,0,0,0.2)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}>
+          {/* Bench label */}
+          <div style={{
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "1.5px",
+            color: "rgba(255,255,255,0.3)",
+            textTransform: "uppercase",
+            fontFamily: fontDisplay,
+            marginBottom: 4,
+          }}>
+            BENCH
+          </div>
+          {/* Bench chips */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              overflowX: "auto",
+              gap: 4,
+              paddingBottom: 4,
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+            }}
+          >
+            {benchPlayers.length === 0 ? (
+              <div
+                style={{
+                  fontFamily: fontBase,
+                  fontSize: 11,
+                  color: "rgba(255,255,255,0.25)",
+                  fontStyle: "italic",
+                  padding: "8px 0",
+                }}
+              >
+                No bench players
+              </div>
+            ) : (
+              benchPlayers.map((player) => (
+                <BenchChip
+                  key={player.id}
+                  player={player}
+                  minuteCount={playerMinutes[player.id] || 0}
+                  onClick={() => handleBenchTap(player)}
+                  isSubSelected={subSource?.id === player.id}
+                />
+              ))
+            )}
+          </div>
         </div>
 
         {/* Pitch area */}
-        <div style={{ flex: 1, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "4px 12px" }}>
+        <div style={{ position: "relative", padding: "6px 10px 0" }}>
           {/* "Start Game" overlay — shown when status is setup */}
           {gameStatus === "setup" && (
             <div
@@ -900,6 +922,7 @@ export default function LiveGameScreen() {
                 gap: 16,
                 background: "rgba(17,27,58,0.75)",
                 backdropFilter: "blur(2px)",
+                borderRadius: 8,
               }}
             >
               <div
@@ -943,7 +966,7 @@ export default function LiveGameScreen() {
           )}
 
           {/* Pitch */}
-          <div style={{ position: "relative", width: "100%", maxWidth: 400, aspectRatio: "3 / 3.6", borderRadius: 8, overflow: "visible" }}>
+          <div style={{ position: "relative", width: "100%", aspectRatio: "3 / 3.5", borderRadius: 8, overflow: "visible" }}>
             {/* Green pitch background */}
             <div
               style={{
@@ -975,13 +998,18 @@ export default function LiveGameScreen() {
               />
             ))}
           </div>
+          {/* Bottom padding for GK name/minutes that extend below pitch */}
+          <div style={{ height: 20 }} />
         </div>
 
         {/* Events feed below pitch */}
         <EventsFeed events={events} onUndo={handleUndo} />
 
         {/* Stat bar spacer — only when a player is selected and stat bar visible */}
-        <div style={{ height: isActiveHalfForStats && selectedPlayerId ? 110 : 0 }} />
+        {isActiveHalfForStats && selectedPlayerId && <div style={{ height: 110 }} />}
+
+        {/* Bottom safe area padding */}
+        <div style={{ height: 8, flexShrink: 0 }} />
       </div>
 
       {/* Stat bar — fixed at bottom, visible during active halves */}

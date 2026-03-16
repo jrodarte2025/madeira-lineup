@@ -2,7 +2,7 @@ import { useRef, useCallback } from "react";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 
 // =============================================
-// GAME HEADER — fixed top bar with score + timer + opponent
+// GAME HEADER — fixed top bar with score + timer
 // =============================================
 
 function ScoreColumn({ value, side, label, onScoreChange }) {
@@ -38,15 +38,14 @@ function ScoreColumn({ value, side, label, onScoreChange }) {
         userSelect: "none",
         WebkitUserSelect: "none",
         touchAction: "manipulation",
-        padding: "2px 8px",
+        padding: "2px 10px",
         borderRadius: 8,
-        minWidth: 48,
       }}
     >
       <div
         style={{
           fontFamily: fontDisplay,
-          fontSize: 32,
+          fontSize: 30,
           fontWeight: 800,
           color: isHome ? C.orange : C.white,
           lineHeight: 1,
@@ -64,8 +63,8 @@ function ScoreColumn({ value, side, label, onScoreChange }) {
           color: isHome ? C.orange : "rgba(255,255,255,0.5)",
           opacity: isHome ? 0.7 : 1,
           lineHeight: 1,
-          marginTop: 3,
-          maxWidth: 64,
+          marginTop: 2,
+          maxWidth: 72,
           overflow: "hidden",
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
@@ -120,6 +119,15 @@ export default function GameHeader({
     gameStatus === "2nd-half" && displaySeconds >= 1500;
   const showActionButton = showEndHalf || showStartSecondHalf || showEndGame;
 
+  const timerColor =
+    gameStatus === "halftime"
+      ? "#4CAFB6"
+      : gameStatus === "completed"
+      ? "rgba(255,255,255,0.5)"
+      : isStoppage
+      ? C.orange
+      : "rgba(255,255,255,0.7)";
+
   return (
     <div
       style={{
@@ -133,21 +141,25 @@ export default function GameHeader({
         paddingTop: "env(safe-area-inset-top, 0px)",
       }}
     >
-      {/* Single row: Back | Score | Teams | Score | Clock */}
+      {/* Score row: Back | Home | clock | Away */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          padding: "6px 8px 6px",
+          justifyContent: "center",
+          padding: "8px 16px 6px",
+          gap: 4,
         }}
       >
-        {/* Back arrow */}
+        {/* Back arrow — absolute left so it doesn't push the scoreboard off center */}
         {onBack && (
           <div
             onClick={onBack}
             style={{
+              position: "absolute",
+              left: 12,
               cursor: "pointer",
-              padding: "4px 6px",
+              padding: "8px",
               color: "rgba(255,255,255,0.5)",
               fontSize: 18,
               fontFamily: fontBase,
@@ -156,74 +168,50 @@ export default function GameHeader({
               userSelect: "none",
               WebkitUserSelect: "none",
               WebkitTapHighlightColor: "transparent",
-              flexShrink: 0,
             }}
           >
             &#8592;
           </div>
         )}
 
-        {/* Scoreboard — home score | dash | away score, each with team label */}
+        {/* Home score + label */}
+        <ScoreColumn
+          value={score.home}
+          side="home"
+          label="MFC"
+          onScoreChange={onScoreChange}
+        />
+
+        {/* Center: clock between scores */}
         <div
           style={{
-            flex: 1,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
+            minWidth: 52,
           }}
         >
-          <ScoreColumn
-            value={score.home}
-            side="home"
-            label="MFC"
-            onScoreChange={onScoreChange}
-          />
-
           <div
             style={{
               fontFamily: fontDisplay,
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: 800,
-              color: "rgba(255,255,255,0.25)",
+              color: timerColor,
+              letterSpacing: "0.5px",
               lineHeight: 1,
-              paddingBottom: 14,
             }}
           >
-            –
+            {timerStr}
           </div>
-
-          <ScoreColumn
-            value={score.away}
-            side="away"
-            label={opponent || "AWAY"}
-            onScoreChange={onScoreChange}
-          />
         </div>
 
-        {/* Clock — right side */}
-        <div
-          style={{
-            fontFamily: fontDisplay,
-            fontSize: gameStatus === "halftime" || gameStatus === "completed" ? 14 : 18,
-            fontWeight: 800,
-            color:
-              gameStatus === "halftime"
-                ? "#4CAFB6"
-                : gameStatus === "completed"
-                ? "rgba(255,255,255,0.5)"
-                : isStoppage
-                ? C.orange
-                : C.white,
-            letterSpacing: "0.5px",
-            lineHeight: 1,
-            minWidth: 50,
-            textAlign: "center",
-            flexShrink: 0,
-          }}
-        >
-          {timerStr}
-        </div>
+        {/* Away score + label */}
+        <ScoreColumn
+          value={score.away}
+          side="away"
+          label={opponent || "AWAY"}
+          onScoreChange={onScoreChange}
+        />
       </div>
 
       {/* Action button row — only when needed (stoppage/halftime) */}
