@@ -41,7 +41,7 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 ### Game Lifecycle
 
 - [x] **GAME-01**: Coach can create a game with opponent name and date, linked to current lineup
-- [ ] **GAME-02**: Game screen loads as a separate view with the linked lineup on a pitch
+- [x] **GAME-02**: Game screen loads as a separate view with the linked lineup on a pitch
 - [ ] **GAME-03**: Coach can start a half with a single tap; 25-minute timer counts down and auto-stops
 - [x] **GAME-04**: Timer uses timestamp-based elapsed time (not setInterval ticks) for accuracy
 - [ ] **GAME-05**: Screen Wake Lock prevents phone from sleeping during active game
@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-02 | Phase 4 | Complete |
 | INFRA-03 | Phase 4 | Complete |
 | GAME-01 | Phase 5 | Complete |
-| GAME-02 | Phase 5 | Pending |
+| GAME-02 | Phase 5 | Complete |
 | GAME-03 | Phase 5 | Pending |
 | GAME-04 | Phase 5 | Complete |
 | GAME-05 | Phase 5 | Pending |
