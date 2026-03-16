@@ -100,13 +100,13 @@ Plans:
   4. Dragging a player on/off the field during a game logs a substitution; each player's field circle shows their current running minute count
   5. Tapping a player shows position-appropriate stat buttons (GK/DEF/MID/FWD each get their own set); tapping a button records the stat and increments the badge on that player's circle
   6. The last 3-5 game events are visible in a feed; any single event can be undone with one tap
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 05-01: GameSetupModal + GameTab + game creation flow + Firestore write
-- [ ] 05-02: LiveGameScreen — drift-proof timer (Date.now diff), Screen Wake Lock, localStorage crash buffer + resume prompt
-- [ ] 05-03: Substitution handling — drag events during game mode log subs, per-player minute tracking with halftime intersection calculation, minute display on field circles
-- [ ] 05-04: StatBar — position-aware stat buttons, color coding, stat badge counts on field circles, recent events feed + single-tap undo
+- [ ] 05-01-PLAN.md — Expand constants for full stat set, add listGames() + getPositionGroup(), build GamesTab with game list + creation modal, wire /games/:id route
+- [ ] 05-02-PLAN.md — LiveGameScreen with drift-proof timer (Date.now diff), game state machine, Screen Wake Lock, localStorage crash buffer + auto-resume
+- [ ] 05-03-PLAN.md — Substitution handling during active game, per-player minute tracking with interval intersection, calcMinutes() utility, live minute display on field circles and bench chips
+- [ ] 05-04-PLAN.md — StatBar with position-aware stat buttons, color coding, stat badge counts on field circles, recent events feed with single-tap undo, end-to-end verification checkpoint
 
 ### Phase 6: Post-Game Summary + Exports
 **Goal**: When the final whistle blows, the coach has a complete game record they can review, download, and share in one tap
