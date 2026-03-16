@@ -56,6 +56,17 @@ const fontBase = "'DM Sans', system-ui, -apple-system, sans-serif";
 const fontDisplay = "'Outfit', system-ui, -apple-system, sans-serif";
 
 // =============================================
+// NAME ABBREVIATION UTILITY
+// =============================================
+function abbreviateName(name) {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  if (parts[0].includes(".")) return name.trim();
+  return `${parts[0][0]}. ${parts.slice(1).join(" ")}`;
+}
+
+// =============================================
 // RESPONSIVE HOOK
 // =============================================
 function useMediaQuery(query) {
@@ -141,9 +152,9 @@ function PitchSVG({ lineColor = "rgba(255,255,255,0.75)" }) {
 // =============================================
 function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact }) {
   const has = !!player;
-  const circleSize = has ? (compact ? 36 : 46) : (compact ? 26 : 34);
-  const numSize = has ? (compact ? 13 : 17) : (compact ? 7 : 9);
-  const nameSize = has ? (compact ? 8 : 10) : (compact ? 7 : 9);
+  const circleSize = has ? (compact ? 44 : 56) : (compact ? 44 : 56);
+  const numSize = has ? (compact ? 15 : 20) : (compact ? 8 : 10);
+  const nameSize = has ? (compact ? 10 : 12) : (compact ? 8 : 10);
   return (
     <div draggable={has} onDragStart={has ? onDragStart : undefined} onDragEnd={onDragEnd}
       onDragOver={onDragOver} onDrop={onDrop} onClick={onClick} onDoubleClick={onDoubleClick}
@@ -166,9 +177,9 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
       <div style={{
         fontSize: nameSize, fontWeight: 700, color: has ? C.white : "rgba(255,255,255,0.35)",
         textAlign: "center", textShadow: "0 1px 4px rgba(0,0,0,0.9)",
-        maxWidth: compact ? 56 : 76, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
-      }}>{has ? player.name.split(" ").slice(-1)[0] : pos.label}</div>
-      {has && <div style={{ fontSize: compact ? 6 : 8, fontWeight: 700, color: C.orange, letterSpacing: "1.2px", textShadow: "0 1px 3px rgba(0,0,0,0.9)", opacity: 0.85 }}>{pos.label}</div>}
+        maxWidth: compact ? 68 : 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
+      }}>{has ? abbreviateName(player.name) : pos.label}</div>
+      {has && <div style={{ fontSize: compact ? 7 : 10, fontWeight: 700, color: C.orange, letterSpacing: "1.2px", textShadow: "0 1px 3px rgba(0,0,0,0.9)", opacity: 0.85 }}>{pos.label}</div>}
     </div>
   );
 }
@@ -251,7 +262,7 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
               <div style={{
                 fontSize: 6, fontWeight: 700, color: C.navy,
                 maxWidth: 50, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase, textAlign: "center",
-              }}>{player ? player.name.split(" ").slice(-1)[0] : pos.label}</div>
+              }}>{player ? abbreviateName(player.name) : pos.label}</div>
               {player && <div style={{ fontSize: 5, fontWeight: 700, color: C.orange, letterSpacing: "0.6px" }}>{pos.label}</div>}
             </div>
           );
