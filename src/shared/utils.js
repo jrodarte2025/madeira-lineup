@@ -15,6 +15,34 @@ export function getPositionGroup(label) {
 }
 
 // =============================================
+// MINUTE CALCULATOR — pure function for interval intersection
+// =============================================
+// fieldIntervals: [{ inAt: timestamp, outAt: timestamp|null }]
+// halfIntervals:  [{ startAt: timestamp, endAt: timestamp|null }]
+// Returns total whole minutes the player was on field during active halves
+export function calcMinutes(fieldIntervals, halfIntervals) {
+  if (!fieldIntervals.length || !halfIntervals.length) return 0;
+  const now = Date.now();
+  let totalMs = 0;
+
+  for (const fi of fieldIntervals) {
+    const fiStart = fi.inAt;
+    const fiEnd = fi.outAt ?? now;
+    for (const hi of halfIntervals) {
+      const hiStart = hi.startAt;
+      const hiEnd = hi.endAt ?? now;
+      const overlapStart = Math.max(fiStart, hiStart);
+      const overlapEnd = Math.min(fiEnd, hiEnd);
+      if (overlapEnd > overlapStart) {
+        totalMs += overlapEnd - overlapStart;
+      }
+    }
+  }
+
+  return Math.floor(totalMs / 60000);
+}
+
+// =============================================
 // NAME ABBREVIATION UTILITY
 // =============================================
 export function abbreviateName(name) {
