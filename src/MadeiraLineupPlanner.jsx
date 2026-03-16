@@ -775,6 +775,17 @@ export default function MadeiraLineupPlanner() {
   useEffect(() => saveStored("lineups", lineups), [lineups]);
   useEffect(() => saveStored("savedLineups", savedLineups), [savedLineups]);
 
+  // --- Auto-sync working state to Firestore after cloud load ---
+  const cloudSyncTimer = useRef(null);
+  useEffect(() => {
+    if (!cloudLoaded) return;
+    if (cloudSyncTimer.current) clearTimeout(cloudSyncTimer.current);
+    cloudSyncTimer.current = setTimeout(() => {
+      savePublishedLineup({ formation, lineups, inactiveIds, roster }).catch(() => {});
+    }, 1500);
+    return () => { if (cloudSyncTimer.current) clearTimeout(cloudSyncTimer.current); };
+  }, [cloudLoaded, formation, lineups, inactiveIds, roster]);
+
   const showToast = (msg) => {
     setToast(msg);
     if (toastTimer.current) clearTimeout(toastTimer.current);
