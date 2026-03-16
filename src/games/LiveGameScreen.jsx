@@ -778,12 +778,12 @@ export default function LiveGameScreen() {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        height: "100vh",
         background: C.navyDark,
         display: "flex",
         flexDirection: "column",
         fontFamily: fontBase,
-        overflowX: "hidden",
+        overflow: "hidden",
       }}
     >
       {/* Fixed Header */}
@@ -925,7 +925,7 @@ export default function LiveGameScreen() {
           )}
 
           {/* Pitch */}
-          <div style={{ position: "relative", width: "100%", height: "100%", minHeight: 340 }}>
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
             {/* Green pitch background */}
             <div
               style={{

@@ -105,94 +105,94 @@ export default function GameHeader({
         paddingTop: "env(safe-area-inset-top, 0px)",
       }}
     >
-      {/* Score row */}
+      {/* Back + Score row */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 0,
-          padding: "8px 16px 4px",
-          position: "relative",
+          padding: "8px 12px 4px",
         }}
       >
-        {/* Back arrow */}
+        {/* Back arrow — left edge */}
         {onBack && (
           <div
             onClick={onBack}
             style={{
-              position: "absolute",
-              left: 4,
-              top: "50%",
-              transform: "translateY(-50%)",
               cursor: "pointer",
-              padding: "8px",
+              padding: "4px 8px",
               color: "rgba(255,255,255,0.5)",
-              fontSize: 22,
+              fontSize: 18,
               fontFamily: fontBase,
               fontWeight: 700,
               lineHeight: 1,
               userSelect: "none",
               WebkitUserSelect: "none",
               WebkitTapHighlightColor: "transparent",
+              flexShrink: 0,
             }}
           >
-            &larr;
+            &#8592;
           </div>
         )}
 
-        {/* Home score */}
-        <ScoreButton
-          value={score.home}
-          side="home"
-          onScoreChange={onScoreChange}
-        />
-
-        {/* Center labels */}
+        {/* Centered scoreboard */}
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 0,
             flex: 1,
-            minWidth: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
           }}
         >
-          <div
-            style={{
-              fontFamily: fontBase,
-              fontSize: 11,
-              fontWeight: 600,
-              color: "rgba(255,255,255,0.45)",
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-            }}
-          >
-            Madeira FC
-          </div>
-          <div
-            style={{
-              fontFamily: fontBase,
-              fontSize: 12,
-              fontWeight: 700,
-              color: "rgba(255,255,255,0.7)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: "100%",
-            }}
-          >
-            vs {opponent}
-          </div>
-        </div>
+          <ScoreButton
+            value={score.home}
+            side="home"
+            onScoreChange={onScoreChange}
+          />
 
-        {/* Away score */}
-        <ScoreButton
-          value={score.away}
-          side="away"
-          onScoreChange={onScoreChange}
-        />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              minWidth: 80,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: fontBase,
+                fontSize: 11,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.45)",
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Madeira FC
+            </div>
+            <div
+              style={{
+                fontFamily: fontBase,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.7)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: 140,
+              }}
+            >
+              vs {opponent}
+            </div>
+          </div>
+
+          <ScoreButton
+            value={score.away}
+            side="away"
+            onScoreChange={onScoreChange}
+          />
+        </div>
       </div>
 
       {/* Timer row */}

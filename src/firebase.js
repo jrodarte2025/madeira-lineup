@@ -9,6 +9,7 @@ import {
   addDoc,
   updateDoc,
   arrayUnion,
+  deleteDoc,
   serverTimestamp,
   increment,
   query,
@@ -184,6 +185,16 @@ export async function replaceGameEvents(gameId, events) {
     return true;
   } catch (err) {
     console.error("Failed to replace game events:", err);
+    return false;
+  }
+}
+
+export async function deleteGame(gameId) {
+  try {
+    await deleteDoc(doc(db, "games", gameId));
+    return true;
+  } catch (err) {
+    console.error("Failed to delete game:", err);
     return false;
   }
 }
