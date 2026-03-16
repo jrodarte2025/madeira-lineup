@@ -5,8 +5,9 @@ import { C, fontBase, fontDisplay } from "../shared/constants";
 // GAME HEADER — fixed top bar with score + timer + opponent
 // =============================================
 
-function ScoreButton({ value, side, onScoreChange }) {
+function ScoreColumn({ value, side, label, onScoreChange }) {
   const longPressRef = useRef(null);
+  const isHome = side === "home";
 
   const handleTouchStart = useCallback((e) => {
     e.preventDefault();
@@ -30,22 +31,48 @@ function ScoreButton({ value, side, onScoreChange }) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{
-        fontFamily: fontDisplay,
-        fontSize: 36,
-        fontWeight: 800,
-        color: C.orange,
-        minWidth: 40,
-        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
         cursor: "pointer",
         userSelect: "none",
         WebkitUserSelect: "none",
-        lineHeight: 1,
-        padding: "4px 6px",
-        borderRadius: 8,
         touchAction: "manipulation",
+        padding: "2px 8px",
+        borderRadius: 8,
+        minWidth: 48,
       }}
     >
-      {value}
+      <div
+        style={{
+          fontFamily: fontDisplay,
+          fontSize: 32,
+          fontWeight: 800,
+          color: isHome ? C.orange : C.white,
+          lineHeight: 1,
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontFamily: fontBase,
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: "1px",
+          textTransform: "uppercase",
+          color: isHome ? C.orange : "rgba(255,255,255,0.5)",
+          opacity: isHome ? 0.7 : 1,
+          lineHeight: 1,
+          marginTop: 3,
+          maxWidth: 64,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {label}
+      </div>
     </div>
   );
 }
@@ -136,61 +163,40 @@ export default function GameHeader({
           </div>
         )}
 
-        {/* Scoreboard — centered, compact */}
+        {/* Scoreboard — home score | dash | away score, each with team label */}
         <div
           style={{
             flex: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 3,
+            gap: 6,
           }}
         >
-          <ScoreButton
+          <ScoreColumn
             value={score.home}
             side="home"
+            label="MFC"
             onScoreChange={onScoreChange}
           />
 
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              minWidth: 60,
+              fontFamily: fontDisplay,
+              fontSize: 20,
+              fontWeight: 800,
+              color: "rgba(255,255,255,0.25)",
+              lineHeight: 1,
+              paddingBottom: 14,
             }}
           >
-            <div
-              style={{
-                fontFamily: fontBase,
-                fontSize: 10,
-                fontWeight: 600,
-                color: "rgba(255,255,255,0.45)",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-              }}
-            >
-              Madeira FC
-            </div>
-            <div
-              style={{
-                fontFamily: fontBase,
-                fontSize: 11,
-                fontWeight: 700,
-                color: "rgba(255,255,255,0.7)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                maxWidth: 120,
-              }}
-            >
-              vs {opponent}
-            </div>
+            –
           </div>
 
-          <ScoreButton
+          <ScoreColumn
             value={score.away}
             side="away"
+            label={opponent || "AWAY"}
             onScoreChange={onScoreChange}
           />
         </div>
