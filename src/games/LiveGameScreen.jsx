@@ -979,7 +979,7 @@ export default function LiveGameScreen() {
         <EventsFeed events={events} onUndo={handleUndo} />
 
         {/* Stat bar spacer — only when a player is selected and stat bar visible */}
-        <div style={{ height: isActiveHalfForStats && selectedPlayerId ? 60 : 0 }} />
+        <div style={{ height: isActiveHalfForStats && selectedPlayerId ? 80 : 0 }} />
       </div>
 
       {/* Stat bar — fixed at bottom, visible during active halves */}
