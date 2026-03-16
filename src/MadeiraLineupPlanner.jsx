@@ -200,7 +200,7 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
 // =============================================
 // ROSTER PLAYER CHIP
 // =============================================
-function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, showRemove }) {
+function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, onToggleInactive, showRemove, showEdit }) {
   const canInteract = !isDimmed;
   return (
     <div draggable={canInteract} onDragStart={canInteract ? onDragStart : undefined} onDragEnd={onDragEnd}
@@ -222,6 +222,10 @@ function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onD
       <div style={{ fontSize: isDimmed ? 12 : 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
         {player.name}
       </div>
+      {showEdit && !isDimmed && onToggleInactive && (
+        <button onClick={(e) => { e.stopPropagation(); onToggleInactive(); }}
+          style={{ background: "rgba(255,120,80,0.15)", border: "none", color: "rgba(255,120,80,0.7)", borderRadius: 4, cursor: "pointer", fontSize: 10, padding: "2px 6px", flexShrink: 0, lineHeight: 1, fontWeight: 700 }}>SIT</button>
+      )}
       {showRemove && !isDimmed && (
         <button onClick={(e) => { e.stopPropagation(); onRemove(); }}
           style={{ background: "rgba(255,80,80,0.15)", border: "none", color: "#ff7b7b", borderRadius: 4, cursor: "pointer", fontSize: 12, padding: "2px 6px", flexShrink: 0, lineHeight: 1 }}>×</button>
@@ -435,7 +439,7 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
         {availablePlayers.map((p) => (
           <PlayerChip key={p.id} player={p} isSelected={selectedPlayer === p.id} isDimmed={false} isInactive={false}
             onDragStart={(e) => handleDragStart(e, p.id, "roster")} onDragEnd={handleDragEnd}
-            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} showRemove={showEdit} />
+            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} onToggleInactive={() => toggleInactive(p.id)} showRemove={showEdit} showEdit={showEdit} />
         ))}
 
         {onFieldPlayers.length > 0 && (
@@ -829,6 +833,9 @@ export default function MadeiraLineupPlanner() {
     setNewName(""); setNewNum("");
   };
   const removePlayer = (playerId) => {
+    const player = roster.find((p) => p.id === playerId);
+    const name = player ? player.name : "this player";
+    if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
     setRoster((prev) => prev.filter((p) => p.id !== playerId));
     setInactiveIds((prev) => prev.filter((id) => id !== playerId));
     setLineups((prev) => ({ 1: prev[1].map((id) => (id === playerId ? null : id)), 2: prev[2].map((id) => (id === playerId ? null : id)) }));
@@ -1176,7 +1183,7 @@ export default function MadeiraLineupPlanner() {
                         onTouchMove={handleTouchMove}
                         onTouchEnd={(e) => handleTouchEnd(e, () => handlePlayerClick(p.id))}
                         onTouchCancel={handleTouchCancel}
-                        onClick={() => handlePlayerClick(p.id)}
+                        onClick={(e) => { if ('ontouchstart' in window) return; handlePlayerClick(p.id); }}
                         style={{
                           display: "flex", alignItems: "center", gap: 5,
                           padding: "8px 12px",
@@ -1226,8 +1233,8 @@ export default function MadeiraLineupPlanner() {
                     isTouchDragOver={isTouchDragOver}
                     onDragStart={(e) => handleDragStart(e, player.id, idx)} onDragEnd={handleDragEnd}
                     onDragOver={handlePositionDragOver} onDrop={(e) => handlePositionDrop(e, idx)}
-                    onClick={() => handlePositionClick(idx)}
-                    onDoubleClick={() => player && removeFromPosition(idx)}
+                    onClick={() => { if (isMobile) return; handlePositionClick(idx); }}
+                    onDoubleClick={() => { if (isMobile) return; player && removeFromPosition(idx); }}
                     onTouchStart={isMobile ? (e) => handleTouchStart(player ? player.id : null, idx, e) : undefined}
                     onTouchMove={isMobile ? handleTouchMove : undefined}
                     onTouchEnd={isMobile ? (e) => handleTouchEnd(e, () => handlePositionClick(idx)) : undefined}
