@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, createPortal } from "react";
 import { loadPublishedLineup, savePublishedLineup } from "./firebase";
 
 // =============================================
@@ -150,22 +150,29 @@ function PitchSVG({ lineColor = "rgba(255,255,255,0.75)" }) {
 // =============================================
 // INTERACTIVE FIELD POSITION
 // =============================================
-function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact, dragSource, idx }) {
+function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact, dragSource, idx, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver }) {
   const has = !!player;
-  const circleSize = has ? (compact ? 40 : 50) : (compact ? 40 : 50);
-  const numSize = has ? (compact ? 14 : 18) : (compact ? 8 : 10);
-  const nameSize = has ? (compact ? 9 : 11) : (compact ? 8 : 10);
+  const circleSize = 50;
+  const numSize = has ? 18 : 10;
+  const nameSize = has ? 11 : 10;
   const isBeingDragged = dragSource && dragSource.source === idx;
-  const shouldGlow = dragSource && !isBeingDragged;
+  const shouldGlow = (dragSource && !isBeingDragged) || isTouchDragOver;
   return (
-    <div draggable={has} onDragStart={has ? onDragStart : undefined} onDragEnd={onDragEnd}
+    <div
+      data-drop-id={`field-${idx}`}
+      draggable={has} onDragStart={has ? onDragStart : undefined} onDragEnd={onDragEnd}
       onDragOver={onDragOver} onDrop={onDrop} onClick={onClick} onDoubleClick={onDoubleClick}
+      onTouchStart={has ? onTouchStart : undefined}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
       style={{
         position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%, -50%)",
         display: "flex", flexDirection: "column", alignItems: "center", gap: compact ? 1 : 2,
         cursor: has ? "grab" : isHighlighted ? "pointer" : "default", zIndex: 5,
         transition: "left 0.4s cubic-bezier(0.4,0,0.2,1), top 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
         userSelect: "none", opacity: isBeingDragged ? 0.35 : 1,
+        touchAction: "none",
       }}>
       <div style={{
         width: circleSize, height: circleSize, borderRadius: "50%",
@@ -520,6 +527,143 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
 }
 
 // =============================================
+// TOUCH DRAG HOOK
+// =============================================
+function useTouchDrag({ assignPlayer, swapPositions, removeFromPosition }) {
+  const [touchDragState, setTouchDragState] = useState({
+    isDragging: false,
+    playerId: null,
+    source: null, // "roster" | number (field index)
+    ghostX: 0,
+    ghostY: 0,
+    overTarget: null,
+  });
+
+  // Refs to avoid stale closures in touch event handlers
+  const dragStateRef = useRef(touchDragState);
+  dragStateRef.current = touchDragState;
+
+  const activateTimerRef = useRef(null);
+  const pendingDragRef = useRef(null); // { playerId, source } before activation
+
+  const handleTouchStart = useCallback((playerId, source, e) => {
+    // Store pending drag info; activate after 150ms to distinguish from taps
+    pendingDragRef.current = { playerId, source, startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+
+    activateTimerRef.current = setTimeout(() => {
+      const pending = pendingDragRef.current;
+      if (!pending) return;
+      setTouchDragState({
+        isDragging: true,
+        playerId: pending.playerId,
+        source: pending.source,
+        ghostX: pending.startX,
+        ghostY: pending.startY,
+        overTarget: null,
+      });
+    }, 150);
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!dragStateRef.current.isDragging) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const clientX = touch.clientX;
+    const clientY = touch.clientY;
+
+    // Find what element is under the finger (ghost has pointerEvents:none)
+    const el = document.elementFromPoint(clientX, clientY);
+    let overTarget = null;
+    if (el) {
+      // Walk up the tree to find data-drop-id
+      let node = el;
+      while (node && node !== document.body) {
+        if (node.dataset && node.dataset.dropId) {
+          overTarget = node.dataset.dropId;
+          break;
+        }
+        node = node.parentElement;
+      }
+    }
+
+    setTouchDragState((prev) => ({ ...prev, ghostX: clientX, ghostY: clientY, overTarget }));
+  }, []);
+
+  const handleTouchEnd = useCallback((e, tapCallback) => {
+    // Clear the activation timer
+    if (activateTimerRef.current) {
+      clearTimeout(activateTimerRef.current);
+      activateTimerRef.current = null;
+    }
+
+    const state = dragStateRef.current;
+
+    if (!state.isDragging) {
+      // Was a tap — execute tap callback
+      pendingDragRef.current = null;
+      if (tapCallback) tapCallback();
+      return;
+    }
+
+    const { playerId, source, overTarget } = state;
+
+    // Execute drop action
+    if (overTarget && overTarget.startsWith("field-")) {
+      const targetIdx = parseInt(overTarget.replace("field-", ""), 10);
+      if (source === "roster") {
+        assignPlayer(playerId, targetIdx);
+      } else if (typeof source === "number") {
+        swapPositions(source, targetIdx);
+      }
+    } else if (overTarget === "chipstrip") {
+      if (typeof source === "number") {
+        removeFromPosition(source);
+      }
+    }
+    // If no valid target, do nothing (drop ignored)
+
+    pendingDragRef.current = null;
+    setTouchDragState({
+      isDragging: false,
+      playerId: null,
+      source: null,
+      ghostX: 0,
+      ghostY: 0,
+      overTarget: null,
+    });
+  }, [assignPlayer, swapPositions, removeFromPosition]);
+
+  // Cancel drag on any touch cancel
+  const handleTouchCancel = useCallback(() => {
+    if (activateTimerRef.current) {
+      clearTimeout(activateTimerRef.current);
+      activateTimerRef.current = null;
+    }
+    pendingDragRef.current = null;
+    setTouchDragState({
+      isDragging: false,
+      playerId: null,
+      source: null,
+      ghostX: 0,
+      ghostY: 0,
+      overTarget: null,
+    });
+  }, []);
+
+  // Prevent page scroll during active touch drag via non-passive document listener
+  useEffect(() => {
+    const preventScroll = (e) => {
+      if (dragStateRef.current.isDragging) e.preventDefault();
+    };
+    document.addEventListener("touchmove", preventScroll, { passive: false });
+    return () => document.removeEventListener("touchmove", preventScroll);
+  }, []);
+
+  return { touchDragState, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel };
+}
+
+// =============================================
 // MAIN APP
 // =============================================
 export default function MadeiraLineupPlanner() {
@@ -641,6 +785,13 @@ export default function MadeiraLineupPlanner() {
       return next;
     });
   }, [activeHalf]);
+
+  // Touch drag-and-drop (mobile only — HTML5 drag API does not fire on touch screens)
+  const { touchDragState, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel } = useTouchDrag({
+    assignPlayer,
+    swapPositions,
+    removeFromPosition,
+  });
 
   const clearLineup = () => setLineups((prev) => ({ ...prev, [activeHalf]: Array(9).fill(null) }));
   const clearAll = () => {
@@ -983,6 +1134,74 @@ export default function MadeiraLineupPlanner() {
 
           {/* PITCH */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: isMobile ? "flex-start" : "center", padding: isMobile ? 10 : 20, overflow: "auto" }}>
+
+            {/* MOBILE CHIP STRIP — bench players as draggable chips above the pitch */}
+            {isMobile && (
+              <div
+                data-drop-id="chipstrip"
+                onTouchMove={handleTouchMove}
+                onTouchEnd={(e) => handleTouchEnd(e, null)}
+                onTouchCancel={handleTouchCancel}
+                style={{
+                  width: "100%", maxWidth: 360,
+                  minHeight: 52, marginBottom: 8,
+                  display: "flex", alignItems: "center",
+                  padding: "6px 8px",
+                  borderRadius: 10,
+                  background: touchDragState.overTarget === "chipstrip"
+                    ? "rgba(232,100,32,0.15)"
+                    : "rgba(0,0,0,0.2)",
+                  border: touchDragState.overTarget === "chipstrip"
+                    ? `2px dashed ${C.orange}`
+                    : "1px solid rgba(255,255,255,0.08)",
+                  transition: "background 0.15s ease, border 0.15s ease",
+                  overflowX: "auto",
+                  gap: 6,
+                  flexShrink: 0,
+                  WebkitOverflowScrolling: "touch",
+                }}>
+                {availablePlayers.length === 0 ? (
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontStyle: "italic", whiteSpace: "nowrap", padding: "0 4px" }}>
+                    All players assigned
+                  </div>
+                ) : (
+                  <>
+                    {availablePlayers.map((p) => (
+                      <div
+                        key={p.id}
+                        data-drag-id={p.id}
+                        data-drag-source="roster"
+                        onTouchStart={(e) => handleTouchStart(p.id, "roster", e)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={(e) => handleTouchEnd(e, () => handlePlayerClick(p.id))}
+                        onTouchCancel={handleTouchCancel}
+                        onClick={() => handlePlayerClick(p.id)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 5,
+                          padding: "8px 12px",
+                          minHeight: 44,
+                          borderRadius: 22, cursor: "pointer",
+                          background: selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.07)",
+                          border: `1px solid ${selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.12)"}`,
+                          whiteSpace: "nowrap", flexShrink: 0,
+                          transition: "all 0.15s ease", userSelect: "none",
+                          touchAction: "none",
+                          opacity: touchDragState.isDragging && touchDragState.playerId === p.id && touchDragState.source === "roster" ? 0.35 : 1,
+                        }}>
+                        <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 13, color: selectedPlayer === p.id ? C.white : C.orange }}>{p.num}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{p.name.split(" ")[0]}</span>
+                      </div>
+                    ))}
+                    {!touchDragState.isDragging && !selectedPlayer && (
+                      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", whiteSpace: "nowrap", padding: "0 6px", fontStyle: "italic", flexShrink: 0 }}>
+                        Drag to position
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
             <div style={{
               position: "relative", width: "100%", maxWidth: isMobile ? 360 : isTablet ? 420 : 480, aspectRatio: "3 / 4",
               background: pitchBg, borderRadius: isMobile ? 10 : 14, overflow: "hidden",
@@ -998,14 +1217,21 @@ export default function MadeiraLineupPlanner() {
               }}>{formation} · {activeHalf === 1 ? "1ST" : "2ND"} HALF</div>
               {positions.map((pos, idx) => {
                 const player = currentLineup[idx] ? getPlayer(currentLineup[idx]) : null;
+                const isTouchDragOver = touchDragState.overTarget === `field-${idx}`;
                 return (
                   <FieldPosition key={`${formation}-${idx}`} pos={pos} player={player}
-                    isHighlighted={!!selectedPlayer && !player} compact={isMobile}
+                    isHighlighted={!!selectedPlayer && !player} compact={false}
                     dragSource={dragSource} idx={idx}
+                    isTouchDragOver={isTouchDragOver}
                     onDragStart={(e) => handleDragStart(e, player.id, idx)} onDragEnd={handleDragEnd}
                     onDragOver={handlePositionDragOver} onDrop={(e) => handlePositionDrop(e, idx)}
                     onClick={() => handlePositionClick(idx)}
-                    onDoubleClick={() => player && removeFromPosition(idx)} />
+                    onDoubleClick={() => player && removeFromPosition(idx)}
+                    onTouchStart={isMobile ? (e) => handleTouchStart(player ? player.id : null, idx, e) : undefined}
+                    onTouchMove={isMobile ? handleTouchMove : undefined}
+                    onTouchEnd={isMobile ? (e) => handleTouchEnd(e, () => handlePositionClick(idx)) : undefined}
+                    onTouchCancel={isMobile ? handleTouchCancel : undefined}
+                  />
                 );
               })}
             </div>
@@ -1131,6 +1357,44 @@ export default function MadeiraLineupPlanner() {
           {toast}
         </div>
       )}
+
+      {/* TOUCH DRAG GHOST — follows finger during touch drag */}
+      {isMobile && touchDragState.isDragging && (() => {
+        const ghostPlayer = touchDragState.playerId ? getPlayer(touchDragState.playerId) : null;
+        return createPortal(
+          <div style={{
+            position: "fixed",
+            left: touchDragState.ghostX,
+            top: touchDragState.ghostY,
+            transform: "translate(-50%, -50%)",
+            pointerEvents: "none",
+            zIndex: 9999,
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+          }}>
+            <div style={{
+              width: 50, height: 50, borderRadius: "50%",
+              background: `linear-gradient(145deg, ${C.navy}, ${C.navyLight})`,
+              border: `2.5px solid ${C.orange}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: fontDisplay, fontSize: 18, fontWeight: 800, color: C.orange,
+              boxShadow: `0 4px 20px rgba(0,0,0,0.6), 0 0 20px ${C.orangeGlow}`,
+              opacity: 0.92,
+            }}>
+              {ghostPlayer ? ghostPlayer.num : "?"}
+            </div>
+            {ghostPlayer && (
+              <div style={{
+                fontSize: 10, fontWeight: 700, color: C.white,
+                textShadow: "0 1px 4px rgba(0,0,0,0.9)",
+                background: "rgba(0,0,0,0.5)", borderRadius: 4, padding: "1px 5px",
+              }}>
+                {ghostPlayer.name.split(" ")[0]}
+              </div>
+            )}
+          </div>,
+          document.body
+        );
+      })()}
     </>
   );
 }
