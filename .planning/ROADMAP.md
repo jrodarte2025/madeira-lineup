@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Display Polish** - Sharpen player name formatting and field position sizing (completed 2026-03-16)
 - [x] **Phase 2: Drag-and-Drop Completion** - Complete all drag-and-drop interactions (bench removal and bench-to-field swap) (completed 2026-03-16)
-- [ ] **Phase 3: Mobile UX Overhaul** - Rebuild mobile layout and touch targets; preserve desktop
+- [x] **Phase 3: Mobile UX Overhaul** - Rebuild mobile layout and touch targets; preserve desktop (completed 2026-03-16)
 
 ## Phase Details
 
@@ -55,11 +55,11 @@ Plans:
   3. All buttons and touch targets on mobile are large enough to tap accurately with a thumb
   4. The desktop layout is pixel-for-pixel identical to before this phase — no regressions
   5. Touch drag-and-drop works on mobile (touchstart/touchmove/touchend) for all interaction types
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [~] 03-01-PLAN.md — Touch drag-and-drop engine (custom touch events) + mobile chip strip above field (awaiting verification)
-- [ ] 03-02-PLAN.md — Controls below field (formation, half toggle, actions), roster management modal, minimal header
+- [x] 03-01-PLAN.md — Touch drag-and-drop engine (custom touch events) + mobile chip strip above field
+- [x] 03-02-PLAN.md — Mobile layout reorganization, roster modal, bench scrubber, PWA, Firestore auto-sync
 
 ## Progress
 
@@ -70,4 +70,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
 | 2. Drag-and-Drop Completion | 2/2 | Complete    | 2026-03-16 |
-| 3. Mobile UX Overhaul | 0/2 | In progress | - |
+| 3. Mobile UX Overhaul | 2/2 | Complete    | 2026-03-16 |
