@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
-status: in-progress
-stopped_at: Completed 04-03-PLAN.md (game CRUD and season stats data layer)
-last_updated: "2026-03-16T17:05:00Z"
-last_activity: 2026-03-16 — Completed Phase 4 Plan 03
+status: executing
+stopped_at: Completed 04-02-PLAN.md (bottom tab navigation shell)
+last_updated: "2026-03-16T17:22:08.580Z"
+last_activity: 2026-03-16 — Completed 04-03 game CRUD and season stats data layer
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 8
   percent: 25
 ---
 
@@ -56,6 +56,8 @@ v2.0 decisions (04-01):
 v2.0 decisions (04-03):
 - updateSeasonStats uses dotted-path keys with setDoc merge to avoid overwriting unrelated player stats
 - appendGameEvent uses arrayUnion for atomic array append — no read-modify-write race conditions
+- [Phase 04]: HashRouter chosen (not BrowserRouter) so SPA works without server-side rewrite rules
+- [Phase 04]: buildShareUrl updated to hash format (#/lineup?lineup=...); MadeiraLineupPlanner reads param from window.location.hash
 
 ### Pending Todos
 
@@ -68,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T17:08:00Z
-Stopped at: Completed 04-01-PLAN.md (shared module extraction)
-Resume file: .planning/phases/04-app-shell-data-foundation/04-01-SUMMARY.md
+Last session: 2026-03-16T17:22:03.938Z
+Stopped at: Completed 04-02-PLAN.md (bottom tab navigation shell)
+Resume file: None

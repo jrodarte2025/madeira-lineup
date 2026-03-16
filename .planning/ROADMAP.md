@@ -65,7 +65,7 @@ Plans:
 - Integer phases (4, 5, 6, 7): v2.0 planned work
 - Decimal phases (4.1, 4.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 4: App Shell + Data Foundation** - Extract shared components, add tab navigation, lock Firestore schema before any game code
+- [x] **Phase 4: App Shell + Data Foundation** - Extract shared components, add tab navigation, lock Firestore schema before any game code (completed 2026-03-16)
 - [ ] **Phase 5: Live Game** - Complete game-day loop: game creation, drift-proof timer, substitutions, minute tracking, stat logging, events feed
 - [ ] **Phase 6: Post-Game Summary + Exports** - Stats table, CSV download, shareable link, and image export card
 - [ ] **Phase 7: Season Dashboard + Player Profiles** - Running tallies across all games and per-player season history
@@ -150,7 +150,7 @@ v2.0: 4 → 5 → 6 → 7
 | 1. Display Polish | v1.0 | 1/1 | Complete | 2026-03-16 |
 | 2. Drag-and-Drop Completion | v1.0 | 2/2 | Complete | 2026-03-16 |
 | 3. Mobile UX Overhaul | v1.0 | 2/2 | Complete | 2026-03-16 |
-| 4. App Shell + Data Foundation | 2/3 | In Progress|  | - |
+| 4. App Shell + Data Foundation | 3/3 | Complete   | 2026-03-16 | - |
 | 5. Live Game | v2.0 | 0/4 | Not started | - |
 | 6. Post-Game Summary + Exports | v2.0 | 0/3 | Not started | - |
 | 7. Season Dashboard + Player Profiles | v2.0 | 0/3 | Not started | - |
