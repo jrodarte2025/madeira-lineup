@@ -47,6 +47,12 @@ v2.0 decisions (pending):
 - Firestore: embedded events array in game doc (NOT subcollection per event)
 - Two new deps only: react-router-dom v7, html-to-image v1.11.13
 
+v2.0 decisions (04-01):
+- STAT_TYPES grouped into offensive/defensive/neutral; stat names (goal, assist, shot, tackle, clearance, save, foul) are Phase 5 starters — refine in Phase 5 implementation
+- STAT_COLORS maps each type to statOffensive (#E86420), statDefensive (#4CAFB6), statNeutral (#6b7280)
+- POSITION_GROUP uses simple string enum (GK/DEF/MID/FWD) — matches JS-only stack
+- buildShareUrl kept as-is; Plan 04-02 will update for HashRouter
+
 v2.0 decisions (04-03):
 - updateSeasonStats uses dotted-path keys with setDoc merge to avoid overwriting unrelated player stats
 - appendGameEvent uses arrayUnion for atomic array append — no read-modify-write race conditions
@@ -62,6 +68,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T17:05:00Z
-Stopped at: Completed 04-03-PLAN.md
-Resume file: .planning/phases/04-app-shell-data-foundation/04-03-SUMMARY.md
+Last session: 2026-03-16T17:08:00Z
+Stopped at: Completed 04-01-PLAN.md (shared module extraction)
+Resume file: .planning/phases/04-app-shell-data-foundation/04-01-SUMMARY.md

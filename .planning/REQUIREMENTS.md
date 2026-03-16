@@ -35,7 +35,7 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 ### App Infrastructure
 
 - [ ] **INFRA-01**: App has bottom tab navigation with Lineup, Games, and Stats tabs
-- [ ] **INFRA-02**: Shared components (PitchSVG, FieldPosition, constants) extracted into reusable files
+- [x] **INFRA-02**: Shared components (PitchSVG, FieldPosition, constants) extracted into reusable files
 - [ ] **INFRA-03**: Existing lineup builder works unchanged within the new tab structure
 
 ### Game Lifecycle
@@ -114,7 +114,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 4 | Pending |
-| INFRA-02 | Phase 4 | Pending |
+| INFRA-02 | Phase 4 | Complete |
 | INFRA-03 | Phase 4 | Pending |
 | GAME-01 | Phase 5 | Pending |
 | GAME-02 | Phase 5 | Pending |
