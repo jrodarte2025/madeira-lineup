@@ -179,20 +179,28 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
         width: circleSize, height: circleSize, borderRadius: "50%",
         background: has ? `linear-gradient(145deg, ${C.navy}, ${C.navyLight})` : isHighlighted ? "rgba(232,100,32,0.25)" : "rgba(0,0,0,0.2)",
         border: has ? `2.5px solid ${C.orange}` : isHighlighted ? `2px dashed ${C.orange}` : "2px dashed rgba(255,255,255,0.3)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: fontDisplay, fontSize: numSize, fontWeight: 800,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        fontFamily: fontDisplay, fontWeight: 800,
         color: has ? C.orange : "rgba(255,255,255,0.45)",
         boxShadow: shouldGlow
           ? `0 4px 14px rgba(0,0,0,0.45), 0 0 12px 3px rgba(232,100,32,0.4)`
           : has ? `0 4px 14px rgba(0,0,0,0.45), 0 0 20px ${C.orangeGlow}` : "none",
         transition: "all 0.2s ease",
-      }}>{has ? player.num : pos.label}</div>
-      <div style={{
-        fontSize: nameSize, fontWeight: 700, color: has ? C.white : "rgba(255,255,255,0.35)",
+      }}>
+        {has ? (
+          <>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>{player.num}</span>
+            <span style={{ fontSize: 7, letterSpacing: "0.8px", color: "rgba(255,255,255,0.55)", lineHeight: 1, marginTop: 2 }}>{pos.label}</span>
+          </>
+        ) : (
+          <span style={{ fontSize: numSize }}>{pos.label}</span>
+        )}
+      </div>
+      {has && <div style={{
+        fontSize: nameSize, fontWeight: 700, color: C.white,
         textAlign: "center", textShadow: "0 1px 4px rgba(0,0,0,0.9)",
-        maxWidth: compact ? 68 : 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
-      }}>{has ? abbreviateName(player.name) : pos.label}</div>
-      {has && <div style={{ fontSize: compact ? 7 : 10, fontWeight: 700, color: C.orange, letterSpacing: "1.2px", WebkitTextStroke: "0.5px rgba(255,255,255,0.7)", textShadow: "0 1px 3px rgba(0,0,0,0.9)" }}>{pos.label}</div>}
+        maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
+      }}>{abbreviateName(player.name)}</div>}
     </div>
   );
 }
@@ -272,15 +280,23 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
                 width: player ? 24 : 18, height: player ? 24 : 18, borderRadius: "50%",
                 background: "white",
                 border: player ? `2px solid ${C.orange}` : `1px dashed #bbb`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: fontDisplay, fontSize: player ? 10 : 5.5, fontWeight: 800,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                fontFamily: fontDisplay, fontWeight: 800,
                 color: player ? C.navy : "#bbb",
-              }}>{player ? player.num : pos.label}</div>
-              <div style={{
+              }}>
+                {player ? (
+                  <>
+                    <span style={{ fontSize: 9, lineHeight: 1 }}>{player.num}</span>
+                    <span style={{ fontSize: 4, letterSpacing: "0.4px", color: C.orange, lineHeight: 1, marginTop: 1 }}>{pos.label}</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: 5.5 }}>{pos.label}</span>
+                )}
+              </div>
+              {player && <div style={{
                 fontSize: 6, fontWeight: 700, color: C.navy,
                 maxWidth: 50, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase, textAlign: "center",
-              }}>{player ? abbreviateName(player.name) : pos.label}</div>
-              {player && <div style={{ fontSize: 5, fontWeight: 700, color: C.orange, letterSpacing: "0.6px" }}>{pos.label}</div>}
+              }}>{abbreviateName(player.name)}</div>}
             </div>
           );
         })}
