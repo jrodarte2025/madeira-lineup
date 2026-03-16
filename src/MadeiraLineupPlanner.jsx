@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect, useRef, createPortal } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { loadPublishedLineup, savePublishedLineup } from "./firebase";
 
 // =============================================
