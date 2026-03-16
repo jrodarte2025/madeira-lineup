@@ -55,12 +55,13 @@ const clearGameStorage = () => {
 // ---------------------------------------------------------------------------
 // Bench chip for the horizontal bench strip
 // ---------------------------------------------------------------------------
-function BenchChip({ player, minuteCount, draggable, onDragStart, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver }) {
+function BenchChip({ player, minuteCount, draggable, onDragStart, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver, onClick, isSubSelected }) {
   return (
     <div
       data-drop-id={`bench-${player.id}`}
       draggable={draggable}
       onDragStart={draggable ? onDragStart : undefined}
+      onClick={onClick}
       onTouchStart={draggable ? onTouchStart : undefined}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -73,10 +74,10 @@ function BenchChip({ player, minuteCount, draggable, onDragStart, onTouchStart, 
         padding: "4px 6px",
         minWidth: 48,
         flexShrink: 0,
-        cursor: draggable ? "grab" : "default",
+        cursor: draggable ? "grab" : "pointer",
         borderRadius: 8,
-        border: isTouchDragOver ? `2px solid ${C.orange}` : "2px solid transparent",
-        background: isTouchDragOver ? "rgba(232,100,32,0.15)" : "transparent",
+        border: isSubSelected ? `2px solid ${C.orange}` : isTouchDragOver ? `2px solid ${C.orange}` : "2px solid transparent",
+        background: isSubSelected ? "rgba(232,100,32,0.25)" : isTouchDragOver ? "rgba(232,100,32,0.15)" : "transparent",
         transition: "all 0.15s ease",
         touchAction: "none",
         userSelect: "none",
@@ -156,6 +157,9 @@ export default function LiveGameScreen() {
   // --- Drag state (desktop HTML5) ---
   const [dragSource, setDragSource] = useState(null);
   // dragSource shape: { type: "field"|"bench", idx: number|null, playerId: string, player: object }
+
+  // --- Tap-to-sub state (tap bench player, then tap field position to swap) ---
+  const [subSource, setSubSource] = useState(null); // bench player selected for sub
 
   // --- Touch drag state ---
   const [touchDragState, setTouchDragState] = useState({
@@ -434,6 +438,7 @@ export default function LiveGameScreen() {
 
     setGameStatus("halftime");
     setSelectedPlayerId(null);
+    setSubSource(null);
     setDisplaySeconds(0);
     updateGameStatus(gameId, "halftime");
   }, [gameId, stopTimer, releaseWakeLock]);
@@ -492,6 +497,7 @@ export default function LiveGameScreen() {
 
     setGameStatus("completed");
     setSelectedPlayerId(null);
+    setSubSource(null);
     setDisplaySeconds(0);
     updateGameStatus(gameId, "completed");
     clearGameStorage();
@@ -859,10 +865,24 @@ export default function LiveGameScreen() {
   // ---------------------------------------------------------------------------
   const isActiveHalfForStats = gameStatus === "1st-half" || gameStatus === "2nd-half";
 
-  const handlePlayerSelect = useCallback((player) => {
-    if (!isActiveHalfForStats) return;
+  // Tap a bench player to select them for substitution
+  const handleBenchTap = useCallback((player) => {
+    if (!isInteractive) return;
+    setSubSource((prev) => (prev?.id === player.id ? null : player));
+    setSelectedPlayerId(null); // clear stat selection when picking a sub
+  }, [isInteractive]);
+
+  // Tap a field position — if a bench sub is queued, perform the swap; otherwise select for stats
+  const handleFieldTap = useCallback((idx) => {
+    if (subSource) {
+      handleSubstitution({ type: "bench", idx: null, player: subSource }, idx);
+      setSubSource(null);
+      return;
+    }
+    const player = fieldPositions[idx]?.player;
+    if (!player || !isActiveHalfForStats) return;
     setSelectedPlayerId((prev) => (prev === player.id ? null : player.id));
-  }, [isActiveHalfForStats]);
+  }, [subSource, fieldPositions, isActiveHalfForStats, handleSubstitution]);
 
   // Determine the selected player's position group
   const selectedPositionGroup = useMemo(() => {
@@ -1052,11 +1072,13 @@ export default function LiveGameScreen() {
                 minuteCount={playerMinutes[player.id] || 0}
                 draggable={isInteractive}
                 onDragStart={(e) => handleBenchDragStart(player, e)}
+                onClick={() => handleBenchTap(player)}
                 onTouchStart={(e) => handleTouchStart({ type: "bench", idx: null }, player, e)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
                 onTouchCancel={handleTouchCancel}
                 isTouchDragOver={touchDragState.overTarget === `bench-${player.id}`}
+                isSubSelected={subSource?.id === player.id}
               />
             ))
           )}
@@ -1150,7 +1172,7 @@ export default function LiveGameScreen() {
                 }
                 isSelected={!!player && player.id === selectedPlayerId}
                 statCount={player ? (statCounts[player.id] || 0) : 0}
-                onClick={isActiveHalfForStats && player ? () => handlePlayerSelect(player) : undefined}
+                onClick={isInteractive ? () => handleFieldTap(idx) : undefined}
                 onDragStart={isInteractive ? (e) => handleFieldDragStart(idx, e) : undefined}
                 onDragEnd={handleDragEnd}
                 onDragOver={isInteractive ? handleFieldDragOver : undefined}
