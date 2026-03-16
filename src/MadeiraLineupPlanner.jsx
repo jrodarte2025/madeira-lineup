@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { loadPublishedLineup, savePublishedLineup } from "./firebase";
 
@@ -99,22 +99,22 @@ const INITIAL_ROSTER = [
 
 const FORMATIONS = {
   "3-3-2": [
-    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
     { label: "RB", x: 78, y: 73 }, { label: "LM", x: 22, y: 51 }, { label: "CM", x: 50, y: 54 },
     { label: "RM", x: 78, y: 51 }, { label: "LS", x: 36, y: 30 }, { label: "RS", x: 64, y: 30 },
   ],
   "3-2-3": [
-    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
     { label: "RB", x: 78, y: 73 }, { label: "LCM", x: 36, y: 54 }, { label: "RCM", x: 64, y: 54 },
     { label: "LW", x: 20, y: 30 }, { label: "CF", x: 50, y: 27 }, { label: "RW", x: 80, y: 30 },
   ],
   "2-3-3": [
-    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 33, y: 74 }, { label: "RB", x: 67, y: 74 },
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 33, y: 74 }, { label: "RB", x: 67, y: 74 },
     { label: "LM", x: 20, y: 51 }, { label: "CM", x: 50, y: 54 }, { label: "RM", x: 80, y: 51 },
     { label: "LW", x: 20, y: 30 }, { label: "CF", x: 50, y: 27 }, { label: "RW", x: 80, y: 30 },
   ],
   "4-3-1": [
-    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 16, y: 72 }, { label: "LCB", x: 39, y: 76 },
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 16, y: 72 }, { label: "LCB", x: 39, y: 76 },
     { label: "RCB", x: 61, y: 76 }, { label: "RB", x: 84, y: 72 }, { label: "LM", x: 22, y: 51 },
     { label: "CM", x: 50, y: 54 }, { label: "RM", x: 78, y: 51 }, { label: "ST", x: 50, y: 30 },
   ],
@@ -801,6 +801,18 @@ export default function MadeiraLineupPlanner() {
   const inactivePlayers = roster.filter((p) => inactiveIds.includes(p.id));
   const getPlayer = (id) => roster.find((p) => p.id === id);
 
+  // Detect duplicate first names among bench players for disambiguation
+  const dupFirstNames = useMemo(() => {
+    const counts = {};
+    availablePlayers.forEach((p) => { const f = p.name.split(" ")[0]; counts[f] = (counts[f] || 0) + 1; });
+    return new Set(Object.keys(counts).filter((f) => counts[f] > 1));
+  }, [availablePlayers]);
+  const benchDisplayName = (p) => {
+    const parts = p.name.split(" ");
+    if (dupFirstNames.has(parts[0]) && parts.length > 1) return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+    return parts[0];
+  };
+
   // --- LINEUP ACTIONS ---
   const assignPlayer = useCallback((playerId, posIndex) => {
     if (inactiveIds.includes(playerId)) return;
@@ -1357,7 +1369,7 @@ export default function MadeiraLineupPlanner() {
                           opacity: touchDragState.isDragging && touchDragState.playerId === p.id && touchDragState.source === "roster" ? 0.35 : 1,
                         }}>
                         <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 13, color: selectedPlayer === p.id ? C.white : C.orange }}>{p.num}</span>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{p.name.split(" ")[0]}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{benchDisplayName(p)}</span>
                       </div>
                     ))
                   )}
@@ -1506,7 +1518,7 @@ export default function MadeiraLineupPlanner() {
                       whiteSpace: "nowrap", fontSize: 11, fontWeight: 500, transition: "all 0.15s ease", flexShrink: 0, userSelect: "none",
                     }}>
                     <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 10 }}>{p.num}</span>
-                    <span>{p.name.split(" ")[0]}</span>
+                    <span>{benchDisplayName(p)}</span>
                   </div>
                 ))
               )}
