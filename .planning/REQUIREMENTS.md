@@ -42,10 +42,10 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 - [x] **GAME-01**: Coach can create a game with opponent name and date, linked to current lineup
 - [x] **GAME-02**: Game screen loads as a separate view with the linked lineup on a pitch
-- [ ] **GAME-03**: Coach can start a half with a single tap; 25-minute timer counts down and auto-stops
+- [x] **GAME-03**: Coach can start a half with a single tap; 25-minute timer counts down and auto-stops
 - [x] **GAME-04**: Timer uses timestamp-based elapsed time (not setInterval ticks) for accuracy
-- [ ] **GAME-05**: Screen Wake Lock prevents phone from sleeping during active game
-- [ ] **GAME-06**: Game state is mirrored to localStorage for crash recovery
+- [x] **GAME-05**: Screen Wake Lock prevents phone from sleeping during active game
+- [x] **GAME-06**: Game state is mirrored to localStorage for crash recovery
 
 ### Substitution & Minutes
 
@@ -81,7 +81,7 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 - [x] **DATA-01**: Game documents stored in Firestore games collection with events embedded
 - [x] **DATA-02**: Season stats stored in Firestore with denormalized player totals for fast reads
-- [ ] **DATA-03**: All game state mirrored to localStorage during active games
+- [x] **DATA-03**: All game state mirrored to localStorage during active games
 
 ## Future Requirements
 
@@ -118,10 +118,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-03 | Phase 4 | Complete |
 | GAME-01 | Phase 5 | Complete |
 | GAME-02 | Phase 5 | Complete |
-| GAME-03 | Phase 5 | Pending |
+| GAME-03 | Phase 5 | Complete |
 | GAME-04 | Phase 5 | Complete |
-| GAME-05 | Phase 5 | Pending |
-| GAME-06 | Phase 5 | Pending |
+| GAME-05 | Phase 5 | Complete |
+| GAME-06 | Phase 5 | Complete |
 | SUB-01 | Phase 5 | Pending |
 | SUB-02 | Phase 5 | Pending |
 | SUB-03 | Phase 5 | Pending |
@@ -142,7 +142,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEASON-03 | Phase 7 | Pending |
 | DATA-01 | Phase 4 | Complete |
 | DATA-02 | Phase 4 | Complete |
-| DATA-03 | Phase 5 | Pending |
+| DATA-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 30 total

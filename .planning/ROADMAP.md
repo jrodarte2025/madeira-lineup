@@ -152,6 +152,6 @@ v2.0: 4 → 5 → 6 → 7
 | 2. Drag-and-Drop Completion | v1.0 | 2/2 | Complete | 2026-03-16 |
 | 3. Mobile UX Overhaul | v1.0 | 2/2 | Complete | 2026-03-16 |
 | 4. App Shell + Data Foundation | 3/3 | Complete   | 2026-03-16 | - |
-| 5. Live Game | 1/5 | In Progress|  | - |
+| 5. Live Game | 3/5 | In Progress|  | - |
 | 6. Post-Game Summary + Exports | v2.0 | 0/3 | Not started | - |
 | 7. Season Dashboard + Player Profiles | v2.0 | 0/3 | Not started | - |

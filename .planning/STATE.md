@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-16T19:24:19.962Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-03-16T19:30:33.998Z"
 last_activity: 2026-03-16 — Completed 04-03 game CRUD and season stats data layer
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 13
-  completed_plans: 10
-  percent: 25
+  completed_plans: 11
+  percent: 85
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** Coaches can manage lineups, track live games, and review player stats from phone or desktop
-**Current focus:** v2.0 — Phase 4: App Shell + Data Foundation
+**Current focus:** v2.0 — Phase 5: Live Game Tracking & Stats
 
 ## Current Position
 
-Phase: 4 of 7 (App Shell + Data Foundation)
-Plan: 3 of 3 in current phase (plan 03 complete)
+Phase: 5 of 7 (Live Game Tracking & Stats)
+Plan: 2 of 5 in current phase (plan 02 complete)
 Status: In progress
-Last activity: 2026-03-16 — Completed 04-03 game CRUD and season stats data layer
+Last activity: 2026-03-16 — Completed 05-02 LiveGameScreen with timer, state machine, crash recovery
 
-Progress: [██░░░░░░░░] 25%
+Progress: [█████████░] 85%
 
 ## Accumulated Context
 
@@ -61,6 +61,9 @@ v2.0 decisions (04-03):
 - [Phase 05-live-game]: vitest chosen as test runner (ESM-native, zero-config with vite)
 - [Phase 05-live-game]: AppShell component introduced in App.jsx so useLocation() works inside HashRouter context
 - [Phase 05-live-game]: TabBar hidden and paddingBottom removed on /games/:id routes to reclaim full vertical space
+- [Phase 05-live-game]: FORMATIONS imported statically to avoid async-in-then anti-pattern
+- [Phase 05-live-game]: Crash recovery checks madeira_activeGameId on mount; if matches gameId, skips Firestore load and restores from localStorage
+- [Phase 05-live-game]: halfIntervals + playerIntervals built in 05-02 so Plans 05-03/05-04 can consume without refactor
 
 ### Pending Todos
 
@@ -73,6 +76,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-16T19:24:19.960Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-16T19:30:33.996Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
