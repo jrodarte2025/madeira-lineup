@@ -750,20 +750,6 @@ export default function LiveGameScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events.length, currentHalf]);
 
-  // Spread field positions to use full pitch height (formations are designed for half-pitch)
-  const spreadPositions = useMemo(() => {
-    if (fieldPositions.length === 0) return [];
-    const ys = fieldPositions.map(({ pos }) => pos.y);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    const range = maxY - minY || 1;
-    // Remap from original range to 8%–92% of pitch
-    return fieldPositions.map(({ pos, player }) => ({
-      pos: { ...pos, y: 8 + ((pos.y - minY) / range) * 84 },
-      player,
-    }));
-  }, [fieldPositions]);
-
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
@@ -786,8 +772,8 @@ export default function LiveGameScreen() {
     );
   }
 
-  const HEADER_HEIGHT = 94;
-  const BENCH_HEIGHT = 64;
+  const HEADER_HEIGHT = 110;
+  const BENCH_HEIGHT = 72;
 
   return (
     <div
@@ -847,8 +833,8 @@ export default function LiveGameScreen() {
             alignItems: "center",
             overflowX: "auto",
             overflowY: "hidden",
-            padding: "0 8px",
-            gap: 2,
+            padding: "0 12px",
+            gap: 4,
             borderBottom: "1px solid rgba(255,255,255,0.08)",
             background: "rgba(0,0,0,0.2)",
             flexShrink: 0,
@@ -939,7 +925,7 @@ export default function LiveGameScreen() {
           )}
 
           {/* Pitch */}
-          <div style={{ position: "relative", width: "100%", height: "100%", minHeight: 420 }}>
+          <div style={{ position: "relative", width: "100%", height: "100%", minHeight: 340 }}>
             {/* Green pitch background */}
             <div
               style={{
@@ -951,7 +937,7 @@ export default function LiveGameScreen() {
             <PitchSVG />
 
             {/* Field positions */}
-            {spreadPositions.map(({ pos, player }, idx) => (
+            {fieldPositions.map(({ pos, player }, idx) => (
               <FieldPosition
                 key={idx}
                 pos={pos}

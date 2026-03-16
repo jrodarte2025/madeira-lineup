@@ -7,44 +7,28 @@ import { C, fontBase, fontDisplay } from "../shared/constants";
 
 function ScoreButton({ value, side, onScoreChange }) {
   const longPressRef = useRef(null);
-  const handledRef = useRef(false);
 
-  const handlePointerDown = useCallback((e) => {
-    e.preventDefault(); // prevent text selection
-    handledRef.current = false;
+  const handleTouchStart = useCallback((e) => {
+    e.preventDefault();
     longPressRef.current = setTimeout(() => {
       longPressRef.current = null;
-      handledRef.current = true;
       onScoreChange(side, -1);
     }, 500);
   }, [side, onScoreChange]);
 
-  const handlePointerUp = useCallback((e) => {
+  const handleTouchEnd = useCallback((e) => {
     e.preventDefault();
     if (longPressRef.current) {
       clearTimeout(longPressRef.current);
       longPressRef.current = null;
-    }
-    if (!handledRef.current) {
       onScoreChange(side, 1);
     }
-    handledRef.current = false;
   }, [side, onScoreChange]);
-
-  const handlePointerCancel = useCallback(() => {
-    if (longPressRef.current) {
-      clearTimeout(longPressRef.current);
-      longPressRef.current = null;
-    }
-    handledRef.current = false;
-  }, []);
 
   return (
     <div
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerCancel}
-      onPointerLeave={handlePointerCancel}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{
         fontFamily: fontDisplay,
         fontSize: 40,
@@ -128,29 +112,34 @@ export default function GameHeader({
           alignItems: "center",
           justifyContent: "center",
           gap: 0,
-          padding: "6px 12px 2px",
+          padding: "8px 16px 4px",
           position: "relative",
         }}
       >
-        {/* Back button */}
-        <div
-          onClick={onBack}
-          style={{
-            position: "absolute",
-            left: 8,
-            top: "50%",
-            transform: "translateY(-50%)",
-            cursor: "pointer",
-            padding: "6px 8px",
-            color: "rgba(255,255,255,0.5)",
-            fontSize: 20,
-            lineHeight: 1,
-            userSelect: "none",
-            WebkitUserSelect: "none",
-          }}
-        >
-          ‹
-        </div>
+        {/* Back arrow */}
+        {onBack && (
+          <div
+            onClick={onBack}
+            style={{
+              position: "absolute",
+              left: 4,
+              top: "50%",
+              transform: "translateY(-50%)",
+              cursor: "pointer",
+              padding: "8px",
+              color: "rgba(255,255,255,0.5)",
+              fontSize: 22,
+              fontFamily: fontBase,
+              fontWeight: 700,
+              lineHeight: 1,
+              userSelect: "none",
+              WebkitUserSelect: "none",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            &larr;
+          </div>
+        )}
 
         {/* Home score */}
         <ScoreButton
@@ -173,9 +162,9 @@ export default function GameHeader({
           <div
             style={{
               fontFamily: fontBase,
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 600,
-              color: "rgba(255,255,255,0.4)",
+              color: "rgba(255,255,255,0.45)",
               letterSpacing: "0.5px",
               textTransform: "uppercase",
             }}
@@ -185,9 +174,9 @@ export default function GameHeader({
           <div
             style={{
               fontFamily: fontBase,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 700,
-              color: "rgba(255,255,255,0.65)",
+              color: "rgba(255,255,255,0.7)",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -212,15 +201,15 @@ export default function GameHeader({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: 10,
-          padding: "0 12px 6px",
+          gap: 12,
+          padding: "2px 16px 8px",
         }}
       >
         <div
           style={{
             fontFamily: fontDisplay,
             fontSize:
-              gameStatus === "halftime" || gameStatus === "completed" ? 16 : 24,
+              gameStatus === "halftime" || gameStatus === "completed" ? 18 : 28,
             fontWeight: 800,
             color:
               gameStatus === "halftime"
@@ -232,7 +221,7 @@ export default function GameHeader({
                 : C.white,
             letterSpacing: "1px",
             lineHeight: 1,
-            minWidth: 70,
+            minWidth: 80,
             textAlign: "center",
           }}
         >
@@ -248,10 +237,11 @@ export default function GameHeader({
               borderRadius: 8,
               color: C.white,
               fontFamily: fontBase,
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 700,
-              padding: "5px 12px",
+              padding: "6px 14px",
               cursor: "pointer",
+              letterSpacing: "0.3px",
             }}
           >
             End Half
@@ -267,10 +257,11 @@ export default function GameHeader({
               borderRadius: 8,
               color: C.white,
               fontFamily: fontBase,
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 700,
-              padding: "5px 12px",
+              padding: "6px 14px",
               cursor: "pointer",
+              letterSpacing: "0.3px",
             }}
           >
             Start 2nd Half
@@ -286,10 +277,11 @@ export default function GameHeader({
               borderRadius: 8,
               color: C.white,
               fontFamily: fontBase,
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: 700,
-              padding: "5px 12px",
+              padding: "6px 14px",
               cursor: "pointer",
+              letterSpacing: "0.3px",
             }}
           >
             Full Time!
