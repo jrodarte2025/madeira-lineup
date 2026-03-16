@@ -1098,79 +1098,169 @@ export default function MadeiraLineupPlanner() {
             </div>
           </div>
 
-          {/* Formation selector */}
-          <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3, order: isMobile ? 3 : 0, flex: isMobile ? "1 1 100%" : "0 0 auto" }}>
-            {Object.keys(FORMATIONS).map((f) => (
-              <button key={f} onClick={() => setFormation(f)} style={{
-                padding: isMobile ? "6px 0" : "7px 16px", borderRadius: 7, border: "none", cursor: "pointer",
-                fontFamily: fontDisplay, fontWeight: 700, fontSize: isMobile ? 12 : 13,
-                background: formation === f ? C.orange : "transparent",
-                color: formation === f ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
-                flex: isMobile ? 1 : "0 0 auto",
-              }}>{f}</button>
-            ))}
-          </div>
-
-          {/* Controls: half toggle, save/load, print */}
-          <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 4 : 8, flexWrap: isMobile ? "wrap" : "nowrap" }}>
-            <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3 }}>
-              {[1, 2].map((h) => (
-                <button key={h} onClick={() => { setActiveHalf(h); setSelectedPlayer(null); }} style={{
-                  padding: isMobile ? "6px 12px" : "7px 18px", borderRadius: 7, border: "none", cursor: "pointer",
-                  fontFamily: fontDisplay, fontWeight: 700, fontSize: isMobile ? 11 : 12,
-                  background: activeHalf === h ? C.orange : "transparent",
-                  color: activeHalf === h ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
-                }}>{h === 1 ? "1ST" : "2ND"}</button>
+          {/* Formation selector — desktop only in header */}
+          {!isMobile && (
+            <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3 }}>
+              {Object.keys(FORMATIONS).map((f) => (
+                <button key={f} onClick={() => setFormation(f)} style={{
+                  padding: "7px 16px", borderRadius: 7, border: "none", cursor: "pointer",
+                  fontFamily: fontDisplay, fontWeight: 700, fontSize: 13,
+                  background: formation === f ? C.orange : "transparent",
+                  color: formation === f ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
+                }}>{f}</button>
               ))}
             </div>
+          )}
 
-            <div style={{ display: "flex", gap: 3 }}>
-              <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
-                padding: isMobile ? "6px 8px" : "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
+          {/* Controls — desktop only in header */}
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3 }}>
+                {[1, 2].map((h) => (
+                  <button key={h} onClick={() => { setActiveHalf(h); setSelectedPlayer(null); }} style={{
+                    padding: "7px 18px", borderRadius: 7, border: "none", cursor: "pointer",
+                    fontFamily: fontDisplay, fontWeight: 700, fontSize: 12,
+                    background: activeHalf === h ? C.orange : "transparent",
+                    color: activeHalf === h ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
+                  }}>{h === 1 ? "1ST" : "2ND"}</button>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: 3 }}>
+                <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
+                  padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
+                  background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
+                  fontFamily: fontBase, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+                }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Save
+                </button>
+                <button onClick={() => { setModalMode("load"); setModalOpen(true); }} style={{
+                  padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
+                  background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
+                  fontFamily: fontBase, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+                }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Load
+                  {savedLineups.length > 0 && (
+                    <span style={{ background: C.orange, borderRadius: 10, padding: "1px 5px", fontSize: 9, fontWeight: 800, color: C.white }}>
+                      {savedLineups.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <button onClick={handlePrint} style={{
+                padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
                 background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: isMobile ? 11 : 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+                fontFamily: fontBase, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
               }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                {!isMobile && "Save"}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                </svg>
+                Print
+              </button>
+
+              <button onClick={handleShareCurrent} style={{
+                padding: "7px 12px", borderRadius: 7, border: `1px solid ${C.orange}`,
+                background: "rgba(232,100,32,0.1)", color: C.orange, cursor: "pointer",
+                fontFamily: fontBase, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+              }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* MOBILE CONTROLS — below header, above pitch */}
+        {isMobile && (
+          <div style={{ padding: "8px 12px 0", display: "flex", flexDirection: "column", gap: 8 }}>
+            {/* Row 1: Roster button + Half toggle */}
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <button onClick={() => setRosterOpen(true)} style={{
+                padding: "8px 12px", borderRadius: 8, border: `1px solid ${C.orange}`,
+                background: "rgba(232,100,32,0.12)", color: C.orange, cursor: "pointer",
+                fontFamily: fontDisplay, fontSize: 11, fontWeight: 700, letterSpacing: "0.5px",
+                display: "flex", alignItems: "center", gap: 5, minHeight: 40, flexShrink: 0,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                ROSTER
+              </button>
+              <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 3, flex: 1 }}>
+                {[1, 2].map((h) => (
+                  <button key={h} onClick={() => { setActiveHalf(h); setSelectedPlayer(null); }} style={{
+                    padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                    fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
+                    background: activeHalf === h ? C.orange : "transparent",
+                    color: activeHalf === h ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
+                    minHeight: 40,
+                  }}>{h === 1 ? "1ST HALF" : "2ND HALF"}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Row 2: Save, Load, Print, Share */}
+            <div style={{ display: "flex", gap: 4 }}>
+              <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
+                flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)",
+                background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
               </button>
               <button onClick={() => { setModalMode("load"); setModalOpen(true); }} style={{
-                padding: isMobile ? "6px 8px" : "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
+                flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)",
                 background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: isMobile ? 11 : 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
               }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                {!isMobile && "Load"}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Load
                 {savedLineups.length > 0 && (
-                  <span style={{ background: C.orange, borderRadius: 10, padding: "1px 5px", fontSize: 9, fontWeight: 800, color: C.white }}>
+                  <span style={{ background: C.orange, borderRadius: 10, padding: "1px 5px", fontSize: 8, fontWeight: 800, color: C.white, marginLeft: 2 }}>
                     {savedLineups.length}
                   </span>
                 )}
               </button>
+              <button onClick={handlePrint} style={{
+                flex: 1, padding: "8px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)",
+                background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                </svg>
+                Print
+              </button>
+              <button onClick={handleShareCurrent} style={{
+                flex: 1, padding: "8px 0", borderRadius: 8, border: `1px solid ${C.orange}`,
+                background: "rgba(232,100,32,0.1)", color: C.orange, cursor: "pointer",
+                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 38,
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Share
+              </button>
             </div>
 
-            <button onClick={handlePrint} style={{
-              padding: isMobile ? "6px 8px" : "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
-              background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-              fontFamily: fontBase, fontSize: isMobile ? 11 : 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
-            }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
-              </svg>
-              {!isMobile && "Print"}
-            </button>
-
-            <button onClick={handleShareCurrent} style={{
-              padding: isMobile ? "6px 8px" : "7px 12px", borderRadius: 7, border: `1px solid ${C.orange}`,
-              background: "rgba(232,100,32,0.1)", color: C.orange, cursor: "pointer",
-              fontFamily: fontBase, fontSize: isMobile ? 11 : 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
-            }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-              {!isMobile && "Share"}
-            </button>
+            {/* Row 3: Formation selector */}
+            <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 3 }}>
+              {Object.keys(FORMATIONS).map((f) => (
+                <button key={f} onClick={() => setFormation(f)} style={{
+                  padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                  fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
+                  background: formation === f ? C.orange : "transparent",
+                  color: formation === f ? C.white : "rgba(255,255,255,0.45)", transition: "all 0.2s ease",
+                  minHeight: 38,
+                }}>{f}</button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* MAIN */}
         <div style={{ display: "flex", flex: 1, overflow: "hidden", flexDirection: isMobile ? "column" : "row" }}>
@@ -1186,38 +1276,54 @@ export default function MadeiraLineupPlanner() {
           {/* PITCH */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: isMobile ? "flex-start" : "center", padding: isMobile ? 10 : 20, overflow: "auto" }}>
 
-            {/* MOBILE CHIP STRIP — bench players as draggable chips above the pitch */}
+            {/* MOBILE BENCH — labeled bench with scroll indicator */}
             {isMobile && (
-              <div
-                data-drop-id="chipstrip"
-                onTouchMove={handleTouchMove}
-                onTouchEnd={(e) => handleTouchEnd(e, null)}
-                onTouchCancel={handleTouchCancel}
-                style={{
-                  width: "100%", maxWidth: 360,
-                  minHeight: 52, marginBottom: 8,
-                  display: "flex", alignItems: "center",
-                  padding: "6px 8px",
-                  borderRadius: 10,
-                  background: touchDragState.overTarget === "chipstrip"
-                    ? "rgba(232,100,32,0.15)"
-                    : "rgba(0,0,0,0.2)",
-                  border: touchDragState.overTarget === "chipstrip"
-                    ? `2px dashed ${C.orange}`
-                    : "1px solid rgba(255,255,255,0.08)",
-                  transition: "background 0.15s ease, border 0.15s ease",
-                  overflowX: "auto",
-                  gap: 6,
-                  flexShrink: 0,
-                  WebkitOverflowScrolling: "touch",
+              <div style={{ width: "100%", maxWidth: 360, marginBottom: 8, flexShrink: 0 }}>
+                {/* Bench label */}
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  marginBottom: 4, padding: "0 4px",
                 }}>
-                {availablePlayers.length === 0 ? (
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontStyle: "italic", whiteSpace: "nowrap", padding: "0 4px" }}>
-                    All players assigned
-                  </div>
-                ) : (
-                  <>
-                    {availablePlayers.map((p) => (
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, letterSpacing: "2px", color: "rgba(255,255,255,0.35)",
+                    fontFamily: fontDisplay, textTransform: "uppercase",
+                  }}>BENCH</span>
+                  {availablePlayers.length > 0 && (
+                    <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontWeight: 600 }}>
+                      {availablePlayers.length} available
+                    </span>
+                  )}
+                </div>
+
+                {/* Chips container */}
+                <div
+                  data-drop-id="chipstrip"
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={(e) => handleTouchEnd(e, null)}
+                  onTouchCancel={handleTouchCancel}
+                  style={{
+                    width: "100%",
+                    minHeight: 52,
+                    display: "flex", alignItems: "center",
+                    padding: "6px 8px",
+                    borderRadius: 10,
+                    background: touchDragState.overTarget === "chipstrip"
+                      ? "rgba(232,100,32,0.15)"
+                      : "rgba(0,0,0,0.2)",
+                    border: touchDragState.overTarget === "chipstrip"
+                      ? `2px dashed ${C.orange}`
+                      : "1px solid rgba(255,255,255,0.08)",
+                    transition: "background 0.15s ease, border 0.15s ease",
+                    overflowX: "auto",
+                    gap: 6,
+                    WebkitOverflowScrolling: "touch",
+                  }}>
+                  {availablePlayers.length === 0 ? (
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontStyle: "italic", whiteSpace: "nowrap", padding: "0 4px" }}>
+                      All players assigned
+                    </div>
+                  ) : (
+                    availablePlayers.map((p) => (
                       <div
                         key={p.id}
                         data-drag-id={p.id}
@@ -1242,13 +1348,33 @@ export default function MadeiraLineupPlanner() {
                         <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 13, color: selectedPlayer === p.id ? C.white : C.orange }}>{p.num}</span>
                         <span style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{p.name.split(" ")[0]}</span>
                       </div>
-                    ))}
-                    {!touchDragState.isDragging && !selectedPlayer && (
-                      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", whiteSpace: "nowrap", padding: "0 6px", fontStyle: "italic", flexShrink: 0 }}>
-                        Drag to position
-                      </div>
-                    )}
-                  </>
+                    ))
+                  )}
+                </div>
+
+                {/* Scroll indicator */}
+                {availablePlayers.length > 3 && (
+                  <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    gap: 6, marginTop: 4, padding: "2px 0",
+                  }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    <div style={{
+                      height: 3, flex: 1, maxWidth: 80, borderRadius: 2,
+                      background: "rgba(255,255,255,0.08)",
+                      position: "relative", overflow: "hidden",
+                    }}>
+                      <div style={{
+                        position: "absolute", top: 0, left: 0, height: "100%", width: "40%",
+                        borderRadius: 2, background: C.orange, opacity: 0.6,
+                      }} />
+                    </div>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </div>
                 )}
               </div>
             )}
@@ -1289,84 +1415,75 @@ export default function MadeiraLineupPlanner() {
           </div>
         </div>
 
-        {/* BENCH BAR */}
-        <div
-          onDragOver={handleRosterDragOver} onDrop={handleRosterDrop} onDragLeave={handleRosterDragLeave}
-          style={{
-            padding: isMobile ? "8px 12px" : "9px 24px",
-            borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", alignItems: "center",
-            gap: isMobile ? 8 : 14, background: rosterHover ? "rgba(232,100,32,0.08)" : "rgba(0,0,0,0.12)",
-            flexWrap: isMobile ? "nowrap" : "nowrap", transition: "background 0.2s ease",
-          }}>
-          {/* Mobile: roster toggle button */}
-          {isMobile && (
-            <button onClick={() => setRosterOpen(true)} style={{
-              padding: "6px 10px", borderRadius: 7, border: `1px solid ${C.orange}`,
-              background: "rgba(232,100,32,0.12)", color: C.orange, cursor: "pointer",
-              fontFamily: fontDisplay, fontSize: 10, fontWeight: 700, letterSpacing: "1px",
-              flexShrink: 0, display: "flex", alignItems: "center", gap: 4,
+        {/* BENCH BAR — desktop only */}
+        {!isMobile && (
+          <div
+            onDragOver={handleRosterDragOver} onDrop={handleRosterDrop} onDragLeave={handleRosterDragLeave}
+            style={{
+              padding: "9px 24px",
+              borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", alignItems: "center",
+              gap: 14, background: rosterHover ? "rgba(232,100,32,0.08)" : "rgba(0,0,0,0.12)",
+              transition: "background 0.2s ease",
             }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              ROSTER
-            </button>
-          )}
-          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", flexShrink: 0, display: isMobile ? "none" : "block" }}>BENCH</div>
-          <div style={{ display: "flex", gap: 5, flex: 1, overflowX: "auto", padding: "2px 0" }}>
-            {availablePlayers.length === 0 ? (
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.18)", fontStyle: "italic" }}>All players assigned</div>
-            ) : (
-              availablePlayers.map((p) => (
-                <div key={p.id} draggable={!isMobile} onDragStart={!isMobile ? (e) => handleDragStart(e, p.id, "roster") : undefined} onDragEnd={handleDragEnd}
-                  onClick={() => handlePlayerClick(p.id)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: isMobile ? 4 : 6,
-                    padding: isMobile ? "4px 8px" : "5px 10px", borderRadius: 20, cursor: "pointer",
-                    background: selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.05)",
-                    border: `1px solid ${selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.08)"}`,
-                    whiteSpace: "nowrap", fontSize: isMobile ? 10 : 11, fontWeight: 500, transition: "all 0.15s ease", flexShrink: 0, userSelect: "none",
-                  }}>
-                  <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: isMobile ? 9 : 10 }}>{p.num}</span>
-                  <span>{p.name.split(" ")[0]}</span>
-                </div>
-              ))
-            )}
-          </div>
-          {inactivePlayers.length > 0 && !isMobile && (
-            <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, opacity: 0.4 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,120,80,0.8)" }}>INACTIVE: {inactivePlayers.length}</span>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", flexShrink: 0 }}>BENCH</div>
+            <div style={{ display: "flex", gap: 5, flex: 1, overflowX: "auto", padding: "2px 0" }}>
+              {availablePlayers.length === 0 ? (
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.18)", fontStyle: "italic" }}>All players assigned</div>
+              ) : (
+                availablePlayers.map((p) => (
+                  <div key={p.id} draggable onDragStart={(e) => handleDragStart(e, p.id, "roster")} onDragEnd={handleDragEnd}
+                    onClick={() => handlePlayerClick(p.id)}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "5px 10px", borderRadius: 20, cursor: "pointer",
+                      background: selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.05)",
+                      border: `1px solid ${selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.08)"}`,
+                      whiteSpace: "nowrap", fontSize: 11, fontWeight: 500, transition: "all 0.15s ease", flexShrink: 0, userSelect: "none",
+                    }}>
+                    <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 10 }}>{p.num}</span>
+                    <span>{p.name.split(" ")[0]}</span>
+                  </div>
+                ))
+              )}
             </div>
-          )}
-          <div style={{ fontSize: isMobile ? 9 : 10, color: "rgba(255,255,255,0.25)", flexShrink: 0, fontStyle: "italic", display: isMobile ? "none" : "block" }}>
-            {selectedPlayer ? "Tap a position to assign" : "Click or drag players"}
+            {inactivePlayers.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, opacity: 0.4 }}>
+                <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,120,80,0.8)" }}>INACTIVE: {inactivePlayers.length}</span>
+              </div>
+            )}
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", flexShrink: 0, fontStyle: "italic" }}>
+              {selectedPlayer ? "Tap a position to assign" : "Click or drag players"}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* MOBILE ROSTER DRAWER */}
-      {isMobile && (
+      {/* MOBILE ROSTER MODAL */}
+      {isMobile && rosterOpen && (
         <>
-          {/* Backdrop */}
-          {rosterOpen && (
-            <div onClick={() => setRosterOpen(false)} style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 50,
-            }} />
-          )}
-          {/* Drawer */}
+          <div onClick={() => setRosterOpen(false)} style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(4px)", zIndex: 50,
+          }} />
           <div style={{
-            position: "fixed", bottom: 0, left: 0, right: 0,
-            height: rosterOpen ? "75vh" : 0,
-            background: C.navyDark, borderRadius: "16px 16px 0 0",
-            zIndex: 51, transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)",
-            overflow: "hidden", display: "flex", flexDirection: "column",
-            boxShadow: rosterOpen ? "0 -10px 40px rgba(0,0,0,0.4)" : "none",
+            position: "fixed", inset: 0, zIndex: 51,
+            background: C.navyDark, display: "flex", flexDirection: "column",
+            color: C.white, fontFamily: fontBase,
           }}>
-            {/* Drawer handle */}
-            <div onClick={() => setRosterOpen(false)} style={{
-              padding: "10px 0 6px", display: "flex", justifyContent: "center", cursor: "pointer", flexShrink: 0,
+            <div style={{
+              padding: "14px 16px", borderBottom: `1px solid ${C.whiteAlpha}`,
+              display: "flex", alignItems: "center", justifyContent: "space-between",
             }}>
-              <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.2)" }} />
+              <span style={{
+                fontFamily: fontDisplay, fontSize: 16, fontWeight: 800,
+              }}>Roster Management</span>
+              <button onClick={() => setRosterOpen(false)} style={{
+                background: "rgba(255,255,255,0.1)", border: "none",
+                color: C.white, borderRadius: 8, cursor: "pointer",
+                fontSize: 14, padding: "8px 14px", fontWeight: 700, minHeight: 44,
+              }}>Done</button>
             </div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", color: C.white, fontFamily: fontBase }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <RosterContent {...rosterProps} />
             </div>
           </div>
