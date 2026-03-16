@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 01-01-PLAN.md — Add name abbreviation utility, enlarge field circles, update print formatting
+- [x] 01-01-PLAN.md — Add name abbreviation utility, enlarge field circles, update print formatting
 
 ### Phase 2: Drag-and-Drop Completion
 **Goal**: Coaches can move players in any direction using drag-and-drop with no dead ends
@@ -39,7 +39,11 @@ Plans:
   1. Dragging a field player to the bench removes them from their position (spot becomes empty)
   2. Dragging a bench player onto an occupied field position swaps them — bench player goes to field, field player goes to bench
   3. Dragging a bench player onto an empty field position assigns them to that spot
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Drag-and-drop logic (field-to-bench removal, bench-to-field swap) and visual drag feedback
+- [ ] 02-02-PLAN.md — Click interaction parity (field-to-field swap, double-click remove) and full verification
 
 ### Phase 3: Mobile UX Overhaul
 **Goal**: Coaches can build and adjust lineups on a phone as quickly and comfortably as on desktop
@@ -60,5 +64,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
-| 2. Drag-and-Drop Completion | 0/TBD | Not started | - |
+| 2. Drag-and-Drop Completion | 0/2 | In progress | - |
 | 3. Mobile UX Overhaul | 0/TBD | Not started | - |
