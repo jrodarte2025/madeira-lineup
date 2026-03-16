@@ -286,7 +286,7 @@ export default function LiveGameScreen() {
           return;
         }
 
-        const { opponent: opp, score: sc, status, lineup } = data;
+        const { opponent: opp, score: sc, status, lineup, halfStartTs: firestoreHalfStartTs } = data;
         const resolvedStatus = status || "setup";
         const resolvedScore = sc || { home: 0, away: 0 };
 
@@ -326,6 +326,17 @@ export default function LiveGameScreen() {
         setFieldPositions(resolvedFieldPositions);
         setBenchPlayers(resolvedBenchPlayers);
 
+        // Restart timer if game is in active half (Firestore has the halfStartTs)
+        const resolvedHalfStartTs = firestoreHalfStartTs || null;
+        if (
+          (resolvedStatus === "1st-half" || resolvedStatus === "2nd-half") &&
+          resolvedHalfStartTs
+        ) {
+          setHalfStartTs(resolvedHalfStartTs);
+          startHalf(resolvedHalfStartTs);
+          acquireWakeLock();
+        }
+
         // Save to localStorage immediately so we can recover on reload
         saveStored("activeGameId", gameId);
         saveStored("gameStatus", resolvedStatus);
@@ -333,10 +344,15 @@ export default function LiveGameScreen() {
         saveStored("opponent", opp || "");
         saveStored("fieldPositions", resolvedFieldPositions);
         saveStored("benchPlayers", resolvedBenchPlayers);
-        saveStored("events", []);
+        saveStored("events", data.events || []);
         saveStored("halfIntervals", []);
         saveStored("playerIntervals", {});
-        saveStored("halfStartTs", null);
+        saveStored("halfStartTs", resolvedHalfStartTs);
+
+        // Also restore events from Firestore if available
+        if (data.events && data.events.length > 0) {
+          setEvents(data.events);
+        }
 
         setLoading(false);
       });
@@ -379,7 +395,7 @@ export default function LiveGameScreen() {
 
     startHalf(now);
     acquireWakeLock();
-    updateGameStatus(gameId, "1st-half");
+    updateGameStatus(gameId, "1st-half", now);
   }, [gameId, fieldPositions, startHalf, acquireWakeLock]);
 
   const handleEndHalf = useCallback(() => {
@@ -438,7 +454,7 @@ export default function LiveGameScreen() {
 
     startHalf(now);
     acquireWakeLock();
-    updateGameStatus(gameId, "2nd-half");
+    updateGameStatus(gameId, "2nd-half", now);
   }, [gameId, fieldPositions, startHalf, acquireWakeLock]);
 
   const handleEndGame = useCallback(() => {

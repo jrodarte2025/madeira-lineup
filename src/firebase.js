@@ -113,9 +113,11 @@ export async function loadGame(gameId) {
  * @param {"setup"|"1st-half"|"halftime"|"2nd-half"|"completed"} status
  * @returns {Promise<boolean>}
  */
-export async function updateGameStatus(gameId, status) {
+export async function updateGameStatus(gameId, status, halfStartTs = null) {
   try {
-    await updateDoc(doc(db, "games", gameId), { status });
+    const update = { status };
+    if (halfStartTs !== null) update.halfStartTs = halfStartTs;
+    await updateDoc(doc(db, "games", gameId), update);
     return true;
   } catch (err) {
     console.error("Failed to update game status:", err);
