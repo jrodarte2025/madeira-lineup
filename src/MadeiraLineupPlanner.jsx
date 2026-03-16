@@ -570,6 +570,36 @@ function useTouchDrag({ assignPlayer, swapPositions, removeFromPosition }) {
   }, []);
 
   const handleTouchMove = useCallback((e) => {
+    // During pending phase (before activation), check drag direction
+    if (!dragStateRef.current.isDragging && pendingDragRef.current) {
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - pendingDragRef.current.startX);
+      const dy = Math.abs(touch.clientY - pendingDragRef.current.startY);
+      const moved = dx > 8 || dy > 8; // past dead zone
+      if (moved) {
+        if (dx > dy) {
+          // Horizontal swipe — cancel drag, allow native scroll
+          clearTimeout(activateTimerRef.current);
+          activateTimerRef.current = null;
+          pendingDragRef.current = null;
+          return;
+        } else {
+          // Vertical drag — activate immediately, don't wait for timer
+          clearTimeout(activateTimerRef.current);
+          activateTimerRef.current = null;
+          const pending = pendingDragRef.current;
+          setTouchDragState({
+            isDragging: true,
+            playerId: pending.playerId,
+            source: pending.source,
+            ghostX: touch.clientX,
+            ghostY: touch.clientY,
+            overTarget: null,
+          });
+        }
+      }
+      return;
+    }
     if (!dragStateRef.current.isDragging) return;
     e.preventDefault();
 
