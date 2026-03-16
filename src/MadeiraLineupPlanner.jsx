@@ -778,14 +778,13 @@ export default function MadeiraLineupPlanner() {
         return;
       }
     }
-    // No URL share — load published lineup from Firestore
+    // No URL share — load published lineup from Firestore (no banner needed)
     loadPublishedLineup().then((data) => {
       if (data) {
         if (data.roster) setRoster(data.roster);
         if (data.formation) setFormation(data.formation);
         if (data.lineups) setLineups({ 1: [...data.lineups[1]], 2: [...data.lineups[2]] });
         if (data.inactiveIds) setInactiveIds([...data.inactiveIds]);
-        if (data.name) setSharedName(data.name);
       }
       setCloudLoaded(true);
     });
@@ -1494,21 +1493,22 @@ export default function MadeiraLineupPlanner() {
       <SaveLoadModal isOpen={modalOpen} mode={modalMode} savedLineups={savedLineups} isMobile={isMobile}
         onSave={saveLineup} onLoad={loadLineup} onDelete={deleteLineup} onShare={handleShareSaved} onClose={() => setModalOpen(false)} />
 
-      {/* SHARED LINEUP BANNER */}
+      {/* SHARED LINEUP NOTICE — subtle pill, auto-dismisses */}
       {sharedName && (
         <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, zIndex: 60,
-          background: C.orange, color: C.white, padding: "8px 16px",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          fontFamily: fontBase, fontSize: 13, fontWeight: 600,
-        }}>
-          <span>Shared lineup: {sharedName}</span>
-          <button onClick={() => setSharedName(null)} style={{
-            background: "rgba(255,255,255,0.2)", border: "none", color: C.white, borderRadius: 4,
-            cursor: "pointer", fontSize: 11, padding: "2px 8px", fontWeight: 700,
-          }}>Dismiss</button>
+          position: "fixed", top: 12, left: "50%", transform: "translateX(-50%)", zIndex: 60,
+          background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)",
+          color: C.white, padding: "6px 16px",
+          borderRadius: 20, display: "flex", alignItems: "center", gap: 8,
+          fontFamily: fontBase, fontSize: 12, fontWeight: 500,
+          border: `1px solid ${C.orange}`,
+          animation: "fadeInOut 4s ease-in-out forwards",
+        }} onAnimationEnd={() => setSharedName(null)}>
+          <span style={{ color: C.orange, fontWeight: 700 }}>Loaded:</span>
+          <span>{sharedName}</span>
         </div>
       )}
+      <style>{`@keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(-8px); } 10% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }`}</style>
 
       {/* TOAST */}
       {toast && (
