@@ -98,22 +98,22 @@ const INITIAL_ROSTER = [
 
 const FORMATIONS = {
   "3-3-2": [
-    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
+    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
     { label: "RB", x: 78, y: 73 }, { label: "LM", x: 22, y: 51 }, { label: "CM", x: 50, y: 54 },
     { label: "RM", x: 78, y: 51 }, { label: "LS", x: 36, y: 30 }, { label: "RS", x: 64, y: 30 },
   ],
   "3-2-3": [
-    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
+    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
     { label: "RB", x: 78, y: 73 }, { label: "LCM", x: 36, y: 54 }, { label: "RCM", x: 64, y: 54 },
     { label: "LW", x: 20, y: 30 }, { label: "CF", x: 50, y: 27 }, { label: "RW", x: 80, y: 30 },
   ],
   "2-3-3": [
-    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 33, y: 74 }, { label: "RB", x: 67, y: 74 },
+    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 33, y: 74 }, { label: "RB", x: 67, y: 74 },
     { label: "LM", x: 20, y: 51 }, { label: "CM", x: 50, y: 54 }, { label: "RM", x: 80, y: 51 },
     { label: "LW", x: 20, y: 30 }, { label: "CF", x: 50, y: 27 }, { label: "RW", x: 80, y: 30 },
   ],
   "4-3-1": [
-    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 16, y: 72 }, { label: "LCB", x: 39, y: 76 },
+    { label: "GK", x: 50, y: 93 }, { label: "LB", x: 16, y: 72 }, { label: "LCB", x: 39, y: 76 },
     { label: "RCB", x: 61, y: 76 }, { label: "RB", x: 84, y: 72 }, { label: "LM", x: 22, y: 51 },
     { label: "CM", x: 50, y: 54 }, { label: "RM", x: 78, y: 51 }, { label: "ST", x: 50, y: 30 },
   ],
