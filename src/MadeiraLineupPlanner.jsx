@@ -550,6 +550,7 @@ function useTouchDrag({ assignPlayer, swapPositions, removeFromPosition }) {
 
   const activateTimerRef = useRef(null);
   const pendingDragRef = useRef(null); // { playerId, source } before activation
+  const lastTapRef = useRef({ time: 0, source: null }); // double-tap detection
 
   const handleTouchStart = useCallback((playerId, source, e) => {
     // Store pending drag info; activate after 150ms to distinguish from taps
@@ -635,8 +636,20 @@ function useTouchDrag({ assignPlayer, swapPositions, removeFromPosition }) {
     const state = dragStateRef.current;
 
     if (!state.isDragging) {
-      // Was a tap — execute tap callback
+      // Was a tap — check for double-tap on field positions
+      const pending = pendingDragRef.current;
       pendingDragRef.current = null;
+      if (pending && typeof pending.source === "number") {
+        const now = Date.now();
+        const last = lastTapRef.current;
+        if (last.source === pending.source && now - last.time < 400) {
+          // Double-tap on same field position — remove player
+          lastTapRef.current = { time: 0, source: null };
+          removeFromPosition(pending.source);
+          return;
+        }
+        lastTapRef.current = { time: now, source: pending.source };
+      }
       if (tapCallback) tapCallback();
       return;
     }
