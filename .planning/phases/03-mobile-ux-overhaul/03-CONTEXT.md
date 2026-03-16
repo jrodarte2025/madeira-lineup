@@ -14,12 +14,21 @@ Rebuild the mobile layout so coaches can build and adjust lineups on a phone as 
 ## Implementation Decisions
 
 ### Roster placement (above field)
-- Horizontal scrollable chip strip above the pitch, replacing the current bottom drawer
+- Horizontal scrollable chip strip above the pitch, replacing the current bottom drawer as the primary bench
 - Shows only unassigned (available) players — assigned players disappear from the strip
 - Each chip shows: jersey number + first name (e.g., "7 Alex") — matches current bench bar pattern
 - When all players are assigned, strip shows "All players assigned" message — strip area stays visible (no layout shift)
-- When no player is selected, show a subtle hint like "Tap a player, then a position" in the strip area
-- Mobile roster drawer is completely removed — chip strip replaces it entirely
+- When no player is selected, show a subtle hint like "Drag a player to a position" in the strip area
+- Chip strip is a drag source AND drag target — players can be dragged from strip to field and from field back to strip
+- Mobile roster drawer is removed ONLY AFTER the Roster management button (in action row) is wired up — never leave mobile without roster management access
+
+### Touch drag-and-drop (CRITICAL)
+- Drag-and-drop MUST work on mobile via touch events (touchstart/touchmove/touchend)
+- HTML5 drag API does not work on touch screens — implement custom touch drag handling
+- All existing drag interactions must work on mobile: chip-to-field (assign), field-to-chip-strip (remove to bench), field-to-field (swap), chip-to-occupied-field (swap)
+- During touch drag, show a visual ghost/clone of the dragged element following the finger
+- Drop targets highlight when a dragged element is over them (same orange glow as desktop)
+- Touch drag must not conflict with page scrolling — use a drag handle, long-press to initiate, or prevent scroll only during active drag
 
 ### Mobile header
 - Minimal header on mobile — logo + "Lineup Planner" title only
@@ -61,8 +70,9 @@ Rebuild the mobile layout so coaches can build and adjust lineups on a phone as 
 ## Specific Ideas
 
 - The overall mobile flow should be: header (minimal) → chip strip (bench) → pitch → formation → half toggle → action buttons — a clean top-to-bottom flow
-- Drag is currently disabled on mobile (`draggable={!isMobile}`) — click/tap interaction only, which is fine
-- The "no dead ends" philosophy from Phase 2 carries forward — every tap interaction should work intuitively on mobile
+- Drag-and-drop MUST work on mobile — coaches use this at practice on their phones and need to drag players just like on desktop
+- The "no dead ends" philosophy from Phase 2 carries forward — every interaction (drag AND tap) should work intuitively on mobile
+- Don't remove any mobile functionality (drawer, roster management) until its replacement is wired up in the same plan
 
 </specifics>
 
