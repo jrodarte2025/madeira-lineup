@@ -1,0 +1,67 @@
+# Requirements: Madeira FC Lineup Planner — UX Improvements
+
+**Defined:** 2026-03-15
+**Core Value:** Coaches can quickly build and adjust lineups on any device with drag-and-drop that feels natural
+
+## v1 Requirements
+
+### Display
+
+- [ ] **DISP-01**: Field positions show first initial + last name (e.g., "J. Smith")
+- [ ] **DISP-02**: Bench/roster shows full player names
+- [ ] **DISP-03**: Position circles on field are larger with bigger name and position text
+
+### Drag & Drop
+
+- [ ] **DND-01**: Dragging a field player to the bench removes them from their field position (spot goes empty)
+- [ ] **DND-02**: Dragging a bench player onto an occupied field position swaps them (bench player goes to field, field player goes to bench)
+- [ ] **DND-03**: Dragging a bench player onto an empty field position assigns them
+
+### Mobile UX
+
+- [ ] **MOB-01**: Mobile layout places bench/roster above the field
+- [ ] **MOB-02**: Mobile layout places formation selector and controls below the field
+- [ ] **MOB-03**: Touch targets and buttons are large enough for comfortable phone use
+- [ ] **MOB-04**: Overall mobile UX is intuitive and polished (no cramped or hidden elements)
+
+### Preservation
+
+- [ ] **PRES-01**: Desktop layout remains unchanged from current state
+
+## v2 Requirements
+
+(None — this is a focused UX polish milestone)
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| New formations | UX polish only, no feature additions |
+| Backend/Firebase changes | Infrastructure is stable |
+| Desktop layout redesign | Coaches are happy with current desktop UX |
+| Component library (MUI, etc.) | Keep current inline style approach |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DISP-01 | — | Pending |
+| DISP-02 | — | Pending |
+| DISP-03 | — | Pending |
+| DND-01 | — | Pending |
+| DND-02 | — | Pending |
+| DND-03 | — | Pending |
+| MOB-01 | — | Pending |
+| MOB-02 | — | Pending |
+| MOB-03 | — | Pending |
+| MOB-04 | — | Pending |
+| PRES-01 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 11 total
+- Mapped to phases: 0
+- Unmapped: 11 ⚠️
+
+---
+*Requirements defined: 2026-03-15*
+*Last updated: 2026-03-15 after initial definition*
