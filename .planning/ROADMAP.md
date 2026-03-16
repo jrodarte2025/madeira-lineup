@@ -82,12 +82,12 @@ Plans:
   3. Shared constants (STAT_TYPES, POSITION_GROUP, STAT_COLORS) are extracted into reusable files and importable by game and stats components
   4. A game document can be written to and read from Firestore games collection with embedded events array (verified in Firestore console)
   5. Denormalized season stats document structure exists in Firestore and accepts player total updates
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: App.jsx shell + TabBar + stub Games and Stats tabs + react-router-dom wiring
-- [ ] 04-02: Extract shared/constants.js and shared/statUtils.js; confirm v1.0 lineup still works
-- [ ] 04-03: Expand firebase.js with game CRUD; define and test Firestore schema
+- [ ] 04-01-PLAN.md — Extract shared constants, PitchSVG, FieldPosition, and utilities into src/shared/
+- [ ] 04-02-PLAN.md — App.jsx shell with HashRouter, TabBar, stub tabs, and react-router wiring
+- [ ] 04-03-PLAN.md — Expand firebase.js with game CRUD and season stats functions
 
 ### Phase 5: Live Game
 **Goal**: A coach can run a complete game from kickoff to final whistle — timer counts down, substitutions log player minutes, and tapping any player records a stat — all without losing data on a phone reload
