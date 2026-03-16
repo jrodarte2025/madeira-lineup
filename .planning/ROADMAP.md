@@ -54,7 +54,11 @@ Plans:
   2. On mobile, the formation selector and controls appear below the field
   3. All buttons and touch targets on mobile are large enough to tap accurately with a thumb
   4. The desktop layout is pixel-for-pixel identical to before this phase — no regressions
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Mobile chip strip above field, minimal header, remove bench bar and drawer on mobile
+- [ ] 03-02-PLAN.md — Controls below field (formation, half toggle, actions), touch targets, roster management modal
 
 ## Progress
 
@@ -65,4 +69,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
 | 2. Drag-and-Drop Completion | 2/2 | Complete    | 2026-03-16 |
-| 3. Mobile UX Overhaul | 0/TBD | Not started | - |
+| 3. Mobile UX Overhaul | 0/2 | Not started | - |
