@@ -152,9 +152,9 @@ function PitchSVG({ lineColor = "rgba(255,255,255,0.75)" }) {
 // =============================================
 function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact }) {
   const has = !!player;
-  const circleSize = has ? (compact ? 44 : 56) : (compact ? 44 : 56);
-  const numSize = has ? (compact ? 15 : 20) : (compact ? 8 : 10);
-  const nameSize = has ? (compact ? 10 : 12) : (compact ? 8 : 10);
+  const circleSize = has ? (compact ? 40 : 50) : (compact ? 40 : 50);
+  const numSize = has ? (compact ? 14 : 18) : (compact ? 8 : 10);
+  const nameSize = has ? (compact ? 9 : 11) : (compact ? 8 : 10);
   return (
     <div draggable={has} onDragStart={has ? onDragStart : undefined} onDragEnd={onDragEnd}
       onDragOver={onDragOver} onDrop={onDrop} onClick={onClick} onDoubleClick={onDoubleClick}
@@ -179,7 +179,7 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
         textAlign: "center", textShadow: "0 1px 4px rgba(0,0,0,0.9)",
         maxWidth: compact ? 68 : 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
       }}>{has ? abbreviateName(player.name) : pos.label}</div>
-      {has && <div style={{ fontSize: compact ? 7 : 10, fontWeight: 700, color: C.orange, letterSpacing: "1.2px", textShadow: "0 1px 3px rgba(0,0,0,0.9)", opacity: 0.85 }}>{pos.label}</div>}
+      {has && <div style={{ fontSize: compact ? 7 : 10, fontWeight: 700, color: C.white, letterSpacing: "1.2px", textShadow: "0 1px 3px rgba(0,0,0,0.9)", opacity: 0.85 }}>{pos.label}</div>}
     </div>
   );
 }
