@@ -39,7 +39,7 @@ Plans:
   1. Dragging a field player to the bench removes them from their position (spot becomes empty)
   2. Dragging a bench player onto an occupied field position swaps them — bench player goes to field, field player goes to bench
   3. Dragging a bench player onto an empty field position assigns them to that spot
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 02-01-PLAN.md — Drag-and-drop logic (field-to-bench removal, bench-to-field swap) and visual drag feedback
@@ -64,5 +64,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Display Polish | 1/1 | Complete    | 2026-03-16 |
-| 2. Drag-and-Drop Completion | 0/2 | In progress | - |
+| 2. Drag-and-Drop Completion | 1/2 | In Progress|  |
 | 3. Mobile UX Overhaul | 0/TBD | Not started | - |

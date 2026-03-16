@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-16T02:19:02.601Z"
+stopped_at: Completed 02-drag-drop-completion/02-01-PLAN.md
+last_updated: "2026-03-16T02:29:33.841Z"
 last_activity: 2026-03-15 — Phase 1 Display Polish complete (1/1 plans)
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 3
+  completed_plans: 2
   percent: 100
 ---
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100%
 - Trend: baseline
 
 *Updated after each plan completion*
+| Phase 02-drag-drop-completion P01 | 8min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,8 @@ Recent decisions affecting current work:
 - 01-01: Position labels changed from orange to white for better readability
 - 01-01: Circle sizes reduced from planned 56px to 50px after visual review
 - 01-01: GK y-position moved from 89 to 93 to fix CB overlap
+- [Phase 02-drag-drop-completion]: Bench-to-occupied swap uses assignPlayer overwrite — no extra logic needed
+- [Phase 02-drag-drop-completion]: rosterHover only activates for field-sourced drags to avoid misleading bench-to-bench highlight
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T02:19:02.598Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-drag-drop-completion/02-CONTEXT.md
+Last session: 2026-03-16T02:29:33.839Z
+Stopped at: Completed 02-drag-drop-completion/02-01-PLAN.md
+Resume file: None

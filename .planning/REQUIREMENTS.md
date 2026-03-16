@@ -13,9 +13,9 @@
 
 ### Drag & Drop
 
-- [ ] **DND-01**: Dragging a field player to the bench removes them from their field position (spot goes empty)
-- [ ] **DND-02**: Dragging a bench player onto an occupied field position swaps them (bench player goes to field, field player goes to bench)
-- [ ] **DND-03**: Dragging a bench player onto an empty field position assigns them
+- [x] **DND-01**: Dragging a field player to the bench removes them from their field position (spot goes empty)
+- [x] **DND-02**: Dragging a bench player onto an occupied field position swaps them (bench player goes to field, field player goes to bench)
+- [x] **DND-03**: Dragging a bench player onto an empty field position assigns them
 
 ### Mobile UX
 
@@ -48,9 +48,9 @@
 | DISP-01 | Phase 1 | Complete |
 | DISP-02 | Phase 1 | Complete |
 | DISP-03 | Phase 1 | Complete |
-| DND-01 | Phase 2 | Pending |
-| DND-02 | Phase 2 | Pending |
-| DND-03 | Phase 2 | Pending |
+| DND-01 | Phase 2 | Complete |
+| DND-02 | Phase 2 | Complete |
+| DND-03 | Phase 2 | Complete |
 | MOB-01 | Phase 3 | Pending |
 | MOB-02 | Phase 3 | Pending |
 | MOB-03 | Phase 3 | Pending |
