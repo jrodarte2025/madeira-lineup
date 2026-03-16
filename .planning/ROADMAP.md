@@ -26,7 +26,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Field position circles show abbreviated names (e.g., "J. Smith") that fit without truncation
   2. Bench/roster area shows each player's full name
   3. Field position circles are large enough that name and position label are legible without zooming
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Add name abbreviation utility, enlarge field circles, update print formatting
 
 ### Phase 2: Drag-and-Drop Completion
 **Goal**: Coaches can move players in any direction using drag-and-drop with no dead ends
@@ -56,6 +59,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Display Polish | 0/TBD | Not started | - |
+| 1. Display Polish | 0/1 | Not started | - |
 | 2. Drag-and-Drop Completion | 0/TBD | Not started | - |
 | 3. Mobile UX Overhaul | 0/TBD | Not started | - |
