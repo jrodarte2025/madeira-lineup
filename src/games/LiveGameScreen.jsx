@@ -789,7 +789,7 @@ export default function LiveGameScreen() {
     );
   }
 
-  const HEADER_HEIGHT = 110;
+  const HEADER_HEIGHT = 60;
   const BENCH_HEIGHT = 72;
 
   return (
@@ -979,7 +979,7 @@ export default function LiveGameScreen() {
         <EventsFeed events={events} onUndo={handleUndo} />
 
         {/* Stat bar spacer — only when a player is selected and stat bar visible */}
-        <div style={{ height: isActiveHalfForStats && selectedPlayerId ? 80 : 0 }} />
+        <div style={{ height: isActiveHalfForStats && selectedPlayerId ? 110 : 0 }} />
       </div>
 
       {/* Stat bar — fixed at bottom, visible during active halves */}

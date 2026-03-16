@@ -31,16 +31,16 @@ function ScoreButton({ value, side, onScoreChange }) {
       onTouchEnd={handleTouchEnd}
       style={{
         fontFamily: fontDisplay,
-        fontSize: 40,
+        fontSize: 36,
         fontWeight: 800,
         color: C.orange,
-        minWidth: 48,
+        minWidth: 40,
         textAlign: "center",
         cursor: "pointer",
         userSelect: "none",
         WebkitUserSelect: "none",
         lineHeight: 1,
-        padding: "4px 8px",
+        padding: "4px 6px",
         borderRadius: 8,
         touchAction: "manipulation",
       }}
@@ -66,8 +66,8 @@ function formatStoppage(elapsed) {
 
 function getTimerDisplay(gameStatus, displaySeconds) {
   if (gameStatus === "setup") return "25:00";
-  if (gameStatus === "halftime") return "HALFTIME";
-  if (gameStatus === "completed") return "FULL TIME";
+  if (gameStatus === "halftime") return "HT";
+  if (gameStatus === "completed") return "FT";
   if (displaySeconds < 1500) return formatCountdown(displaySeconds);
   return formatStoppage(displaySeconds);
 }
@@ -91,6 +91,7 @@ export default function GameHeader({
   const showStartSecondHalf = gameStatus === "halftime";
   const showEndGame =
     gameStatus === "2nd-half" && displaySeconds >= 1500;
+  const showActionButton = showEndHalf || showStartSecondHalf || showEndGame;
 
   return (
     <div
@@ -105,21 +106,21 @@ export default function GameHeader({
         paddingTop: "env(safe-area-inset-top, 0px)",
       }}
     >
-      {/* Back + Score row */}
+      {/* Single row: Back | Score | Teams | Score | Clock */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          padding: "8px 12px 4px",
+          padding: "6px 8px 6px",
         }}
       >
-        {/* Back arrow — left edge */}
+        {/* Back arrow */}
         {onBack && (
           <div
             onClick={onBack}
             style={{
               cursor: "pointer",
-              padding: "4px 8px",
+              padding: "4px 6px",
               color: "rgba(255,255,255,0.5)",
               fontSize: 18,
               fontFamily: fontBase,
@@ -135,14 +136,14 @@ export default function GameHeader({
           </div>
         )}
 
-        {/* Centered scoreboard */}
+        {/* Scoreboard — centered, compact */}
         <div
           style={{
             flex: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 4,
+            gap: 3,
           }}
         >
           <ScoreButton
@@ -156,13 +157,13 @@ export default function GameHeader({
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              minWidth: 80,
+              minWidth: 60,
             }}
           >
             <div
               style={{
                 fontFamily: fontBase,
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: 600,
                 color: "rgba(255,255,255,0.45)",
                 letterSpacing: "0.5px",
@@ -174,13 +175,13 @@ export default function GameHeader({
             <div
               style={{
                 fontFamily: fontBase,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 700,
                 color: "rgba(255,255,255,0.7)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
-                maxWidth: 140,
+                maxWidth: 120,
               }}
             >
               vs {opponent}
@@ -193,23 +194,12 @@ export default function GameHeader({
             onScoreChange={onScoreChange}
           />
         </div>
-      </div>
 
-      {/* Timer row */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 12,
-          padding: "2px 16px 8px",
-        }}
-      >
+        {/* Clock — right side */}
         <div
           style={{
             fontFamily: fontDisplay,
-            fontSize:
-              gameStatus === "halftime" || gameStatus === "completed" ? 18 : 28,
+            fontSize: gameStatus === "halftime" || gameStatus === "completed" ? 14 : 18,
             fontWeight: 800,
             color:
               gameStatus === "halftime"
@@ -219,75 +209,88 @@ export default function GameHeader({
                 : isStoppage
                 ? C.orange
                 : C.white,
-            letterSpacing: "1px",
+            letterSpacing: "0.5px",
             lineHeight: 1,
-            minWidth: 80,
+            minWidth: 50,
             textAlign: "center",
+            flexShrink: 0,
           }}
         >
           {timerStr}
         </div>
-
-        {showEndHalf && (
-          <button
-            onClick={onEndHalf}
-            style={{
-              background: C.orange,
-              border: "none",
-              borderRadius: 8,
-              color: C.white,
-              fontFamily: fontBase,
-              fontSize: 13,
-              fontWeight: 700,
-              padding: "6px 14px",
-              cursor: "pointer",
-              letterSpacing: "0.3px",
-            }}
-          >
-            End Half
-          </button>
-        )}
-
-        {showStartSecondHalf && (
-          <button
-            onClick={onStartSecondHalf}
-            style={{
-              background: "#4CAFB6",
-              border: "none",
-              borderRadius: 8,
-              color: C.white,
-              fontFamily: fontBase,
-              fontSize: 13,
-              fontWeight: 700,
-              padding: "6px 14px",
-              cursor: "pointer",
-              letterSpacing: "0.3px",
-            }}
-          >
-            Start 2nd Half
-          </button>
-        )}
-
-        {showEndGame && (
-          <button
-            onClick={onEndGame}
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.3)",
-              borderRadius: 8,
-              color: C.white,
-              fontFamily: fontBase,
-              fontSize: 13,
-              fontWeight: 700,
-              padding: "6px 14px",
-              cursor: "pointer",
-              letterSpacing: "0.3px",
-            }}
-          >
-            Full Time!
-          </button>
-        )}
       </div>
+
+      {/* Action button row — only when needed (stoppage/halftime) */}
+      {showActionButton && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "0 16px 6px",
+          }}
+        >
+          {showEndHalf && (
+            <button
+              onClick={onEndHalf}
+              style={{
+                background: C.orange,
+                border: "none",
+                borderRadius: 8,
+                color: C.white,
+                fontFamily: fontBase,
+                fontSize: 13,
+                fontWeight: 700,
+                padding: "6px 14px",
+                cursor: "pointer",
+                letterSpacing: "0.3px",
+              }}
+            >
+              End Half
+            </button>
+          )}
+
+          {showStartSecondHalf && (
+            <button
+              onClick={onStartSecondHalf}
+              style={{
+                background: "#4CAFB6",
+                border: "none",
+                borderRadius: 8,
+                color: C.white,
+                fontFamily: fontBase,
+                fontSize: 13,
+                fontWeight: 700,
+                padding: "6px 14px",
+                cursor: "pointer",
+                letterSpacing: "0.3px",
+              }}
+            >
+              Start 2nd Half
+            </button>
+          )}
+
+          {showEndGame && (
+            <button
+              onClick={onEndGame}
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                borderRadius: 8,
+                color: C.white,
+                fontFamily: fontBase,
+                fontSize: 13,
+                fontWeight: 700,
+                padding: "6px 14px",
+                cursor: "pointer",
+                letterSpacing: "0.3px",
+                marginLeft: 8,
+              }}
+            >
+              Full Time!
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
