@@ -545,6 +545,7 @@ export default function MadeiraLineupPlanner() {
   const [modalMode, setModalMode] = useState("save");
   const [rosterOpen, setRosterOpen] = useState(false);
   const [inactiveHover, setInactiveHover] = useState(false);
+  const [rosterHover, setRosterHover] = useState(false);
   const [toast, setToast] = useState(null);
   const [sharedName, setSharedName] = useState(null);
   const [cloudLoaded, setCloudLoaded] = useState(false);
@@ -743,6 +744,24 @@ export default function MadeiraLineupPlanner() {
     setDragSource(null);
   };
   const handlePositionDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; };
+  const handleRosterDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragSource && typeof dragSource.source === "number") setRosterHover(true);
+  };
+  const handleRosterDragLeave = () => setRosterHover(false);
+  const handleRosterDrop = (e) => {
+    e.preventDefault();
+    setRosterHover(false);
+    try {
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+      if (typeof data.source === "number") {
+        removeFromPosition(data.source);
+      }
+      // "roster" already on bench, "inactive" shouldn't go to bench via drag — both ignored
+    } catch {}
+    setDragSource(null);
+  };
   const handlePlayerClick = (playerId) => setSelectedPlayer((prev) => (prev === playerId ? null : playerId));
   const handlePositionClick = (posIndex) => {
     if (selectedPlayer) assignPlayer(selectedPlayer, posIndex);
@@ -759,6 +778,7 @@ export default function MadeiraLineupPlanner() {
     handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive,
     newName, setNewName, newNum, setNewNum, addPlayer, copyToOtherHalf, clearLineup, clearAll, activeHalf,
     inactiveHover, setInactiveHover,
+    rosterHover,
   };
 
   return (
@@ -925,7 +945,9 @@ export default function MadeiraLineupPlanner() {
         <div style={{ display: "flex", flex: 1, overflow: "hidden", flexDirection: isMobile ? "column" : "row" }}>
           {/* ROSTER SIDEBAR — desktop/tablet only */}
           {!isMobile && (
-            <div style={{ width: sidebarWidth, borderRight: `1px solid ${C.whiteAlpha}`, display: "flex", flexDirection: "column", background: "rgba(0,0,0,0.12)", flexShrink: 0 }}>
+            <div
+              onDragOver={handleRosterDragOver} onDrop={handleRosterDrop} onDragLeave={handleRosterDragLeave}
+              style={{ width: sidebarWidth, borderRight: `1px solid ${C.whiteAlpha}`, display: "flex", flexDirection: "column", background: "rgba(0,0,0,0.12)", flexShrink: 0, transition: "all 0.2s ease", boxShadow: rosterHover ? "inset 0 0 20px rgba(232,100,32,0.15)" : "none" }}>
               <RosterContent {...rosterProps} />
             </div>
           )}
@@ -961,12 +983,14 @@ export default function MadeiraLineupPlanner() {
         </div>
 
         {/* BENCH BAR */}
-        <div style={{
-          padding: isMobile ? "8px 12px" : "9px 24px",
-          borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", alignItems: "center",
-          gap: isMobile ? 8 : 14, background: "rgba(0,0,0,0.12)",
-          flexWrap: isMobile ? "nowrap" : "nowrap",
-        }}>
+        <div
+          onDragOver={handleRosterDragOver} onDrop={handleRosterDrop} onDragLeave={handleRosterDragLeave}
+          style={{
+            padding: isMobile ? "8px 12px" : "9px 24px",
+            borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", alignItems: "center",
+            gap: isMobile ? 8 : 14, background: rosterHover ? "rgba(232,100,32,0.08)" : "rgba(0,0,0,0.12)",
+            flexWrap: isMobile ? "nowrap" : "nowrap", transition: "background 0.2s ease",
+          }}>
           {/* Mobile: roster toggle button */}
           {isMobile && (
             <button onClick={() => setRosterOpen(true)} style={{
