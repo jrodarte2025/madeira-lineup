@@ -356,7 +356,7 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
               style={{
                 width: "100%", padding: isMobile ? "8px 10px" : "10px 12px", background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: C.white,
-                fontSize: isMobile ? 13 : 14, fontFamily: fontBase, outline: "none", marginBottom: 8,
+                fontSize: isMobile ? 16 : 14, fontFamily: fontBase, outline: "none", marginBottom: 8,
               }} autoFocus />
             <button onClick={() => { if (name.trim()) { onSave(name.trim()); setName(""); } }}
               style={{
