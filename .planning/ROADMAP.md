@@ -42,8 +42,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 02-01-PLAN.md — Drag-and-drop logic (field-to-bench removal, bench-to-field swap) and visual drag feedback
-- [ ] 02-02-PLAN.md — Click interaction parity (field-to-field swap, double-click remove) and full verification
+- [x] 02-01-PLAN.md — Drag-and-drop logic (field-to-bench removal, bench-to-field swap) and visual drag feedback
+- [x] 02-02-PLAN.md — Click interaction parity (field-to-field swap, double-click remove) and full verification
 
 ### Phase 3: Mobile UX Overhaul
 **Goal**: Coaches can build and adjust lineups on a phone as quickly and comfortably as on desktop
@@ -54,11 +54,12 @@ Plans:
   2. On mobile, the formation selector and controls appear below the field
   3. All buttons and touch targets on mobile are large enough to tap accurately with a thumb
   4. The desktop layout is pixel-for-pixel identical to before this phase — no regressions
+  5. Touch drag-and-drop works on mobile (touchstart/touchmove/touchend) for all interaction types
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Mobile chip strip above field, minimal header, remove bench bar and drawer on mobile
-- [ ] 03-02-PLAN.md — Controls below field (formation, half toggle, actions), touch targets, roster management modal
+- [ ] 03-01-PLAN.md — Touch drag-and-drop engine (custom touch events) + mobile chip strip above field
+- [ ] 03-02-PLAN.md — Controls below field (formation, half toggle, actions), roster management modal, minimal header
 
 ## Progress
 
