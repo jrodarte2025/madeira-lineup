@@ -336,12 +336,13 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
       display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", zIndex: 100,
     }} onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{
-        background: C.navyLight, borderRadius: isMobile ? "14px 14px 0 0" : 14, padding: 24,
-        width: isMobile ? "100%" : 360, maxHeight: "80vh",
+        background: C.navyLight, borderRadius: isMobile ? "14px 14px 0 0" : 14,
+        padding: isMobile ? "16px 16px 20px" : 24,
+        width: isMobile ? "100%" : 360, maxHeight: isMobile ? "60vh" : "80vh",
         border: `1px solid rgba(255,255,255,0.12)`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
         display: "flex", flexDirection: "column",
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isMobile ? 12 : 16 }}>
           <div style={{ fontFamily: fontDisplay, fontSize: 16, fontWeight: 800, color: C.white }}>
             {mode === "save" ? "Save Lineup" : "Load Lineup"}
           </div>
@@ -353,14 +354,14 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
             <input placeholder="Lineup name (e.g. vs. Anderson Twp)" value={name} onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onSave(name.trim()); setName(""); } }}
               style={{
-                width: "100%", padding: "10px 12px", background: "rgba(255,255,255,0.08)",
+                width: "100%", padding: isMobile ? "8px 10px" : "10px 12px", background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: C.white,
-                fontSize: 14, fontFamily: fontBase, outline: "none", marginBottom: 10,
+                fontSize: isMobile ? 13 : 14, fontFamily: fontBase, outline: "none", marginBottom: 8,
               }} autoFocus />
             <button onClick={() => { if (name.trim()) { onSave(name.trim()); setName(""); } }}
               style={{
-                width: "100%", padding: 10, background: C.orange, border: "none", borderRadius: 8,
-                color: C.white, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: fontBase,
+                width: "100%", padding: isMobile ? 8 : 10, background: C.orange, border: "none", borderRadius: 8,
+                color: C.white, fontSize: isMobile ? 13 : 14, fontWeight: 700, cursor: "pointer", fontFamily: fontBase,
                 opacity: name.trim() ? 1 : 0.4,
               }}>Save</button>
           </div>
