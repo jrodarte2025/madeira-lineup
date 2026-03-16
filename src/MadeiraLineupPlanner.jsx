@@ -769,8 +769,32 @@ export default function MadeiraLineupPlanner() {
   };
   const handlePlayerClick = (playerId) => setSelectedPlayer((prev) => (prev === playerId ? null : playerId));
   const handlePositionClick = (posIndex) => {
-    if (selectedPlayer) assignPlayer(selectedPlayer, posIndex);
-    else if (currentLineup[posIndex]) setSelectedPlayer(currentLineup[posIndex]);
+    if (!selectedPlayer) {
+      // No selection — select the field player at this position (if any)
+      if (currentLineup[posIndex]) setSelectedPlayer(currentLineup[posIndex]);
+      return;
+    }
+
+    // A player is selected — determine source
+    const selectedPosIndex = currentLineup.indexOf(selectedPlayer);
+    const isSelectedOnField = selectedPosIndex !== -1;
+
+    if (isSelectedOnField) {
+      // Selected player is on the field
+      if (selectedPosIndex === posIndex) {
+        // Clicked same position — deselect
+        setSelectedPlayer(null);
+      } else {
+        // Clicked different position — swap the two field positions
+        swapPositions(selectedPosIndex, posIndex);
+        setSelectedPlayer(null);
+      }
+    } else {
+      // Selected player is on the bench — assign to this position
+      // assignPlayer handles: puts bench player here, displaces occupant to bench
+      assignPlayer(selectedPlayer, posIndex);
+      // selectedPlayer is cleared inside assignPlayer
+    }
   };
   const handlePrint = () => window.print();
 
