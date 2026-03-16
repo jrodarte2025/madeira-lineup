@@ -150,11 +150,13 @@ function PitchSVG({ lineColor = "rgba(255,255,255,0.75)" }) {
 // =============================================
 // INTERACTIVE FIELD POSITION
 // =============================================
-function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact }) {
+function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact, dragSource, idx }) {
   const has = !!player;
   const circleSize = has ? (compact ? 40 : 50) : (compact ? 40 : 50);
   const numSize = has ? (compact ? 14 : 18) : (compact ? 8 : 10);
   const nameSize = has ? (compact ? 9 : 11) : (compact ? 8 : 10);
+  const isBeingDragged = dragSource && dragSource.source === idx;
+  const shouldGlow = dragSource && !isBeingDragged;
   return (
     <div draggable={has} onDragStart={has ? onDragStart : undefined} onDragEnd={onDragEnd}
       onDragOver={onDragOver} onDrop={onDrop} onClick={onClick} onDoubleClick={onDoubleClick}
@@ -162,7 +164,8 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
         position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%, -50%)",
         display: "flex", flexDirection: "column", alignItems: "center", gap: compact ? 1 : 2,
         cursor: has ? "grab" : isHighlighted ? "pointer" : "default", zIndex: 5,
-        transition: "left 0.4s cubic-bezier(0.4,0,0.2,1), top 0.4s cubic-bezier(0.4,0,0.2,1)", userSelect: "none",
+        transition: "left 0.4s cubic-bezier(0.4,0,0.2,1), top 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
+        userSelect: "none", opacity: isBeingDragged ? 0.35 : 1,
       }}>
       <div style={{
         width: circleSize, height: circleSize, borderRadius: "50%",
@@ -171,8 +174,10 @@ function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onD
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: fontDisplay, fontSize: numSize, fontWeight: 800,
         color: has ? C.orange : "rgba(255,255,255,0.45)",
-        boxShadow: has ? `0 4px 14px rgba(0,0,0,0.45), 0 0 20px ${C.orangeGlow}` : "none",
-        transition: "all 0.25s ease",
+        boxShadow: shouldGlow
+          ? `0 4px 14px rgba(0,0,0,0.45), 0 0 12px 3px rgba(232,100,32,0.4)`
+          : has ? `0 4px 14px rgba(0,0,0,0.45), 0 0 20px ${C.orangeGlow}` : "none",
+        transition: "all 0.2s ease",
       }}>{has ? player.num : pos.label}</div>
       <div style={{
         fontSize: nameSize, fontWeight: 700, color: has ? C.white : "rgba(255,255,255,0.35)",
@@ -972,6 +977,7 @@ export default function MadeiraLineupPlanner() {
                 return (
                   <FieldPosition key={`${formation}-${idx}`} pos={pos} player={player}
                     isHighlighted={!!selectedPlayer && !player} compact={isMobile}
+                    dragSource={dragSource} idx={idx}
                     onDragStart={(e) => handleDragStart(e, player.id, idx)} onDragEnd={handleDragEnd}
                     onDragOver={handlePositionDragOver} onDrop={(e) => handlePositionDrop(e, idx)}
                     onClick={() => handlePositionClick(idx)}
