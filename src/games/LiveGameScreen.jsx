@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "react-router";
-import { loadGame, updateGameStatus, updateGameScore } from "../firebase";
+import { loadGame, updateGameStatus, updateGameScore, appendGameEvent } from "../firebase";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
+import { calcMinutes, abbreviateName } from "../shared/utils";
 import PitchSVG from "../shared/PitchSVG";
 import FieldPosition from "../shared/FieldPosition";
 import GameHeader from "./GameHeader";
@@ -51,9 +53,16 @@ const clearGameStorage = () => {
 // ---------------------------------------------------------------------------
 // Bench chip for the horizontal bench strip
 // ---------------------------------------------------------------------------
-function BenchChip({ player }) {
+function BenchChip({ player, minuteCount, draggable, onDragStart, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver }) {
   return (
     <div
+      data-drop-id={`bench-${player.id}`}
+      draggable={draggable}
+      onDragStart={draggable ? onDragStart : undefined}
+      onTouchStart={draggable ? onTouchStart : undefined}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -62,6 +71,13 @@ function BenchChip({ player }) {
         padding: "4px 6px",
         minWidth: 48,
         flexShrink: 0,
+        cursor: draggable ? "grab" : "default",
+        borderRadius: 8,
+        border: isTouchDragOver ? `2px solid ${C.orange}` : "2px solid transparent",
+        background: isTouchDragOver ? "rgba(232,100,32,0.15)" : "transparent",
+        transition: "all 0.15s ease",
+        touchAction: "none",
+        userSelect: "none",
       }}
     >
       <div
@@ -97,6 +113,17 @@ function BenchChip({ player }) {
       >
         {player.name.split(" ")[0]}
       </div>
+      {minuteCount > 0 && (
+        <div style={{
+          fontFamily: fontBase,
+          fontSize: 9,
+          fontWeight: 700,
+          color: "rgba(255,255,255,0.45)",
+          lineHeight: 1,
+        }}>
+          {minuteCount}m
+        </div>
+      )}
     </div>
   );
 }
@@ -120,8 +147,29 @@ export default function LiveGameScreen() {
 
   // --- Timer state ---
   const [displaySeconds, setDisplaySeconds] = useState(0);
+  const [displayMinute, setDisplayMinute] = useState(0);
   const startTsRef = useRef(null);
   const rafRef = useRef(null);
+
+  // --- Drag state (desktop HTML5) ---
+  const [dragSource, setDragSource] = useState(null);
+  // dragSource shape: { type: "field"|"bench", idx: number|null, playerId: string, player: object }
+
+  // --- Touch drag state ---
+  const [touchDragState, setTouchDragState] = useState({
+    isDragging: false,
+    playerId: null,
+    player: null,
+    source: null, // { type: "field"|"bench", idx: number|null }
+    ghostX: 0,
+    ghostY: 0,
+    overTarget: null,
+  });
+
+  const touchDragStateRef = useRef(touchDragState);
+  touchDragStateRef.current = touchDragState;
+  const activateTimerRef = useRef(null);
+  const pendingDragRef = useRef(null);
 
   // --- UI state ---
   const [loading, setLoading] = useState(true);
@@ -196,6 +244,12 @@ export default function LiveGameScreen() {
     startTsRef.current = null;
   }, []);
 
+  // Update displayMinute only when minute changes to avoid expensive recalc every frame
+  useEffect(() => {
+    const newMinute = Math.floor(displaySeconds / 60);
+    setDisplayMinute((prev) => (prev !== newMinute ? newMinute : prev));
+  }, [displaySeconds]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -262,9 +316,6 @@ export default function LiveGameScreen() {
 
         if (lineup) {
           const { formation, lineups, roster } = lineup;
-          // lineups comes from MadeiraLineupPlanner's state:
-          // { [formationKey]: [playerId | null, ...] }
-          // From createGame: lineup = { formation, lineups, roster }
           const positionDefs = FORMATIONS[formation] || [];
           const lineupArray =
             lineups && lineups[formation]
@@ -451,6 +502,351 @@ export default function LiveGameScreen() {
   );
 
   // ---------------------------------------------------------------------------
+  // Substitution handler — core logic for bench<->field swap during active game
+  // ---------------------------------------------------------------------------
+  const handleSubstitution = useCallback(
+    (source, targetFieldIdx) => {
+      // source: { type: "field"|"bench", idx: number|null, player: object }
+      // targetFieldIdx: the field slot index being dropped on
+      const isActiveHalf = gameStatus === "1st-half" || gameStatus === "2nd-half";
+
+      if (source.type === "field" && source.idx !== undefined && source.idx !== null) {
+        // Field-to-field swap: no sub event, just reposition
+        const fromIdx = source.idx;
+        if (fromIdx === targetFieldIdx) return;
+        setFieldPositions((prev) => {
+          const updated = [...prev];
+          const tmp = updated[fromIdx];
+          updated[fromIdx] = { ...updated[fromIdx], player: updated[targetFieldIdx].player };
+          updated[targetFieldIdx] = { ...updated[targetFieldIdx], player: tmp.player };
+          return updated;
+        });
+      } else if (source.type === "bench") {
+        // Bench-to-field: swap the bench player with the field player at targetFieldIdx
+        const benchPlayer = source.player;
+        if (!benchPlayer) return;
+
+        // Collect outgoing player from current state before updating
+        const outgoingPlayer = fieldPositions[targetFieldIdx]?.player || null;
+
+        setFieldPositions((prev) => {
+          const updated = [...prev];
+          updated[targetFieldIdx] = { ...updated[targetFieldIdx], player: benchPlayer };
+          return updated;
+        });
+
+        setBenchPlayers((prev) => {
+          const withoutBenchPlayer = prev.filter((p) => p.id !== benchPlayer.id);
+          if (outgoingPlayer) {
+            return [...withoutBenchPlayer, outgoingPlayer];
+          }
+          return withoutBenchPlayer;
+        });
+
+        // Only log sub event and update intervals during active halves
+        if (isActiveHalf) {
+          const now = Date.now();
+          const currentHalf = gameStatus === "1st-half" ? 1 : 2;
+
+          // Build sub event
+          const subEvent = {
+            id: crypto.randomUUID(),
+            type: "sub",
+            playerIn: { id: benchPlayer.id, name: benchPlayer.name, num: benchPlayer.num },
+            playerOut: outgoingPlayer ? { id: outgoingPlayer.id, name: outgoingPlayer.name, num: outgoingPlayer.num } : null,
+            half: currentHalf,
+            t: now,
+          };
+
+          setEvents((prev) => [...prev, subEvent]);
+          appendGameEvent(gameId, subEvent); // fire-and-forget
+
+          // Update intervals: close outgoing, open incoming
+          setPlayerIntervals((prev) => {
+            const updated = { ...prev };
+
+            // Close outgoing player's last open interval
+            if (outgoingPlayer) {
+              const outIntervals = updated[outgoingPlayer.id] || [];
+              if (outIntervals.length > 0 && outIntervals[outIntervals.length - 1].outAt === null) {
+                updated[outgoingPlayer.id] = outIntervals.map((interval, i) =>
+                  i === outIntervals.length - 1 ? { ...interval, outAt: now } : interval
+                );
+              }
+            }
+
+            // Open new interval for incoming player
+            const inIntervals = updated[benchPlayer.id] || [];
+            updated[benchPlayer.id] = [...inIntervals, { inAt: now, outAt: null }];
+
+            return updated;
+          });
+        }
+        // During halftime: allow bench-to-field pre-positioning, no intervals updated
+      }
+    },
+    [gameId, gameStatus, fieldPositions]
+  );
+
+  const handleBenchDrop = useCallback(
+    (sourceFieldIdx) => {
+      // Field-to-bench: remove player from field, add to bench
+      const isActiveHalf = gameStatus === "1st-half" || gameStatus === "2nd-half";
+      const leavingPlayer = fieldPositions[sourceFieldIdx]?.player;
+      if (!leavingPlayer) return;
+
+      setFieldPositions((prev) => {
+        const updated = [...prev];
+        updated[sourceFieldIdx] = { ...updated[sourceFieldIdx], player: null };
+        return updated;
+      });
+
+      setBenchPlayers((prev) => [...prev, leavingPlayer]);
+
+      if (isActiveHalf) {
+        const now = Date.now();
+        const currentHalf = gameStatus === "1st-half" ? 1 : 2;
+
+        const subEvent = {
+          id: crypto.randomUUID(),
+          type: "sub",
+          playerIn: null,
+          playerOut: { id: leavingPlayer.id, name: leavingPlayer.name, num: leavingPlayer.num },
+          half: currentHalf,
+          t: now,
+        };
+
+        setEvents((prev) => [...prev, subEvent]);
+        appendGameEvent(gameId, subEvent); // fire-and-forget
+
+        // Close outgoing player's interval
+        setPlayerIntervals((prev) => {
+          const updated = { ...prev };
+          const outIntervals = updated[leavingPlayer.id] || [];
+          if (outIntervals.length > 0 && outIntervals[outIntervals.length - 1].outAt === null) {
+            updated[leavingPlayer.id] = outIntervals.map((interval, i) =>
+              i === outIntervals.length - 1 ? { ...interval, outAt: now } : interval
+            );
+          }
+          return updated;
+        });
+      }
+    },
+    [gameId, gameStatus, fieldPositions]
+  );
+
+  // ---------------------------------------------------------------------------
+  // Desktop HTML5 drag handlers
+  // ---------------------------------------------------------------------------
+  const isInteractive = gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime";
+
+  const handleFieldDragStart = useCallback((idx, e) => {
+    const player = fieldPositions[idx]?.player;
+    if (!player || !isInteractive) return;
+    setDragSource({ type: "field", idx, playerId: player.id, player });
+    e.dataTransfer.effectAllowed = "move";
+  }, [fieldPositions, isInteractive]);
+
+  const handleBenchDragStart = useCallback((player, e) => {
+    if (!player || !isInteractive) return;
+    setDragSource({ type: "bench", idx: null, playerId: player.id, player });
+    e.dataTransfer.effectAllowed = "move";
+  }, [isInteractive]);
+
+  const handleFieldDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleFieldDrop = useCallback((targetIdx, e) => {
+    e.preventDefault();
+    if (!dragSource || !isInteractive) {
+      setDragSource(null);
+      return;
+    }
+    handleSubstitution(dragSource, targetIdx);
+    setDragSource(null);
+  }, [dragSource, isInteractive, handleSubstitution]);
+
+  const handleBenchStripDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleBenchStripDrop = useCallback((e) => {
+    e.preventDefault();
+    if (!dragSource || !isInteractive) {
+      setDragSource(null);
+      return;
+    }
+    if (dragSource.type === "field" && dragSource.idx !== null) {
+      handleBenchDrop(dragSource.idx);
+    }
+    setDragSource(null);
+  }, [dragSource, isInteractive, handleBenchDrop]);
+
+  const handleDragEnd = useCallback(() => {
+    setDragSource(null);
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Touch drag handlers (inline, same pattern as MadeiraLineupPlanner)
+  // ---------------------------------------------------------------------------
+
+  const handleTouchStart = useCallback((sourceInfo, player, e) => {
+    if (!isInteractive || !player) return;
+    pendingDragRef.current = {
+      sourceInfo,
+      player,
+      startX: e.touches[0].clientX,
+      startY: e.touches[0].clientY,
+    };
+
+    activateTimerRef.current = setTimeout(() => {
+      const pending = pendingDragRef.current;
+      if (!pending) return;
+      setTouchDragState({
+        isDragging: true,
+        playerId: pending.player.id,
+        player: pending.player,
+        source: pending.sourceInfo,
+        ghostX: pending.startX,
+        ghostY: pending.startY,
+        overTarget: null,
+      });
+    }, 150);
+  }, [isInteractive]);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!touchDragStateRef.current.isDragging && pendingDragRef.current) {
+      const touch = e.touches[0];
+      const dx = Math.abs(touch.clientX - pendingDragRef.current.startX);
+      const dy = Math.abs(touch.clientY - pendingDragRef.current.startY);
+      const moved = dx > 8 || dy > 8;
+      if (moved) {
+        if (dx > dy) {
+          // Horizontal swipe — cancel drag
+          clearTimeout(activateTimerRef.current);
+          activateTimerRef.current = null;
+          pendingDragRef.current = null;
+          return;
+        } else {
+          // Vertical drag — activate early
+          clearTimeout(activateTimerRef.current);
+          activateTimerRef.current = null;
+          const pending = pendingDragRef.current;
+          setTouchDragState({
+            isDragging: true,
+            playerId: pending.player.id,
+            player: pending.player,
+            source: pending.sourceInfo,
+            ghostX: touch.clientX,
+            ghostY: touch.clientY,
+            overTarget: null,
+          });
+        }
+      }
+      return;
+    }
+    if (!touchDragStateRef.current.isDragging) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const clientX = touch.clientX;
+    const clientY = touch.clientY;
+
+    const el = document.elementFromPoint(clientX, clientY);
+    let overTarget = null;
+    if (el) {
+      let node = el;
+      while (node && node !== document.body) {
+        if (node.dataset && node.dataset.dropId) {
+          overTarget = node.dataset.dropId;
+          break;
+        }
+        node = node.parentElement;
+      }
+    }
+
+    setTouchDragState((prev) => ({ ...prev, ghostX: clientX, ghostY: clientY, overTarget }));
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (activateTimerRef.current) {
+      clearTimeout(activateTimerRef.current);
+      activateTimerRef.current = null;
+    }
+
+    const state = touchDragStateRef.current;
+    pendingDragRef.current = null;
+
+    if (!state.isDragging) {
+      setTouchDragState({
+        isDragging: false, playerId: null, player: null, source: null,
+        ghostX: 0, ghostY: 0, overTarget: null,
+      });
+      return;
+    }
+
+    const { source, overTarget } = state;
+
+    if (overTarget && overTarget.startsWith("field-")) {
+      const targetIdx = parseInt(overTarget.replace("field-", ""), 10);
+      if (source) {
+        handleSubstitution(source, targetIdx);
+      }
+    } else if (overTarget === "bench-strip") {
+      if (source && source.type === "field" && source.idx !== null) {
+        handleBenchDrop(source.idx);
+      }
+    }
+
+    setTouchDragState({
+      isDragging: false, playerId: null, player: null, source: null,
+      ghostX: 0, ghostY: 0, overTarget: null,
+    });
+  }, [handleSubstitution, handleBenchDrop]);
+
+  const handleTouchCancel = useCallback(() => {
+    if (activateTimerRef.current) {
+      clearTimeout(activateTimerRef.current);
+      activateTimerRef.current = null;
+    }
+    pendingDragRef.current = null;
+    setTouchDragState({
+      isDragging: false, playerId: null, player: null, source: null,
+      ghostX: 0, ghostY: 0, overTarget: null,
+    });
+  }, []);
+
+  // Prevent page scroll during active touch drag
+  useEffect(() => {
+    const preventScroll = (e) => {
+      if (touchDragStateRef.current.isDragging) e.preventDefault();
+    };
+    document.addEventListener("touchmove", preventScroll, { passive: false });
+    return () => document.removeEventListener("touchmove", preventScroll);
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Live minute calculations — recompute once per minute (when displayMinute changes)
+  // ---------------------------------------------------------------------------
+  const playerMinutes = useMemo(() => {
+    const result = {};
+    // Collect all player IDs across field and bench
+    const allPlayerIds = new Set();
+    fieldPositions.forEach(({ player }) => { if (player) allPlayerIds.add(player.id); });
+    benchPlayers.forEach((p) => allPlayerIds.add(p.id));
+
+    allPlayerIds.forEach((pid) => {
+      const intervals = playerIntervals[pid] || [];
+      result[pid] = calcMinutes(intervals, halfIntervals);
+    });
+    return result;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayMinute, playerIntervals, halfIntervals, fieldPositions, benchPlayers]);
+
+  // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   if (loading) {
@@ -475,6 +871,11 @@ export default function LiveGameScreen() {
   // Estimate header height: ~110px (score row + timer row + safe area)
   const HEADER_HEIGHT = 110;
   const BENCH_HEIGHT = 72;
+
+  const isFieldBeingDraggedOver = (idx) => {
+    if (dragSource) return true; // highlight all during desktop drag
+    return touchDragState.overTarget === `field-${idx}`;
+  };
 
   return (
     <div
@@ -527,6 +928,9 @@ export default function LiveGameScreen() {
       <div style={{ paddingTop: HEADER_HEIGHT, flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Bench strip */}
         <div
+          data-drop-id="bench-strip"
+          onDragOver={isInteractive ? handleBenchStripDragOver : undefined}
+          onDrop={isInteractive ? handleBenchStripDrop : undefined}
           style={{
             height: BENCH_HEIGHT,
             display: "flex",
@@ -536,10 +940,15 @@ export default function LiveGameScreen() {
             padding: "0 12px",
             gap: 4,
             borderBottom: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(0,0,0,0.2)",
+            background: dragSource?.type === "field"
+              ? "rgba(232,100,32,0.08)"
+              : touchDragState.overTarget === "bench-strip" && touchDragState.source?.type === "field"
+              ? "rgba(232,100,32,0.08)"
+              : "rgba(0,0,0,0.2)",
             flexShrink: 0,
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
+            transition: "background 0.15s ease",
           }}
         >
           {benchPlayers.length === 0 ? (
@@ -555,7 +964,18 @@ export default function LiveGameScreen() {
             </div>
           ) : (
             benchPlayers.map((player) => (
-              <BenchChip key={player.id} player={player} />
+              <BenchChip
+                key={player.id}
+                player={player}
+                minuteCount={playerMinutes[player.id] || 0}
+                draggable={isInteractive}
+                onDragStart={(e) => handleBenchDragStart(player, e)}
+                onTouchStart={(e) => handleTouchStart({ type: "bench", idx: null }, player, e)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchCancel}
+                isTouchDragOver={touchDragState.overTarget === `bench-${player.id}`}
+              />
             ))
           )}
         </div>
@@ -637,16 +1057,64 @@ export default function LiveGameScreen() {
                 pos={pos}
                 player={player}
                 idx={idx}
-                isHighlighted={false}
+                isHighlighted={isInteractive && !player}
                 compact={false}
+                dragSource={dragSource}
+                isTouchDragOver={touchDragState.overTarget === `field-${idx}`}
+                minuteDisplay={
+                  (gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime" || gameStatus === "completed") && player
+                    ? String(playerMinutes[player.id] ?? 0)
+                    : null
+                }
+                isSelected={false}
+                statCount={0}
+                onDragStart={isInteractive ? (e) => handleFieldDragStart(idx, e) : undefined}
+                onDragEnd={handleDragEnd}
+                onDragOver={isInteractive ? handleFieldDragOver : undefined}
+                onDrop={isInteractive ? (e) => handleFieldDrop(idx, e) : undefined}
+                onTouchStart={isInteractive ? (e) => handleTouchStart({ type: "field", idx }, player, e) : undefined}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchCancel}
               />
             ))}
           </div>
         </div>
 
-        {/* Bottom reserved area for Plans 05-03/05-04 */}
+        {/* Bottom reserved area for Plans 05-04 */}
         <div style={{ height: 0 }} />
       </div>
+
+      {/* Touch drag ghost element */}
+      {touchDragState.isDragging && touchDragState.player && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            left: touchDragState.ghostX - 18,
+            top: touchDragState.ghostY - 18,
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: `linear-gradient(145deg, ${C.navy}, ${C.navyLight})`,
+            border: `2.5px solid ${C.orange}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: fontDisplay,
+            fontWeight: 800,
+            fontSize: 14,
+            color: C.orange,
+            pointerEvents: "none",
+            zIndex: 9999,
+            opacity: 0.85,
+            boxShadow: `0 4px 16px rgba(0,0,0,0.5), 0 0 12px 3px rgba(232,100,32,0.4)`,
+            transform: "scale(1.15)",
+          }}
+        >
+          {touchDragState.player.num}
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
