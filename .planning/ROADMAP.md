@@ -12,7 +12,7 @@ Three phases of polish that make the lineup planner feel natural on every device
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Display Polish** - Sharpen player name formatting and field position sizing
+- [x] **Phase 1: Display Polish** - Sharpen player name formatting and field position sizing (completed 2026-03-16)
 - [ ] **Phase 2: Drag-and-Drop Completion** - Complete all drag-and-drop interactions (bench removal and bench-to-field swap)
 - [ ] **Phase 3: Mobile UX Overhaul** - Rebuild mobile layout and touch targets; preserve desktop
 
@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Field position circles show abbreviated names (e.g., "J. Smith") that fit without truncation
   2. Bench/roster area shows each player's full name
   3. Field position circles are large enough that name and position label are legible without zooming
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Add name abbreviation utility, enlarge field circles, update print formatting
@@ -59,6 +59,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Display Polish | 0/1 | Not started | - |
+| 1. Display Polish | 1/1 | Complete   | 2026-03-16 |
 | 2. Drag-and-Drop Completion | 0/TBD | Not started | - |
 | 3. Mobile UX Overhaul | 0/TBD | Not started | - |

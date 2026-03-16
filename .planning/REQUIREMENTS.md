@@ -7,9 +7,9 @@
 
 ### Display
 
-- [ ] **DISP-01**: Field positions show first initial + last name (e.g., "J. Smith")
-- [ ] **DISP-02**: Bench/roster shows full player names
-- [ ] **DISP-03**: Position circles on field are larger with bigger name and position text
+- [x] **DISP-01**: Field positions show first initial + last name (e.g., "J. Smith")
+- [x] **DISP-02**: Bench/roster shows full player names
+- [x] **DISP-03**: Position circles on field are larger with bigger name and position text
 
 ### Drag & Drop
 
@@ -45,9 +45,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DISP-01 | Phase 1 | Pending |
-| DISP-02 | Phase 1 | Pending |
-| DISP-03 | Phase 1 | Pending |
+| DISP-01 | Phase 1 | Complete |
+| DISP-02 | Phase 1 | Complete |
+| DISP-03 | Phase 1 | Complete |
 | DND-01 | Phase 2 | Pending |
 | DND-02 | Phase 2 | Pending |
 | DND-03 | Phase 2 | Pending |
