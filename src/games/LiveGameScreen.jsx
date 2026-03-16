@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents } from "../firebase";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
 import { calcMinutes, abbreviateName, getPositionGroup } from "../shared/utils";
@@ -127,7 +127,6 @@ function BenchChip({ player, minuteCount, onClick, isSubSelected }) {
 // ---------------------------------------------------------------------------
 export default function LiveGameScreen() {
   const { id: gameId } = useParams();
-  const navigate = useNavigate();
 
   // --- Game state ---
   const [gameStatus, setGameStatus] = useState("setup");
@@ -716,24 +715,25 @@ export default function LiveGameScreen() {
   }, [selectedPlayerId, isActiveHalfForStats, fieldPositions, gameStatus, gameId]);
 
   const handleUndo = useCallback((eventId) => {
+    // Find the event before removing it
+    const removed = events.find((e) => e.id === eventId);
+
     setEvents((prev) => {
-      const removed = prev.find((e) => e.id === eventId);
       const updated = prev.filter((e) => e.id !== eventId);
       saveStored("events", updated);
-      replaceGameEvents(gameId, updated); // fire-and-forget
-
-      // Decrement home score when undoing a goal
-      if (removed && removed.type === "stat" && removed.stat === "goal") {
-        setScore((s) => {
-          const newScore = { ...s, home: Math.max(0, s.home - 1) };
-          updateGameScore(gameId, newScore);
-          return newScore;
-        });
-      }
-
+      replaceGameEvents(gameId, updated);
       return updated;
     });
-  }, [gameId]);
+
+    // Decrement home score when undoing a goal
+    if (removed && removed.type === "stat" && removed.stat === "goal") {
+      setScore((s) => {
+        const newScore = { ...s, home: Math.max(0, s.home - 1) };
+        updateGameScore(gameId, newScore);
+        return newScore;
+      });
+    }
+  }, [gameId, events]);
 
   // Stat badge counts — per field player for current half only
   const currentHalf = gameStatus === "1st-half" ? 1 : gameStatus === "2nd-half" ? 2 : null;
@@ -810,7 +810,7 @@ export default function LiveGameScreen() {
         onEndHalf={handleEndHalf}
         onStartSecondHalf={handleStartSecondHalf}
         onEndGame={handleEndGame}
-        onBack={() => navigate("/games")}
+        onBack={() => { window.location.hash = "#/games"; }}
       />
 
       {/* Resume banner */}
