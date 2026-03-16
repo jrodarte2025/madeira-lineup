@@ -852,8 +852,9 @@ export default function LiveGameScreen() {
             overflowY: "hidden",
             padding: "0 12px",
             gap: 4,
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(0,0,0,0.2)",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(0,0,0,0.25)",
             flexShrink: 0,
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
@@ -884,7 +885,7 @@ export default function LiveGameScreen() {
         </div>
 
         {/* Pitch area */}
-        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+        <div style={{ flex: 1, position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "4px 12px" }}>
           {/* "Start Game" overlay — shown when status is setup */}
           {gameStatus === "setup" && (
             <div
@@ -942,13 +943,14 @@ export default function LiveGameScreen() {
           )}
 
           {/* Pitch */}
-          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          <div style={{ position: "relative", width: "100%", maxWidth: 400, aspectRatio: "3 / 3.6", borderRadius: 8, overflow: "visible" }}>
             {/* Green pitch background */}
             <div
               style={{
                 position: "absolute",
                 inset: 0,
                 background: "linear-gradient(180deg, #2d5a27 0%, #1e3d1b 100%)",
+                borderRadius: 8,
               }}
             />
             <PitchSVG />

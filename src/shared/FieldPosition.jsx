@@ -86,7 +86,7 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
       {has && <div style={{
         fontSize: nameSize, fontWeight: 700, color: C.white,
         textAlign: "center", textShadow: "0 1px 4px rgba(0,0,0,0.9)",
-        maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
+        maxWidth: 72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: fontBase,
       }}>{abbreviateName(player.name)}</div>}
 
       {/* Minute display (Plan 05-03) */}

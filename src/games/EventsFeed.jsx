@@ -1,4 +1,5 @@
 import { C, fontBase, STAT_LABELS } from "../shared/constants";
+import { abbreviateName } from "../shared/utils";
 
 function describeEvent(event) {
   if (event.type === "stat") {
@@ -7,10 +8,10 @@ function describeEvent(event) {
   }
   if (event.type === "sub") {
     if (event.playerIn && event.playerOut) {
-      return `${event.playerIn.name} ON for ${event.playerOut.name}`;
+      return `${abbreviateName(event.playerIn.name)} ON for ${abbreviateName(event.playerOut.name)}`;
     }
-    if (event.playerIn) return `${event.playerIn.name} came on`;
-    if (event.playerOut) return `${event.playerOut.name} came off`;
+    if (event.playerIn) return `${abbreviateName(event.playerIn.name)} came on`;
+    if (event.playerOut) return `${abbreviateName(event.playerOut.name)} came off`;
   }
   return "Event";
 }
@@ -21,7 +22,7 @@ export default function EventsFeed({ events, onUndo }) {
   if (recentEvents.length === 0) return null;
 
   return (
-    <div style={{ padding: "2px 0", display: "flex", flexDirection: "column", gap: 1 }}>
+    <div style={{ padding: "2px 0", display: "flex", flexDirection: "column", gap: 1, flexShrink: 0 }}>
       {recentEvents.map((event) => (
         <div
           key={event.id}
