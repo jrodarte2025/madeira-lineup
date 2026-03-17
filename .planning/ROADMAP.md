@@ -132,12 +132,12 @@ Plans:
   1. The Stats tab shows a dashboard with every player's season totals (minutes, goals, assists, and other tracked stats) aggregated across all completed games
   2. Tapping a player on the dashboard opens their profile showing a game-by-game breakdown of their stats and minutes
   3. Finalizing a game immediately updates the season totals — the dashboard reflects the new game without any manual step
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 07-01: StatsTab season dashboard — denormalized totals from Firestore, sortable columns
-- [ ] 07-02: PlayerProfile view — game-by-game history, statUtils.aggregateAcrossGames()
-- [ ] 07-03: Season totals write on game finalize — SEASON-03 trigger, denormalized playerStats update
+- [ ] 07-01-PLAN.md — Season utility functions (TDD): getSeasonId, computeSeasonDeltas + loadSeasonStats/listSeasons firebase reads
+- [ ] 07-02-PLAN.md — StatsTab full season dashboard: sortable table, accordion player profiles, season selector
+- [ ] 07-03-PLAN.md — Wire handleEndGame to push season stats on game finalize
 
 ## Progress
 
