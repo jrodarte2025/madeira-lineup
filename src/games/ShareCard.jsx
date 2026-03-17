@@ -6,7 +6,7 @@ import { abbreviateName } from "../shared/utils";
 // SHARE CARD — off-screen DOM node for html-to-image capture
 // Uses system fonts only (not Google Fonts) to avoid iOS embedding issues.
 // =============================================
-const ShareCard = forwardRef(function ShareCard({ game, rows, shareUrl }, ref) {
+const ShareCard = forwardRef(function ShareCard({ game, rows }, ref) {
   if (!game) return null;
 
   const homeScore = game.score?.home ?? 0;
@@ -106,14 +106,6 @@ const ShareCard = forwardRef(function ShareCard({ game, rows, shareUrl }, ref) {
     margin: "0 0 4px 0",
   };
 
-  const urlStyle = {
-    color: orange,
-    fontSize: 11,
-    wordBreak: "break-all",
-    margin: 0,
-    opacity: 0.85,
-  };
-
   function formatDate(dateStr) {
     if (!dateStr) return "";
     const d = new Date(dateStr);
@@ -121,8 +113,6 @@ const ShareCard = forwardRef(function ShareCard({ game, rows, shareUrl }, ref) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   }
 
-  // Show just the domain — the full URL is too long for an image
-  const displayDomain = "madeira-lineup.vercel.app";
 
   return (
     <div ref={ref} style={cardStyle}>
@@ -156,8 +146,9 @@ const ShareCard = forwardRef(function ShareCard({ game, rows, shareUrl }, ref) {
       )}
 
       {/* Footer */}
-      <p style={footerTextStyle}>Tap for full box score</p>
-      <p style={urlStyle}>{displayDomain}</p>
+      <p style={{ ...footerTextStyle, fontStyle: "normal", fontWeight: 600, fontSize: 13, color: orange }}>
+        Check out the full box score
+      </p>
     </div>
   );
 });

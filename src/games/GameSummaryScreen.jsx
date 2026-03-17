@@ -313,7 +313,7 @@ export default function GameSummaryScreen() {
       {/* Off-screen ShareCard for image export */}
       {!isPublic && (
         <div style={{ position: "absolute", left: -9999, top: -9999, pointerEvents: "none" }}>
-          <ShareCard ref={cardRef} game={game} rows={rows} shareUrl={shareUrl} />
+          <ShareCard ref={cardRef} game={game} rows={rows} />
         </div>
       )}
 
