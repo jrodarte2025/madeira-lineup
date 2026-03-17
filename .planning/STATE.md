@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: executing
-stopped_at: Phase 7 context gathered
-last_updated: "2026-03-17T02:53:36.157Z"
-last_activity: "2026-03-16 — Completed Phase 6 Plan 02: GameSummaryScreen, ShareCard, exports verified"
+stopped_at: "Completed Phase 7 Plan 01: Season utility functions"
+last_updated: "2026-03-16T23:20:00.000Z"
+last_activity: "2026-03-16 — Completed Phase 7 Plan 01: getSeasonId, computeSeasonDeltas, loadSeasonStats, listSeasons"
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 15
-  completed_plans: 15
-  percent: 96
+  total_plans: 18
+  completed_plans: 16
+  percent: 89
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 
 ## Current Position
 
-Phase: 6 of 7 (Post-Game Summary + Exports)
-Plan: 2 of 3 in current phase
-Status: In progress — Plan 02 complete, Plan 03 (season stats aggregation or wrap-up) remains
-Last activity: 2026-03-16 — Completed Phase 6 Plan 02: GameSummaryScreen, ShareCard, exports verified
+Phase: 7 of 7 (Season Dashboard + Player Profiles)
+Plan: 1 of 3 in current phase
+Status: In progress — Plan 01 complete, Plans 02-03 remain
+Last activity: 2026-03-16 — Completed Phase 7 Plan 01: getSeasonId, computeSeasonDeltas, loadSeasonStats, listSeasons
 
-Progress: [█████████░] 96% (plans: 15/15 complete — phase 6 plan 02 done)
+Progress: [████████░░] 89% (plans: 16/18 complete — phase 7 plan 01 done)
 
 ## Accumulated Context
 
@@ -78,6 +78,9 @@ v2.0 decisions (ad-hoc, post-05):
 - [Phase 06-02]: Public mode detected from ?public=true in window.location.hash; same component, isPublic prop, no separate route needed
 - [Phase 06-02]: Share card shows domain-only URL for visual cleanliness; full URL included in navigator.share payload
 - [Phase 06-02]: Minutes column and Back button hidden on public view; CSV export suppressed on public view
+- [Phase 07-01]: Season ID format is {period}-{year} where period is 'spring' (Jan-Jun) or 'fall' (Jul-Dec)
+- [Phase 07-01]: UTC-safe date parsing uses toISOString().slice() for year/month — avoids local timezone offset on date-only strings
+- [Phase 07-01]: computeSeasonDeltas iterates game.lineup.roster to exclude non-roster stat events; skips players with 0 minutes AND 0 stats
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None — html-to-image iOS font concern resolved by using system fonts in ShareC
 
 ## Session Continuity
 
-Last session: 2026-03-17T02:53:36.154Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/07-season-dashboard-player-profiles/07-CONTEXT.md
+Last session: 2026-03-16T23:20:00.000Z
+Stopped at: "Completed Phase 7 Plan 01: Season utility functions"
+Resume file: .planning/phases/07-season-dashboard-player-profiles/07-01-SUMMARY.md
