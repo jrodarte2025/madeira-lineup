@@ -67,7 +67,7 @@ Plans:
 
 - [x] **Phase 4: App Shell + Data Foundation** - Extract shared components, add tab navigation, lock Firestore schema before any game code (completed 2026-03-16)
 - [ ] **Phase 5: Live Game** - Complete game-day loop: game creation, drift-proof timer, substitutions, minute tracking, stat logging, events feed
-- [ ] **Phase 6: Post-Game Summary + Exports** - Stats table, CSV download, shareable link, and image export card
+- [x] **Phase 6: Post-Game Summary + Exports** - Stats table, CSV download, shareable link, and image export card (completed 2026-03-17)
 - [ ] **Phase 7: Season Dashboard + Player Profiles** - Running tallies across all games and per-player season history
 
 ## Phase Details
@@ -118,7 +118,7 @@ Plans:
   2. Tapping Export CSV downloads a file with one row per player and columns for each stat type
   3. Tapping Share Link copies a URL that anyone can open to view the read-only game summary
   4. Tapping Share Image generates and downloads (or shares via the system share sheet) a summary card suitable for group chat
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 06-01-PLAN.md — Summary utility functions (TDD), finalizeGame firebase function, route wiring, handleEndGame interval persistence fix, html-to-image install
@@ -152,5 +152,5 @@ v2.0: 4 → 5 → 6 → 7
 | 3. Mobile UX Overhaul | v1.0 | 2/2 | Complete | 2026-03-16 |
 | 4. App Shell + Data Foundation | 3/3 | Complete   | 2026-03-16 | - |
 | 5. Live Game | 4/5 | In Progress|  | - |
-| 6. Post-Game Summary + Exports | 1/2 | In Progress|  | - |
+| 6. Post-Game Summary + Exports | 2/2 | Complete   | 2026-03-17 | - |
 | 7. Season Dashboard + Player Profiles | v2.0 | 0/3 | Not started | - |

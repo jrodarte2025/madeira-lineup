@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: planning
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-17T00:44:02.557Z"
-last_activity: 2026-03-16 — Completed Phase 5 + game screen design polish
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-03-16T00:00:00.000Z"
+last_activity: 2026-03-16 — Completed Phase 6 Plan 02: GameSummaryScreen, ShareCard, and all export actions
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 15
-  completed_plans: 14
-  percent: 92
+  completed_plans: 15
+  percent: 96
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 6 of 7 (Post-Game Summary + Exports)
-Plan: 0 of 3 in current phase (not yet planned)
-Status: Ready to plan
-Last activity: 2026-03-16 — Completed Phase 5 + game screen design polish
+Plan: 2 of 3 in current phase
+Status: In progress — Plan 02 complete, Plan 03 (season stats aggregation or wrap-up) remains
+Last activity: 2026-03-16 — Completed Phase 6 Plan 02: GameSummaryScreen, ShareCard, exports verified
 
-Progress: [█████████░] 92% (phase-level: 5/7)
+Progress: [█████████░] 96% (plans: 15/15 complete — phase 6 plan 02 done)
 
 ## Accumulated Context
 
@@ -74,6 +74,10 @@ v2.0 decisions (ad-hoc, post-05):
 - Game screen content scrollable so stat bar and events never clip off-screen
 - [Phase 06-01]: handleEndGame computes intervals inline before async finalizeGame to avoid setState race condition
 - [Phase 06-01]: finalizeGame writes playerIntervals + halfIntervals + status=completed in single updateDoc for atomic persistence
+- [Phase 06-02]: ShareCard uses system fonts only (not DM Sans/Outfit) to avoid iOS html-to-image font embedding failures
+- [Phase 06-02]: Public mode detected from ?public=true in window.location.hash; same component, isPublic prop, no separate route needed
+- [Phase 06-02]: Share card shows domain-only URL for visual cleanliness; full URL included in navigator.share payload
+- [Phase 06-02]: Minutes column and Back button hidden on public view; CSV export suppressed on public view
 
 ### Pending Todos
 
@@ -81,10 +85,10 @@ None.
 
 ### Blockers/Concerns
 
-- [Phase 6] html-to-image inline font behavior on iOS needs a quick spike before committing to implementation
+None — html-to-image iOS font concern resolved by using system fonts in ShareCard.
 
 ## Session Continuity
 
-Last session: 2026-03-17T00:44:02.555Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-16T00:00:00.000Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
