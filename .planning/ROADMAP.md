@@ -118,12 +118,11 @@ Plans:
   2. Tapping Export CSV downloads a file with one row per player and columns for each stat type
   3. Tapping Share Link copies a URL that anyone can open to view the read-only game summary
   4. Tapping Share Image generates and downloads (or shares via the system share sheet) a summary card suitable for group chat
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 06-01: PostGameSummary component — stats table, per-player minutes, score
-- [ ] 06-02: CSV export (native Blob pattern) + shareable link (public Firestore read + URL route)
-- [ ] 06-03: Image export via html-to-image — summary card, Web Share API with fallback
+- [ ] 06-01-PLAN.md — Summary utility functions (TDD), finalizeGame firebase function, route wiring, handleEndGame interval persistence fix, html-to-image install
+- [ ] 06-02-PLAN.md — GameSummaryScreen with stats table, CSV export, share link, ShareCard image export, public read-only mode
 
 ### Phase 7: Season Dashboard + Player Profiles
 **Goal**: Coaches can see how every player has performed across all games of the season, with per-player drill-down
@@ -153,5 +152,5 @@ v2.0: 4 → 5 → 6 → 7
 | 3. Mobile UX Overhaul | v1.0 | 2/2 | Complete | 2026-03-16 |
 | 4. App Shell + Data Foundation | 3/3 | Complete   | 2026-03-16 | - |
 | 5. Live Game | 4/5 | In Progress|  | - |
-| 6. Post-Game Summary + Exports | v2.0 | 0/3 | Not started | - |
+| 6. Post-Game Summary + Exports | v2.0 | 0/2 | Not started | - |
 | 7. Season Dashboard + Player Profiles | v2.0 | 0/3 | Not started | - |
