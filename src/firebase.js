@@ -227,8 +227,37 @@ export async function deleteGame(gameId) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Loads the season stats document for a given season.
+ * @param {string} season  Season ID, e.g. "spring-2026"
+ * @returns {Promise<Object|null>} Document data if exists, null if not found or on error.
+ */
+export async function loadSeasonStats(season) {
+  try {
+    const snap = await getDoc(doc(db, "seasonStats", String(season)));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.warn("Failed to load season stats:", err);
+    return null;
+  }
+}
+
+/**
+ * Returns all season IDs sorted reverse-chronologically.
+ * @returns {Promise<string[]>} Array of season IDs (e.g. ["spring-2026", "fall-2025"]), or [] on error.
+ */
+export async function listSeasons() {
+  try {
+    const snap = await getDocs(collection(db, "seasonStats"));
+    return snap.docs.map((d) => d.id).sort().reverse();
+  } catch (err) {
+    console.warn("Failed to list seasons:", err);
+    return [];
+  }
+}
+
+/**
  * Atomically increments season stat totals for a player using dotted-path merge.
- * @param {string|number} season  Year string, e.g. "2026"
+ * @param {string} season  Season ID, e.g. "spring-2026"
  * @param {string} playerId
  * @param {{ [statKey: string]: number }} statDeltas  e.g. { goals: 1, minutes: 45, gamesPlayed: 1 }
  * @returns {Promise<boolean>}
