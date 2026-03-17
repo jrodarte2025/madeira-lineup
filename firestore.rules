@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Practice planner collections — open read/write (PIN auth is client-side)
+    match /drills/{drillId} {
+      allow read, write: if true;
+    }
+
+    match /categories/{categoryId} {
+      allow read, write: if true;
+    }
+
+    match /sessions/{sessionId} {
+      allow read, write: if true;
+    }
+
+    // Config collection (PIN hash, settings)
+    match /config/{docId} {
+      allow read, write: if true;
+    }
+
+    // Lineup app collections
+    match /lineups/{lineupId} {
+      allow read, write: if true;
+    }
+
+    match /games/{gameId} {
+      allow read, write: if true;
+    }
+
+    // Season stats (aggregated per-season player totals)
+    match /seasonStats/{seasonId} {
+      allow read, write: if true;
+    }
+  }
+}
