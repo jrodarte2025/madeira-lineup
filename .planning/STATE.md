@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: executing
-stopped_at: "Completed Phase 7 Plan 01: Season utility functions"
-last_updated: "2026-03-16T23:20:00.000Z"
+stopped_at: "Completed Phase 7 Plan 03: Season stats write pipeline"
+last_updated: "2026-03-17T03:16:27.317Z"
 last_activity: "2026-03-16 — Completed Phase 7 Plan 01: getSeasonId, computeSeasonDeltas, loadSeasonStats, listSeasons"
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 18
-  completed_plans: 16
+  completed_plans: 17
   percent: 89
 ---
 
@@ -81,6 +81,8 @@ v2.0 decisions (ad-hoc, post-05):
 - [Phase 07-01]: Season ID format is {period}-{year} where period is 'spring' (Jan-Jun) or 'fall' (Jul-Dec)
 - [Phase 07-01]: UTC-safe date parsing uses toISOString().slice() for year/month — avoids local timezone offset on date-only strings
 - [Phase 07-01]: computeSeasonDeltas iterates game.lineup.roster to exclude non-roster stat events; skips players with 0 minutes AND 0 stats
+- [Phase 07-season-dashboard-player-profiles]: Store game date and lineup as gameMeta in localStorage to support season stats computation after crash recovery
+- [Phase 07-season-dashboard-player-profiles]: Season stats write is fire-and-forget after finalizeGame -- navigation does not wait for season writes
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ None — html-to-image iOS font concern resolved by using system fonts in ShareC
 
 ## Session Continuity
 
-Last session: 2026-03-16T23:20:00.000Z
-Stopped at: "Completed Phase 7 Plan 01: Season utility functions"
-Resume file: .planning/phases/07-season-dashboard-player-profiles/07-01-SUMMARY.md
+Last session: 2026-03-17T03:16:27.315Z
+Stopped at: Completed Phase 7 Plan 03: Season stats write pipeline
+Resume file: None
