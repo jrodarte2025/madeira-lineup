@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
-status: executing
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-03-16T19:38:22.050Z"
-last_activity: 2026-03-16 — Completed 05-03 substitutions + minute tracking
+status: planning
+stopped_at: Phase 6 context gathered
+last_updated: "2026-03-17T00:18:28.926Z"
+last_activity: 2026-03-16 — Completed Phase 5 + game screen design polish
 progress:
   total_phases: 7
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 92
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** Coaches can manage lineups, track live games, and review player stats from phone or desktop
-**Current focus:** v2.0 — Phase 5: Live Game Tracking & Stats
+**Current focus:** v2.0 — Phase 6: Post-Game Summary + Exports
 
 ## Current Position
 
-Phase: 5 of 7 (Live Game Tracking & Stats)
-Plan: 3 of 5 in current phase (plan 03 complete)
-Status: In progress
-Last activity: 2026-03-16 — Completed 05-03 substitutions + minute tracking
+Phase: 6 of 7 (Post-Game Summary + Exports)
+Plan: 0 of 3 in current phase (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-16 — Completed Phase 5 + game screen design polish
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 92% (phase-level: 5/7)
 
 ## Accumulated Context
 
@@ -66,17 +66,23 @@ v2.0 decisions (04-03):
 - [Phase 05-live-game]: halfIntervals + playerIntervals built in 05-02 so Plans 05-03/05-04 can consume without refactor
 - [Phase 05-live-game]: calcMinutes uses interval intersection math; displayMinute state avoids 60fps recalc; handleSubstitution captures outgoingPlayer before setState
 
+v2.0 decisions (ad-hoc, post-05):
+- Lineup planner simplified to single lineup (no 1st/2nd half) — substitutions happen in-game
+- Game header uses centered scoreboard: Home [clock] Away, with clock between scores
+- StatBar wraps buttons instead of horizontal scroll — all MID stats visible
+- Home score orange, away score white for instant visual distinction
+- Game screen content scrollable so stat bar and events never clip off-screen
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- [Phase 5] Screen Wake Lock has a known WebKit bug (#254545) on installed iOS PWAs — test on physical device first thing in Phase 5
 - [Phase 6] html-to-image inline font behavior on iOS needs a quick spike before committing to implementation
 
 ## Session Continuity
 
-Last session: 2026-03-16T19:38:22.048Z
-Stopped at: Completed 05-03-PLAN.md
-Resume file: None
+Last session: 2026-03-17T00:18:28.924Z
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-post-game-summary-exports/06-CONTEXT.md
