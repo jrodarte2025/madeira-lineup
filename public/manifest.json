@@ -1,6 +1,6 @@
 {
-  "name": "Madeira FC — Lineup Planner",
-  "short_name": "Lineup Planner",
+  "name": "Madeira FC Game Hub",
+  "short_name": "Game Hub",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a1128",
