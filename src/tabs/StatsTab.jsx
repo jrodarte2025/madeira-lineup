@@ -166,7 +166,11 @@ export default function StatsTab() {
   // Sort rows
   tableRows.sort((a, b) => {
     let av, bv;
-    if (sortKey === "totalEvents") {
+    if (sortKey === "player") {
+      av = a.player.name;
+      bv = b.player.name;
+      return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    } else if (sortKey === "totalEvents") {
       av = a.totalEvents;
       bv = b.totalEvents;
     } else if (sortKey === "minutes") {
@@ -372,8 +376,11 @@ export default function StatsTab() {
           <table style={tableStyle}>
             <thead>
               <tr>
-                <th style={sortKey === "player" ? thActiveStyle : thBaseStyle}>
-                  Player
+                <th
+                  style={sortKey === "player" ? thActiveStyle : thBaseStyle}
+                  onClick={() => handleSort("player")}
+                >
+                  Player{sortIndicator("player")}
                 </th>
                 <th
                   style={sortKey === "gamesPlayed" ? thActiveStyle : { ...thBaseStyle, textAlign: "center" }}
