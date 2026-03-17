@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
-import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame } from "../firebase";
+import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame, updateSeasonStats } from "../firebase";
+import { getSeasonId, computeSeasonDeltas } from "../shared/seasonUtils";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
 import { calcMinutes, abbreviateName, getPositionGroup } from "../shared/utils";
 import PitchSVG from "../shared/PitchSVG";
@@ -43,6 +44,7 @@ const clearGameStorage = () => {
     "playerIntervals",
     "score",
     "opponent",
+    "gameMeta",
   ];
   keys.forEach((k) => {
     try {
@@ -130,6 +132,7 @@ export default function LiveGameScreen() {
   const navigate = useNavigate();
 
   // --- Game state ---
+  const [game, setGame] = useState(null); // stores { date, lineup } for season stats computation
   const [gameStatus, setGameStatus] = useState("setup");
   const [score, setScore] = useState({ home: 0, away: 0 });
   const [opponent, setOpponent] = useState("");
@@ -256,7 +259,9 @@ export default function LiveGameScreen() {
       const storedHalfIntervals = loadStored("halfIntervals", []);
       const storedPlayerIntervals = loadStored("playerIntervals", {});
       const storedHalfStartTs = loadStored("halfStartTs", null);
+      const storedGameMeta = loadStored("gameMeta", null);
 
+      setGame(storedGameMeta);
       setGameStatus(status);
       setScore(storedScore);
       setOpponent(storedOpponent);
@@ -287,7 +292,7 @@ export default function LiveGameScreen() {
           return;
         }
 
-        const { opponent: opp, score: sc, status, lineup, halfStartTs: firestoreHalfStartTs } = data;
+        const { opponent: opp, score: sc, status, lineup, date, halfStartTs: firestoreHalfStartTs } = data;
         const resolvedStatus = status || "setup";
         const resolvedScore = sc || { home: 0, away: 0 };
 
@@ -321,6 +326,10 @@ export default function LiveGameScreen() {
             (p) => !assignedIds.includes(p.id)
           );
         }
+
+        // Store game metadata needed for season stats computation
+        const gameMeta = { date: date || null, lineup: lineup || null };
+        setGame(gameMeta);
 
         setGameStatus(resolvedStatus);
         setScore(resolvedScore);
@@ -356,6 +365,7 @@ export default function LiveGameScreen() {
         saveStored("halfIntervals", resolvedHalfIntervals);
         saveStored("playerIntervals", resolvedPlayerIntervals);
         saveStored("halfStartTs", resolvedHalfStartTs);
+        saveStored("gameMeta", gameMeta);
 
         // Also restore events from Firestore if available
         if (data.events && data.events.length > 0) {
@@ -533,6 +543,19 @@ export default function LiveGameScreen() {
       halfIntervals: closedHalfIntervals,
     });
 
+    // Push season stats (fire-and-forget — no await needed)
+    const seasonId = getSeasonId(game?.date);
+    if (seasonId) {
+      const deltas = computeSeasonDeltas(
+        { ...game, events },
+        closedPlayerIntervals,
+        closedHalfIntervals
+      );
+      for (const [pid, statDeltas] of Object.entries(deltas)) {
+        updateSeasonStats(seasonId, pid, statDeltas);
+      }
+    }
+
     // Update React state to reflect closed intervals
     setHalfIntervals(closedHalfIntervals);
     setPlayerIntervals(closedPlayerIntervals);
@@ -544,7 +567,7 @@ export default function LiveGameScreen() {
     // Clear localStorage and navigate to summary
     clearGameStorage();
     navigate(`/games/${gameId}/summary`);
-  }, [gameId, halfIntervals, playerIntervals, stopTimer, releaseWakeLock, navigate]);
+  }, [gameId, game, events, halfIntervals, playerIntervals, stopTimer, releaseWakeLock, navigate]);
 
   const handleScoreChange = useCallback(
     (side, delta) => {
