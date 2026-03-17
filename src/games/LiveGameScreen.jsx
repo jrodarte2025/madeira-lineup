@@ -339,6 +339,12 @@ export default function LiveGameScreen() {
           acquireWakeLock();
         }
 
+        // Restore intervals from Firestore if available (e.g. game in progress)
+        const resolvedHalfIntervals = data.halfIntervals || [];
+        const resolvedPlayerIntervals = data.playerIntervals || {};
+        setHalfIntervals(resolvedHalfIntervals);
+        setPlayerIntervals(resolvedPlayerIntervals);
+
         // Save to localStorage immediately so we can recover on reload
         saveStored("activeGameId", gameId);
         saveStored("gameStatus", resolvedStatus);
@@ -347,8 +353,8 @@ export default function LiveGameScreen() {
         saveStored("fieldPositions", resolvedFieldPositions);
         saveStored("benchPlayers", resolvedBenchPlayers);
         saveStored("events", data.events || []);
-        saveStored("halfIntervals", []);
-        saveStored("playerIntervals", {});
+        saveStored("halfIntervals", resolvedHalfIntervals);
+        saveStored("playerIntervals", resolvedPlayerIntervals);
         saveStored("halfStartTs", resolvedHalfStartTs);
 
         // Also restore events from Firestore if available
@@ -373,6 +379,49 @@ export default function LiveGameScreen() {
   useEffect(() => { saveStored("halfIntervals", halfIntervals); }, [halfIntervals]);
   useEffect(() => { saveStored("playerIntervals", playerIntervals); }, [playerIntervals]);
   useEffect(() => { saveStored("halfStartTs", halfStartTs); }, [halfStartTs]);
+
+  // ---------------------------------------------------------------------------
+  // Safety net: open intervals for on-field players that don't have one
+  // Covers edge cases: game started with empty field, app reloaded losing
+  // intervals, or players placed on field without going through sub handler.
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const isActive = gameStatus === "1st-half" || gameStatus === "2nd-half";
+    if (!isActive) return;
+
+    const needsUpdate = [];
+    fieldPositions.forEach(({ player }) => {
+      if (!player) return;
+      const intervals = playerIntervals[player.id] || [];
+      const hasOpenInterval = intervals.length > 0 && intervals[intervals.length - 1].outAt === null;
+      if (!hasOpenInterval) {
+        needsUpdate.push(player.id);
+      }
+    });
+
+    if (needsUpdate.length === 0) return;
+
+    const now = Date.now();
+    setPlayerIntervals((prev) => {
+      const updated = { ...prev };
+      needsUpdate.forEach((pid) => {
+        const existing = updated[pid] || [];
+        updated[pid] = [...existing, { inAt: now, outAt: null }];
+      });
+      return updated;
+    });
+  }, [gameStatus, fieldPositions, playerIntervals]);
+
+  // Ensure halfIntervals has an open interval during active halves
+  useEffect(() => {
+    const isActive = gameStatus === "1st-half" || gameStatus === "2nd-half";
+    if (!isActive) return;
+    const hasOpenHalf = halfIntervals.length > 0 && halfIntervals[halfIntervals.length - 1].endAt === null;
+    if (!hasOpenHalf) {
+      const now = Date.now();
+      setHalfIntervals((prev) => [...prev, { startAt: now, endAt: null }]);
+    }
+  }, [gameStatus, halfIntervals]);
 
   // ---------------------------------------------------------------------------
   // State machine transitions
