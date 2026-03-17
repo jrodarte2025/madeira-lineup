@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { toBlob } from "html-to-image";
 import { C, fontBase, fontDisplay, STAT_LABELS } from "../shared/constants";
 import { abbreviateName } from "../shared/utils";
-import { buildSummaryRows, buildCSV } from "../shared/summaryUtils";
+import { buildSummaryRows } from "../shared/summaryUtils";
 import { loadGame } from "../firebase";
 import ShareCard from "./ShareCard";
 
@@ -51,24 +51,10 @@ export default function GameSummaryScreen() {
   const summary = game ? buildSummaryRows(game) : null;
   const { rows = [], activeCols = [], totals = { mins: 0, stats: {} } } = summary || {};
 
-  // Build share URL
-  const shareUrl = `${window.location.origin}${window.location.pathname}#/games/${gameId}/summary`;
+  // Build share URL — always include ?public=true so shared views hide coach-only data
+  const shareUrl = `${window.location.origin}${window.location.pathname}#/games/${gameId}/summary?public=true`;
 
   // ---- Handlers ----
-  function handleExportCSV() {
-    if (!game) return;
-    const csv = buildCSV(rows, activeCols, game);
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    const opponentSlug = (game.opponent || "opponent").toLowerCase().replace(/\s+/g, "-");
-    const dateSlug = (game.date || "").replace(/\//g, "-");
-    a.href = url;
-    a.download = `madeira-vs-${opponentSlug}-${dateSlug}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   async function handleShareLink() {
     if (!game) return;
     if (navigator.share) {
@@ -272,9 +258,6 @@ export default function GameSummaryScreen() {
       {/* Export buttons — coach mode only */}
       {!isPublic && (
         <div style={exportRowStyle}>
-          <button style={exportBtnStyle} onClick={handleExportCSV}>
-            Export CSV
-          </button>
           <button style={exportBtnStyle} onClick={handleShareLink}>
             Share Link
           </button>
@@ -290,7 +273,7 @@ export default function GameSummaryScreen() {
           <thead>
             <tr>
               <th style={thStyle}>Player</th>
-              <th style={{ ...thStyle, textAlign: "center" }}>MIN</th>
+              {!isPublic && <th style={{ ...thStyle, textAlign: "center" }}>MIN</th>}
               {activeCols.map((col) => (
                 <th key={col} style={{ ...thStyle, textAlign: "center" }}>
                   {STAT_LABELS[col] || col}
@@ -304,7 +287,7 @@ export default function GameSummaryScreen() {
               return (
                 <tr key={row.player.id}>
                   <td style={cellStyle}>{abbreviateName(row.player.name)}</td>
-                  <td style={{ ...cellStyle, textAlign: "center" }}>{row.mins}</td>
+                  {!isPublic && <td style={{ ...cellStyle, textAlign: "center" }}>{row.mins}</td>}
                   {activeCols.map((col) => (
                     <td key={col} style={{ ...cellStyle, textAlign: "center" }}>
                       {row.stats[col] || "–"}
@@ -316,7 +299,7 @@ export default function GameSummaryScreen() {
             {/* Team totals row */}
             <tr>
               <td style={tdTotalsStyle}>TEAM</td>
-              <td style={{ ...tdTotalsStyle, textAlign: "center" }}>{totals.mins}</td>
+              {!isPublic && <td style={{ ...tdTotalsStyle, textAlign: "center" }}>{totals.mins}</td>}
               {activeCols.map((col) => (
                 <td key={col} style={{ ...tdTotalsStyle, textAlign: "center" }}>
                   {totals.stats[col] || 0}
