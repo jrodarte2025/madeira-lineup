@@ -4,6 +4,7 @@ import MadeiraLineupPlanner from "./MadeiraLineupPlanner.jsx";
 import GamesTab from "./tabs/GamesTab.jsx";
 import StatsTab from "./tabs/StatsTab.jsx";
 import LiveGameScreen from "./games/LiveGameScreen.jsx";
+import GameSummaryScreen from "./games/GameSummaryScreen.jsx";
 
 // ---------------------------------------------------------------------------
 // TabBar
@@ -81,6 +82,7 @@ function AppShell() {
         <Route path="/" element={<Navigate to="/lineup" replace />} />
         <Route path="/lineup" element={<MadeiraLineupPlanner />} />
         <Route path="/games" element={<GamesTab />} />
+        <Route path="/games/:id/summary" element={<GameSummaryScreen />} />
         <Route path="/games/:id" element={<LiveGameScreen />} />
         <Route path="/stats" element={<StatsTab />} />
       </Routes>

@@ -191,6 +191,27 @@ export async function replaceGameEvents(gameId, events) {
   }
 }
 
+/**
+ * Finalizes a game: writes playerIntervals, halfIntervals, and sets status to "completed"
+ * in a single atomic updateDoc call.
+ * @param {string} gameId
+ * @param {{ playerIntervals: Object, halfIntervals: Array }} param1
+ * @returns {Promise<boolean>}
+ */
+export async function finalizeGame(gameId, { playerIntervals, halfIntervals }) {
+  try {
+    await updateDoc(doc(db, "games", gameId), {
+      playerIntervals,
+      halfIntervals,
+      status: "completed",
+    });
+    return true;
+  } catch (err) {
+    console.error("Failed to finalize game:", err);
+    return false;
+  }
+}
+
 export async function deleteGame(gameId) {
   try {
     await deleteDoc(doc(db, "games", gameId));

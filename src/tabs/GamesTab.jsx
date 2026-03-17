@@ -381,7 +381,7 @@ export default function GamesTab() {
           <GameCard
             key={game.id}
             game={game}
-            onClick={() => navigate(`/games/${game.id}`)}
+            onClick={() => navigate(game.status === "completed" ? `/games/${game.id}/summary` : `/games/${game.id}`)}
             onDelete={handleDelete}
           />
         ))

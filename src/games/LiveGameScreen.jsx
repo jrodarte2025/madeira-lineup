@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useParams } from "react-router";
-import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents } from "../firebase";
+import { useParams, useNavigate } from "react-router";
+import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame } from "../firebase";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
 import { calcMinutes, abbreviateName, getPositionGroup } from "../shared/utils";
 import PitchSVG from "../shared/PitchSVG";
@@ -127,6 +127,7 @@ function BenchChip({ player, minuteCount, onClick, isSubSelected }) {
 // ---------------------------------------------------------------------------
 export default function LiveGameScreen() {
   const { id: gameId } = useParams();
+  const navigate = useNavigate();
 
   // --- Game state ---
   const [gameStatus, setGameStatus] = useState("setup");
@@ -458,38 +459,43 @@ export default function LiveGameScreen() {
     updateGameStatus(gameId, "2nd-half", now);
   }, [gameId, fieldPositions, startHalf, acquireWakeLock]);
 
-  const handleEndGame = useCallback(() => {
+  const handleEndGame = useCallback(async () => {
     const now = Date.now();
     stopTimer();
     releaseWakeLock();
 
-    // Close current half interval
-    setHalfIntervals((prev) =>
-      prev.map((interval, i) =>
-        i === prev.length - 1 ? { ...interval, endAt: now } : interval
-      )
+    // Compute closed intervals inline (setState is async and won't flush before we need the values)
+    const closedHalfIntervals = halfIntervals.map((interval, i) =>
+      i === halfIntervals.length - 1 ? { ...interval, endAt: now } : interval
     );
 
-    // Close all active player intervals
-    setPlayerIntervals((prev) => {
-      const updated = { ...prev };
-      Object.keys(updated).forEach((pid) => {
-        updated[pid] = updated[pid].map((interval, i) =>
-          i === updated[pid].length - 1 && interval.outAt === null
-            ? { ...interval, outAt: now }
-            : interval
-        );
-      });
-      return updated;
+    const closedPlayerIntervals = { ...playerIntervals };
+    Object.keys(closedPlayerIntervals).forEach((pid) => {
+      closedPlayerIntervals[pid] = closedPlayerIntervals[pid].map((interval, i) =>
+        i === closedPlayerIntervals[pid].length - 1 && interval.outAt === null
+          ? { ...interval, outAt: now }
+          : interval
+      );
     });
 
+    // Persist intervals + status to Firestore atomically BEFORE clearing localStorage
+    await finalizeGame(gameId, {
+      playerIntervals: closedPlayerIntervals,
+      halfIntervals: closedHalfIntervals,
+    });
+
+    // Update React state to reflect closed intervals
+    setHalfIntervals(closedHalfIntervals);
+    setPlayerIntervals(closedPlayerIntervals);
     setGameStatus("completed");
     setSelectedPlayerId(null);
     setSubSource(null);
     setDisplaySeconds(0);
-    updateGameStatus(gameId, "completed");
+
+    // Clear localStorage and navigate to summary
     clearGameStorage();
-  }, [gameId, stopTimer, releaseWakeLock]);
+    navigate(`/games/${gameId}/summary`);
+  }, [gameId, halfIntervals, playerIntervals, stopTimer, releaseWakeLock, navigate]);
 
   const handleScoreChange = useCallback(
     (side, delta) => {
