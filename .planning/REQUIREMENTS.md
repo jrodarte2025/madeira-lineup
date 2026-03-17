@@ -65,11 +65,11 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 ### Post-Game
 
-- [ ] **POST-01**: After second half auto-stops, game summary is produced showing players x stats table with totals
-- [ ] **POST-02**: Game summary includes per-player minutes played
-- [ ] **POST-03**: CSV export button downloads game stats as a file
-- [ ] **POST-04**: Shareable link allows anyone to view the game summary
-- [ ] **POST-05**: Image export generates a summary card for sharing in group chats
+- [x] **POST-01**: After second half auto-stops, game summary is produced showing players x stats table with totals
+- [x] **POST-02**: Game summary includes per-player minutes played
+- [x] **POST-03**: CSV export button downloads game stats as a file
+- [x] **POST-04**: Shareable link allows anyone to view the game summary
+- [x] **POST-05**: Image export generates a summary card for sharing in group chats
 
 ### Season & Profiles
 
@@ -132,11 +132,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STAT-04 | Phase 5 | Pending |
 | STAT-05 | Phase 5 | Pending |
 | STAT-06 | Phase 5 | Complete |
-| POST-01 | Phase 6 | Pending |
-| POST-02 | Phase 6 | Pending |
-| POST-03 | Phase 6 | Pending |
-| POST-04 | Phase 6 | Pending |
-| POST-05 | Phase 6 | Pending |
+| POST-01 | Phase 6 | Complete |
+| POST-02 | Phase 6 | Complete |
+| POST-03 | Phase 6 | Complete |
+| POST-04 | Phase 6 | Complete |
+| POST-05 | Phase 6 | Complete |
 | SEASON-01 | Phase 7 | Pending |
 | SEASON-02 | Phase 7 | Pending |
 | SEASON-03 | Phase 7 | Pending |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: planning
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-17T00:18:28.926Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-17T00:44:02.557Z"
 last_activity: 2026-03-16 — Completed Phase 5 + game screen design polish
 progress:
   total_phases: 7
   completed_phases: 5
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 15
+  completed_plans: 14
   percent: 92
 ---
 
@@ -72,6 +72,8 @@ v2.0 decisions (ad-hoc, post-05):
 - StatBar wraps buttons instead of horizontal scroll — all MID stats visible
 - Home score orange, away score white for instant visual distinction
 - Game screen content scrollable so stat bar and events never clip off-screen
+- [Phase 06-01]: handleEndGame computes intervals inline before async finalizeGame to avoid setState race condition
+- [Phase 06-01]: finalizeGame writes playerIntervals + halfIntervals + status=completed in single updateDoc for atomic persistence
 
 ### Pending Todos
 
@@ -83,6 +85,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T00:18:28.924Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-post-game-summary-exports/06-CONTEXT.md
+Last session: 2026-03-17T00:44:02.555Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: None
