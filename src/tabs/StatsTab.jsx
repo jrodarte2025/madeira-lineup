@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay, STAT_LABELS, INITIAL_ROSTER } from "../shared/constants";
 import { getSeasonId } from "../shared/seasonUtils";
 import { buildSummaryRows, STAT_ORDER } from "../shared/summaryUtils";
-import { loadSeasonStats, listSeasons, listGames, backfillSeasonStats } from "../firebase";
+import { loadSeasonStats, listSeasons, listGames } from "../firebase";
 import { computeSeasonDeltas } from "../shared/seasonUtils";
 
 // =============================================
@@ -51,14 +51,36 @@ export default function StatsTab() {
         listSeasons(),
       ]);
       if (cancelled) return;
-      // Backfill: if no season data exists, rebuild from completed games
+      // Backfill: if no Firestore season data, compute client-side from completed games
       if (!data) {
-        const count = await backfillSeasonStats(getSeasonId, computeSeasonDeltas);
-        if (count > 0 && !cancelled) {
-          [data, fetchedSeasons] = await Promise.all([
-            loadSeasonStats(defaultSeason),
-            listSeasons(),
-          ]);
+        try {
+          const allGames = await listGames();
+          const completed = allGames.filter((g) => g.status === "completed");
+          const agg = {};
+          const seenSeasons = new Set();
+          for (const game of completed) {
+            const sid = getSeasonId(game.date);
+            if (!sid) continue;
+            seenSeasons.add(sid);
+            const deltas = computeSeasonDeltas(
+              game,
+              game.playerIntervals || {},
+              game.halfIntervals || []
+            );
+            if (!agg[sid]) agg[sid] = {};
+            for (const [pid, stats] of Object.entries(deltas)) {
+              if (!agg[sid][pid]) agg[sid][pid] = {};
+              for (const [key, val] of Object.entries(stats)) {
+                agg[sid][pid][key] = (agg[sid][pid][key] || 0) + val;
+              }
+            }
+          }
+          if (agg[defaultSeason]) {
+            data = { players: agg[defaultSeason] };
+          }
+          fetchedSeasons = [...seenSeasons].sort().reverse();
+        } catch (err) {
+          console.error("Client-side backfill failed:", err);
         }
       }
       if (cancelled) return;
