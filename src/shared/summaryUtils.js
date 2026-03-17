@@ -24,7 +24,7 @@ const MVP_ABBREV = {
 };
 
 // Preferred column ordering for display consistency
-const STAT_ORDER = [
+export const STAT_ORDER = [
   "goal",
   "assist",
   "shot_on_target",
