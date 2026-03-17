@@ -121,10 +121,8 @@ const ShareCard = forwardRef(function ShareCard({ game, rows, shareUrl }, ref) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   }
 
-  // Truncate share URL for display
-  const displayUrl = shareUrl && shareUrl.length > 50
-    ? shareUrl.slice(0, 47) + "..."
-    : shareUrl;
+  // Show just the domain — the full URL is too long for an image
+  const displayDomain = "madeira-lineup.vercel.app";
 
   return (
     <div ref={ref} style={cardStyle}>
@@ -159,7 +157,7 @@ const ShareCard = forwardRef(function ShareCard({ game, rows, shareUrl }, ref) {
 
       {/* Footer */}
       <p style={footerTextStyle}>Tap for full box score</p>
-      {displayUrl && <p style={urlStyle}>{displayUrl}</p>}
+      <p style={urlStyle}>{displayDomain}</p>
     </div>
   );
 });

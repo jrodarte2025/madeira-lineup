@@ -83,7 +83,7 @@ export default function GameSummaryScreen() {
       if (navigator.share && navigator.canShare) {
         const file = new File([blob], "game-summary.png", { type: "image/png" });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "Madeira FC Game Summary" });
+          await navigator.share({ files: [file], title: "Madeira FC Game Summary", url: shareUrl });
           return;
         }
       }
