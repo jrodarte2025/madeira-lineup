@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Live Game Tracking & Stats
 status: executing
-stopped_at: "Completed Phase 7 Plan 03: Season stats write pipeline"
-last_updated: "2026-03-17T03:16:27.317Z"
+stopped_at: "Completed Phase 7 Plan 02: Season stats dashboard"
+last_updated: "2026-03-17T03:18:49.894Z"
 last_activity: "2026-03-16 — Completed Phase 7 Plan 01: getSeasonId, computeSeasonDeltas, loadSeasonStats, listSeasons"
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 18
-  completed_plans: 17
+  completed_plans: 18
   percent: 89
 ---
 
@@ -83,6 +83,7 @@ v2.0 decisions (ad-hoc, post-05):
 - [Phase 07-01]: computeSeasonDeltas iterates game.lineup.roster to exclude non-roster stat events; skips players with 0 minutes AND 0 stats
 - [Phase 07-season-dashboard-player-profiles]: Store game date and lineup as gameMeta in localStorage to support season stats computation after crash recovery
 - [Phase 07-season-dashboard-player-profiles]: Season stats write is fire-and-forget after finalizeGame -- navigation does not wait for season writes
+- [Phase 07-season-dashboard-player-profiles]: StatsTab uses '#N Name' format for player column; default sort is totalEvents desc; STAT_ORDER exported from summaryUtils.js
 
 ### Pending Todos
 
@@ -94,6 +95,6 @@ None — html-to-image iOS font concern resolved by using system fonts in ShareC
 
 ## Session Continuity
 
-Last session: 2026-03-17T03:16:27.315Z
-Stopped at: Completed Phase 7 Plan 03: Season stats write pipeline
+Last session: 2026-03-17T03:18:49.892Z
+Stopped at: Completed Phase 7 Plan 02: Season stats dashboard
 Resume file: None

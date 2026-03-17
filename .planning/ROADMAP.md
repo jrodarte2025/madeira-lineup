@@ -68,7 +68,7 @@ Plans:
 - [x] **Phase 4: App Shell + Data Foundation** - Extract shared components, add tab navigation, lock Firestore schema before any game code (completed 2026-03-16)
 - [ ] **Phase 5: Live Game** - Complete game-day loop: game creation, drift-proof timer, substitutions, minute tracking, stat logging, events feed
 - [x] **Phase 6: Post-Game Summary + Exports** - Stats table, CSV download, shareable link, and image export card (completed 2026-03-17)
-- [ ] **Phase 7: Season Dashboard + Player Profiles** - Running tallies across all games and per-player season history
+- [x] **Phase 7: Season Dashboard + Player Profiles** - Running tallies across all games and per-player season history (completed 2026-03-17)
 
 ## Phase Details
 
@@ -132,7 +132,7 @@ Plans:
   1. The Stats tab shows a dashboard with every player's season totals (minutes, goals, assists, and other tracked stats) aggregated across all completed games
   2. Tapping a player on the dashboard opens their profile showing a game-by-game breakdown of their stats and minutes
   3. Finalizing a game immediately updates the season totals — the dashboard reflects the new game without any manual step
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 07-01-PLAN.md — Season utility functions (TDD): getSeasonId, computeSeasonDeltas + loadSeasonStats/listSeasons firebase reads
@@ -153,4 +153,4 @@ v2.0: 4 → 5 → 6 → 7
 | 4. App Shell + Data Foundation | 3/3 | Complete   | 2026-03-16 | - |
 | 5. Live Game | 4/5 | In Progress|  | - |
 | 6. Post-Game Summary + Exports | 2/2 | Complete   | 2026-03-17 | - |
-| 7. Season Dashboard + Player Profiles | 2/3 | In Progress|  | - |
+| 7. Season Dashboard + Player Profiles | 3/3 | Complete   | 2026-03-17 | - |

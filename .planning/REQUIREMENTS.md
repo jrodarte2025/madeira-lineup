@@ -74,7 +74,7 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 ### Season & Profiles
 
 - [x] **SEASON-01**: Season dashboard shows running tallies (minutes, goals, assists, etc.) across all completed games
-- [ ] **SEASON-02**: Player profiles show individual season stats when a player is selected
+- [x] **SEASON-02**: Player profiles show individual season stats when a player is selected
 - [x] **SEASON-03**: Game data is pushed to season totals when a game is finalized
 
 ### Data Storage
@@ -138,7 +138,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POST-04 | Phase 6 | Complete |
 | POST-05 | Phase 6 | Complete |
 | SEASON-01 | Phase 7 | Complete |
-| SEASON-02 | Phase 7 | Pending |
+| SEASON-02 | Phase 7 | Complete |
 | SEASON-03 | Phase 7 | Complete |
 | DATA-01 | Phase 4 | Complete |
 | DATA-02 | Phase 4 | Complete |
