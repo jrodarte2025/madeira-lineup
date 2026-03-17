@@ -1,5 +1,14 @@
 # Milestones: Madeira FC Lineup Planner
 
+## v2.0 Live Game Tracking & Stats (Shipped: 2026-03-17)
+
+**Phases completed:** 7 phases, 18 plans, 2 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## Completed
 
 ### v1.0 — UX Improvements (completed 2026-03-16)

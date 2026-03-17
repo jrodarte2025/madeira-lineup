@@ -2,25 +2,11 @@
 
 ## What This Is
 
-A soccer lineup planning and live game management tool for Madeira FC coaching staff. Coaches build lineups by dragging players onto a soccer field, then run live games with automatic half timers, substitution tracking, and position-aware stat logging. Post-game summaries and season dashboards give coaches a complete picture of every player's contributions.
+A soccer lineup planning and live game management tool for Madeira FC coaching staff. Coaches build lineups by dragging players onto a soccer field, run live games with automatic half timers and substitution tracking, log position-aware stats with one tap, then review post-game summaries and season dashboards showing every player's contributions across all games.
 
 ## Core Value
 
-Coaches can manage lineups, track live games, and review player stats — all from their phone at the field or desktop at home — with one tool that handles the full game-day workflow.
-
-## Current Milestone: v2.0 — Live Game Tracking & Stats
-
-**Goal:** Transform the lineup planner into a live game management tool with automatic timers, position-aware stat tracking, post-game summaries, and season-long player statistics.
-
-**Target features:**
-- Game creation (opponent, date, linked lineup)
-- Live game mode with 25-minute auto-timers per half
-- Per-player minute tracking (starts/stops with substitutions)
-- Position-aware stat buttons (GK/DEF/MID/FWD get different stats)
-- Post-game summary with shareable link + image export
-- Season dashboard with running tallies
-- Player profiles with individual season stats
-- Bottom tab navigation (Lineup | Games | Stats)
+Coaches can manage lineups, track live games, and review player stats — all from their phone at the field or desktop at home — with one tool that handles the full game-day workflow from kickoff to season review.
 
 ## Requirements
 
@@ -43,23 +29,28 @@ Coaches can manage lineups, track live games, and review player stats — all fr
 - ✓ Position labels inside field circles — v1.0
 - ✓ Duplicate name disambiguation on bench — v1.0
 - ✓ Auto-sync working state to Firestore — v1.0
+- ✓ Bottom tab navigation (Lineup | Games | Stats) — v2.0
+- ✓ Game creation with opponent name and date — v2.0
+- ✓ Live game screen with linked lineup on pitch — v2.0
+- ✓ 25-minute auto-timer per half with drift-proof timestamps — v2.0
+- ✓ Per-player minute tracking via interval intersection — v2.0
+- ✓ Position-aware stat tracking (GK/DEF/MID/FWD groups) — v2.0
+- ✓ Color-coded stat buttons (orange/teal/gray) — v2.0
+- ✓ Stat badge counts on player field circles — v2.0
+- ✓ Recent events feed with single-tap undo — v2.0
+- ✓ Post-game summary with stats table and per-player minutes — v2.0
+- ✓ Shareable game summary link (public read-only mode) — v2.0
+- ✓ Branded image export for group chat sharing — v2.0
+- ✓ Season dashboard with sortable player totals — v2.0
+- ✓ Per-player game-by-game breakdown via accordion — v2.0
+- ✓ Game finalization pushes stats to season totals — v2.0
+- ✓ Screen Wake Lock during active games — v2.0
+- ✓ Crash recovery via localStorage mirroring — v2.0
+- ✓ Firestore schema for games and season stats — v2.0
 
 ### Active
 
-- [ ] Game creation with opponent name and date
-- [ ] Live game screen (separate from lineup builder)
-- [ ] 25-minute auto-timer per half (Start Game → auto-stop → Start 2nd Half → auto-stop)
-- [ ] Per-player minute tracking (start/stop on sub in/out, display to the minute)
-- [ ] Position-aware stat tracking (GK/DEF/MID/FWD groups with specific stat buttons)
-- [ ] Color-coded stat buttons (orange=offensive, teal=defensive, gray=neutral)
-- [ ] Stat badge counts on player field circles
-- [ ] Recent events feed (last 3-5) with undo
-- [ ] Post-game summary modal (players × stats table with totals)
-- [ ] CSV export of game stats
-- [ ] Shareable game summary (link + image)
-- [ ] Season dashboard with running tallies across games
-- [ ] Player profiles with individual season stats
-- [ ] Bottom tab navigation (Lineup | Games | Stats)
+(None — next milestone requirements TBD)
 
 ### Out of Scope
 
@@ -68,31 +59,27 @@ Coaches can manage lineups, track live games, and review player stats — all fr
 - Opponent team tracking — focus is on Madeira FC players only
 - Multiple team management — single team (Madeira FC) for now
 - React Native / native app — PWA is sufficient
+- CSV export of game stats — descoped during v2.0; utility function exists if needed later
 
 ## Context
 
-- Built as a React 19 SPA with Vite, pure inline styles (no component library)
-- Main component: `src/MadeiraLineupPlanner.jsx` (~1600 lines) — may need to split for v2.0
-- Firebase/Firestore for cloud sync — will add game and season collections
-- Existing drag-and-drop will serve as substitution mechanism in game mode
+- **Shipped:** v1.0 (UX Improvements) + v2.0 (Live Game Tracking & Stats)
+- **Codebase:** 6,244 LOC across 109 files (React 19 + Vite + Firebase)
+- **Architecture:** Tab-based SPA with HashRouter; shared components in `src/shared/`; game screens in `src/games/`; tab views in `src/tabs/`
+- **Data:** Firestore collections — `games` (events embedded), `seasonStats` (denormalized player totals), `lineups`, `config`
+- **Testing:** Vitest with 64+ tests across season utils, summary utils, and core utilities
 - Position groups: GK → "GK", LB/CB/RB/LCB/RCB → "DEF", LM/CM/RM/LCM/RCM → "MID", LS/RS/LW/RW/CF/ST → "FWD"
-- Stat types by group:
-  - GK: Save, Distribution, Clearance, 50/50 Won
-  - DEF: Tackle, Interception, Clearance, Block, 50/50 Won
-  - MID: Goal, Assist, Great Pass, Shot on Target, Tackle, Interception, 50/50 Won
-  - FWD: Goal, Assist, Great Pass, Shot on Target, 50/50 Won
 - Color coding: Offensive (#E86420 orange), Defensive (#4CAFB6 teal), Neutral (#6b7280 gray)
-- Coach-only for now; design data model so sharing can be added later
 - 25-minute halves (Madeira FC plays 9v9)
 
 ## Constraints
 
 - **Tech stack**: React 19 + Vite + Firebase — no changes to build tooling
-- **Single repo**: Keep everything in this repo, but may split into multiple component files
-- **No component library**: Continue with inline styles — don't introduce MUI or similar
-- **Mobile-first**: All new features must be thumb-friendly (min 44px touch targets)
-- **Backward compatible**: All v1.0 lineup functionality must continue working
-- **Firestore**: Game data and season stats stored in Firestore collections
+- **Single repo**: Everything in this repo with component-based file structure
+- **No component library**: Inline styles throughout — no MUI or similar
+- **Mobile-first**: All features must be thumb-friendly (min 44px touch targets)
+- **Firestore**: All persistent data in Firestore collections
+- **Firestore rules**: Tracked in `firestore.rules`, deployed via `firebase deploy --only firestore:rules`
 
 ## Key Decisions
 
@@ -103,11 +90,15 @@ Coaches can manage lineups, track live games, and review player stats — all fr
 | Drag-to-bench removes, drag-from-bench swaps | Bench is a holding area | ✓ Good |
 | Position labels inside circles | Eliminates vertical overlap between adjacent positions | ✓ Good |
 | Auto-sync state to Firestore | Fixes inactive toggle persistence across reloads | ✓ Good |
-| Separate game screen (not overlay) | Game mode has its own layout needs; keeps lineup builder clean | — Pending |
-| Position-aware stat groups | Different positions need different stat buttons | — Pending |
-| Bottom tab navigation | Standard mobile pattern, keeps everything one tap away | — Pending |
-| Coach-only, shareable later | Reduces v2 scope; design data model for future sharing | — Pending |
-| Both link + image for game summary sharing | Link for detail, image for quick group chat sharing | — Pending |
+| Separate game screen (not overlay) | Game mode has its own layout needs; keeps lineup builder clean | ✓ Good |
+| Position-aware stat groups | Different positions need different stat buttons; coaches confirmed groupings | ✓ Good |
+| Bottom tab navigation | Standard mobile pattern, keeps everything one tap away | ✓ Good |
+| Coach-only, shareable later | Reduces v2 scope; data model supports future sharing | ✓ Good |
+| Both link + image for game summary sharing | Link for detail, image for quick group chat sharing | ✓ Good |
+| Descoped CSV export | User decided CSV not needed; buildCSV utility preserved | ✓ Good |
+| Fire-and-forget season stat writes | Non-blocking UX; acceptable tradeoff for game finalization speed | ✓ Good |
+| Client-side backfill for season stats | Handles games finalized before seasonStats rules existed | ✓ Good |
+| Firestore rules in version control | Track changes, deploy via CLI | ✓ Good |
 
 ---
-*Last updated: 2026-03-16 after v2.0 milestone start*
+*Last updated: 2026-03-17 after v2.0 milestone completion*
