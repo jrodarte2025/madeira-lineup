@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay, STAT_LABELS, INITIAL_ROSTER } from "../shared/constants";
 import { getSeasonId } from "../shared/seasonUtils";
 import { buildSummaryRows, STAT_ORDER } from "../shared/summaryUtils";
-import { loadSeasonStats, listSeasons, listGames } from "../firebase";
+import { loadSeasonStats, listSeasons, listGames, backfillSeasonStats } from "../firebase";
+import { computeSeasonDeltas } from "../shared/seasonUtils";
 
 // =============================================
 // STATS TAB — Season Dashboard
@@ -45,10 +46,21 @@ export default function StatsTab() {
     let cancelled = false;
     async function fetchInitial() {
       setLoading(true);
-      const [data, fetchedSeasons] = await Promise.all([
+      let [data, fetchedSeasons] = await Promise.all([
         loadSeasonStats(defaultSeason),
         listSeasons(),
       ]);
+      if (cancelled) return;
+      // Backfill: if no season data exists, rebuild from completed games
+      if (!data) {
+        const count = await backfillSeasonStats(getSeasonId, computeSeasonDeltas);
+        if (count > 0 && !cancelled) {
+          [data, fetchedSeasons] = await Promise.all([
+            loadSeasonStats(defaultSeason),
+            listSeasons(),
+          ]);
+        }
+      }
       if (cancelled) return;
       // Ensure current season always appears in dropdown
       const mergedSeasons = [

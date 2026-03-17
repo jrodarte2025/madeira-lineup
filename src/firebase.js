@@ -275,3 +275,47 @@ export async function updateSeasonStats(season, playerId, statDeltas) {
     return false;
   }
 }
+
+/**
+ * Rebuilds seasonStats from all completed games. Wipes existing data first,
+ * then recomputes from scratch using computeSeasonDeltas.
+ * @param {Function} getSeasonIdFn  getSeasonId function
+ * @param {Function} computeDeltasFn  computeSeasonDeltas function
+ * @returns {Promise<number>} Number of games processed
+ */
+export async function backfillSeasonStats(getSeasonIdFn, computeDeltasFn) {
+  const games = await listGames();
+  const completed = games.filter((g) => g.status === "completed");
+
+  // Wipe existing seasonStats docs
+  const existing = await getDocs(collection(db, "seasonStats"));
+  for (const d of existing.docs) {
+    await deleteDoc(doc(db, "seasonStats", d.id));
+  }
+
+  // Aggregate deltas per season
+  const seasonAgg = {}; // { seasonId: { playerId: { stat: val } } }
+  for (const game of completed) {
+    const seasonId = getSeasonIdFn(game.date);
+    if (!seasonId) continue;
+    const deltas = computeDeltasFn(
+      game,
+      game.playerIntervals || {},
+      game.halfIntervals || []
+    );
+    if (!seasonAgg[seasonId]) seasonAgg[seasonId] = {};
+    for (const [pid, stats] of Object.entries(deltas)) {
+      if (!seasonAgg[seasonId][pid]) seasonAgg[seasonId][pid] = {};
+      for (const [key, val] of Object.entries(stats)) {
+        seasonAgg[seasonId][pid][key] = (seasonAgg[seasonId][pid][key] || 0) + val;
+      }
+    }
+  }
+
+  // Write aggregated docs
+  for (const [seasonId, players] of Object.entries(seasonAgg)) {
+    await setDoc(doc(db, "seasonStats", seasonId), { players });
+  }
+
+  return completed.length;
+}
