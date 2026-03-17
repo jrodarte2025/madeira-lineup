@@ -647,11 +647,17 @@ export default function LiveGameScreen() {
   const isInteractive = gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime";
 
   // ---------------------------------------------------------------------------
-  // Live minute calculations — recompute once per minute (when displayMinute changes)
+  // Live minute calculations — recompute every 15 seconds via tick counter
   // ---------------------------------------------------------------------------
+  const [minuteTick, setMinuteTick] = useState(0);
+  useEffect(() => {
+    if (gameStatus !== "1st-half" && gameStatus !== "2nd-half") return;
+    const id = setInterval(() => setMinuteTick((t) => t + 1), 15000);
+    return () => clearInterval(id);
+  }, [gameStatus]);
+
   const playerMinutes = useMemo(() => {
     const result = {};
-    // Collect all player IDs across field and bench
     const allPlayerIds = new Set();
     fieldPositions.forEach(({ player }) => { if (player) allPlayerIds.add(player.id); });
     benchPlayers.forEach((p) => allPlayerIds.add(p.id));
@@ -662,7 +668,7 @@ export default function LiveGameScreen() {
     });
     return result;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [displayMinute, playerIntervals, halfIntervals, fieldPositions, benchPlayers]);
+  }, [minuteTick, displayMinute, playerIntervals, halfIntervals, fieldPositions, benchPlayers]);
 
   // ---------------------------------------------------------------------------
   // Stat recording handlers
