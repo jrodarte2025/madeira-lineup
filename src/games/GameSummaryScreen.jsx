@@ -246,9 +246,11 @@ export default function GameSummaryScreen() {
     <div style={containerStyle}>
       {/* Header */}
       <div style={headerStyle}>
-        <button style={backBtnStyle} onClick={() => navigate("/games")}>
-          ← Back to Games
-        </button>
+        {!isPublic && (
+          <button style={backBtnStyle} onClick={() => navigate("/games")}>
+            ← Back to Games
+          </button>
+        )}
         <p style={scoreStyle}>
           Madeira FC {homeScore} – {awayScore} {game.opponent}
         </p>
