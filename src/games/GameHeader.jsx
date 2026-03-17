@@ -113,10 +113,9 @@ export default function GameHeader({
   const isStoppage =
     (gameStatus === "1st-half" || gameStatus === "2nd-half") &&
     displaySeconds >= 1500;
-  const showEndHalf = isStoppage;
+  const showEndHalf = gameStatus === "1st-half";
   const showStartSecondHalf = gameStatus === "halftime";
-  const showEndGame =
-    gameStatus === "2nd-half" && displaySeconds >= 1500;
+  const showEndGame = gameStatus === "2nd-half";
   const showActionButton = showEndHalf || showStartSecondHalf || showEndGame;
 
   const timerColor =

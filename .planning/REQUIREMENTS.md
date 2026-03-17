@@ -56,11 +56,11 @@ Requirements for Live Game Tracking & Stats milestone. Each maps to roadmap phas
 
 ### Stat Tracking
 
-- [ ] **STAT-01**: Tapping a player on the pitch selects them and shows a StatBar with position-group buttons
+- [x] **STAT-01**: Tapping a player on the pitch selects them and shows a StatBar with position-group buttons
 - [x] **STAT-02**: Stat buttons are position-aware (GK/DEF/MID/FWD each get different stat options)
-- [ ] **STAT-03**: Stat buttons are color-coded (orange=offensive, teal=defensive, gray=neutral)
-- [ ] **STAT-04**: Each button tap records a stat event with playerId, stat type, half, and timestamp
-- [ ] **STAT-05**: Stat badge count shown on each player's field circle for current half
+- [x] **STAT-03**: Stat buttons are color-coded (orange=offensive, teal=defensive, gray=neutral)
+- [x] **STAT-04**: Each button tap records a stat event with playerId, stat type, half, and timestamp
+- [x] **STAT-05**: Stat badge count shown on each player's field circle for current half
 - [x] **STAT-06**: Recent events feed (last 3-5 events) displayed near StatBar with single-tap undo
 
 ### Post-Game
@@ -126,11 +126,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SUB-02 | Phase 5 | Complete |
 | SUB-03 | Phase 5 | Complete |
 | SUB-04 | Phase 5 | Complete |
-| STAT-01 | Phase 5 | Pending |
+| STAT-01 | Phase 5 | Complete |
 | STAT-02 | Phase 5 | Complete |
-| STAT-03 | Phase 5 | Pending |
-| STAT-04 | Phase 5 | Pending |
-| STAT-05 | Phase 5 | Pending |
+| STAT-03 | Phase 5 | Complete |
+| STAT-04 | Phase 5 | Complete |
+| STAT-05 | Phase 5 | Complete |
 | STAT-06 | Phase 5 | Complete |
 | POST-01 | Phase 6 | Complete |
 | POST-02 | Phase 6 | Complete |
