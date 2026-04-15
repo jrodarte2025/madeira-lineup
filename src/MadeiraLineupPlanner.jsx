@@ -153,14 +153,16 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)",
-      display: "flex", alignItems: isMobile ? "flex-end" : "center", justifyContent: "center", zIndex: 100,
-    }} onClick={onClose}>
+      position: "fixed", inset: 0, background: isMobile ? C.navyLight : "rgba(0,0,0,0.6)", backdropFilter: isMobile ? "none" : "blur(4px)",
+      display: "flex", alignItems: isMobile ? "stretch" : "center", justifyContent: "center", zIndex: 100,
+    }} onClick={isMobile ? undefined : onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{
-        background: C.navyLight, borderRadius: isMobile ? "14px 14px 0 0" : 14,
+        background: C.navyLight, borderRadius: isMobile ? 0 : 14,
         padding: isMobile ? "16px 16px calc(20px + env(safe-area-inset-bottom, 0px))" : 24,
-        width: isMobile ? "100%" : 360, maxHeight: isMobile ? "85dvh" : "80vh",
-        border: `1px solid rgba(255,255,255,0.12)`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+        paddingTop: isMobile ? "env(safe-area-inset-top, 16px)" : undefined,
+        width: isMobile ? "100%" : 360, maxHeight: isMobile ? "100%" : "80vh",
+        height: isMobile ? "100%" : undefined,
+        border: isMobile ? "none" : `1px solid rgba(255,255,255,0.12)`, boxShadow: isMobile ? "none" : "0 20px 60px rgba(0,0,0,0.5)",
         display: "flex", flexDirection: "column",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isMobile ? 12 : 16 }}>
@@ -171,7 +173,7 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
         </div>
 
         {mode === "save" && (
-          <div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: isMobile ? "center" : "flex-start" }}>
             <input placeholder="Lineup name (e.g. vs. Anderson Twp)" value={name} onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onSave(name.trim()); setName(""); } }}
               style={{
