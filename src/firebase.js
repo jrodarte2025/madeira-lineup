@@ -108,6 +108,22 @@ export async function loadGame(gameId) {
 }
 
 /**
+ * Updates arbitrary fields on a game document.
+ * @param {string} gameId
+ * @param {Object} fields  Key/value pairs to merge into the game doc
+ * @returns {Promise<boolean>}
+ */
+export async function updateGame(gameId, fields) {
+  try {
+    await updateDoc(doc(db, "games", gameId), fields);
+    return true;
+  } catch (err) {
+    console.error("Failed to update game:", err);
+    return false;
+  }
+}
+
+/**
  * Updates only the status field of a game.
  * @param {string} gameId
  * @param {"setup"|"1st-half"|"halftime"|"2nd-half"|"completed"} status
@@ -296,19 +312,23 @@ export async function backfillSeasonStats(getSeasonIdFn, computeDeltasFn) {
   // Aggregate deltas per season
   const seasonAgg = {}; // { seasonId: { playerId: { stat: val } } }
   for (const game of completed) {
-    const seasonId = getSeasonIdFn(game.date);
-    if (!seasonId) continue;
-    const deltas = computeDeltasFn(
-      game,
-      game.playerIntervals || {},
-      game.halfIntervals || []
-    );
-    if (!seasonAgg[seasonId]) seasonAgg[seasonId] = {};
-    for (const [pid, stats] of Object.entries(deltas)) {
-      if (!seasonAgg[seasonId][pid]) seasonAgg[seasonId][pid] = {};
-      for (const [key, val] of Object.entries(stats)) {
-        seasonAgg[seasonId][pid][key] = (seasonAgg[seasonId][pid][key] || 0) + val;
+    try {
+      const seasonId = getSeasonIdFn(game.date);
+      if (!seasonId) continue;
+      const deltas = computeDeltasFn(
+        game,
+        game.playerIntervals || {},
+        game.halfIntervals || []
+      );
+      if (!seasonAgg[seasonId]) seasonAgg[seasonId] = {};
+      for (const [pid, stats] of Object.entries(deltas)) {
+        if (!seasonAgg[seasonId][pid]) seasonAgg[seasonId][pid] = {};
+        for (const [key, val] of Object.entries(stats)) {
+          seasonAgg[seasonId][pid][key] = (seasonAgg[seasonId][pid][key] || 0) + val;
+        }
       }
+    } catch (err) {
+      console.warn("Backfill: skipping game", game.id, err);
     }
   }
 

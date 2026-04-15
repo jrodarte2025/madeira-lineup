@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants.js";
-import { createGame, listGames, loadPublishedLineup, deleteGame } from "../firebase.js";
+import { createGame, listGames, loadPublishedLineup, deleteGame, updateGame } from "../firebase.js";
 
 // ---------------------------------------------------------------------------
 // Status badge helpers
@@ -385,6 +385,218 @@ function GameSetupModal({ onClose, onGameCreated }) {
 }
 
 // ---------------------------------------------------------------------------
+// GameDetailModal — shown when tapping a setup game
+// ---------------------------------------------------------------------------
+function GameDetailModal({ game, onClose, onUpdated }) {
+  const navigate = useNavigate();
+  const [step, setStep] = useState("actions"); // "actions" | "pickLineup" | "edit"
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [savedLineups, setSavedLineups] = useState([]);
+  const [selectedLineup, setSelectedLineup] = useState(null);
+  const [opponent, setOpponent] = useState(game.opponent || "");
+  const [date, setDate] = useState(game.date || "");
+
+  const loadSavedLineups = () => {
+    try {
+      const stored = localStorage.getItem("savedLineups");
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  };
+
+  const currentLineupName = selectedLineup
+    ? (selectedLineup.name || selectedLineup.formation)
+    : game.lineup
+      ? (game.lineup.name || game.lineup.formation || "Published lineup")
+      : null;
+
+  async function handleLoadLineup(lineupData) {
+    setSaving(true);
+    const ok = await updateGame(game.id, { lineup: lineupData });
+    setSaving(false);
+    if (ok) {
+      setSelectedLineup(lineupData);
+      setStep("actions");
+      onUpdated();
+    } else {
+      setError("Failed to update lineup.");
+    }
+  }
+
+  async function handleSaveEdits() {
+    if (!opponent.trim()) { setError("Opponent name is required."); return; }
+    setSaving(true);
+    const ok = await updateGame(game.id, { opponent: opponent.trim(), date });
+    setSaving(false);
+    if (ok) {
+      setStep("actions");
+      onUpdated();
+    } else {
+      setError("Failed to save changes.");
+    }
+  }
+
+  const dateStr = date
+    ? new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+    : "No date";
+
+  const inputStyle = {
+    display: "block", width: "100%", boxSizing: "border-box", padding: "10px 14px",
+    fontSize: 16, fontFamily: fontBase, background: C.navyLight,
+    border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: C.white,
+    outline: "none", WebkitAppearance: "none", MozAppearance: "none",
+    appearance: "none", maxWidth: "100%", minWidth: 0,
+  };
+
+  const actionBtnStyle = (bg) => ({
+    width: "100%", padding: "13px 0", fontSize: 15, fontWeight: 700,
+    fontFamily: fontDisplay, background: bg,
+    border: bg === "transparent" ? "1px solid rgba(255,255,255,0.2)" : "none",
+    borderRadius: 8, color: C.white,
+    cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.5 : 1,
+    boxSizing: "border-box",
+  });
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 200,
+      display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+    }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{
+        background: C.navyDark, border: "1px solid rgba(255,255,255,0.12)",
+        borderRadius: 14, padding: 24, width: "100%", maxWidth: 400, fontFamily: fontBase,
+        maxHeight: "85dvh", overflowY: "auto", overflowX: "hidden", boxSizing: "border-box",
+      }}>
+        {/* ---- Actions ---- */}
+        {step === "actions" && (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+              <h2 style={{ color: C.white, fontFamily: fontDisplay, fontSize: 20, fontWeight: 700, margin: 0 }}>
+                vs. {opponent.trim() || game.opponent}
+              </h2>
+              <button onClick={onClose} style={{
+                background: "none", border: "none", color: "rgba(255,255,255,0.4)",
+                cursor: "pointer", fontSize: 20, lineHeight: 1, padding: 0,
+              }}>&times;</button>
+            </div>
+            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 16 }}>{dateStr}</div>
+
+            {currentLineupName && (
+              <div style={{
+                display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: 8, marginBottom: 16,
+                background: "rgba(232,100,32,0.1)", border: "1px solid rgba(232,100,32,0.25)",
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>Lineup</div>
+                  <div style={{ fontSize: 14, color: C.orange, fontWeight: 700 }}>{currentLineupName}</div>
+                </div>
+              </div>
+            )}
+
+            {error && <p style={{ color: "#F15F5E", fontSize: 13, margin: "0 0 16px", fontWeight: 600 }}>{error}</p>}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button onClick={() => navigate(`/games/${game.id}`)} style={actionBtnStyle(C.orange)}>
+                Start Game
+              </button>
+              <button onClick={() => { setSavedLineups(loadSavedLineups()); setStep("pickLineup"); }} style={actionBtnStyle(C.navyLight)}>
+                {currentLineupName ? "Change Lineup" : "Load Lineup"}
+              </button>
+              <button onClick={() => { setError(null); setStep("edit"); }} style={actionBtnStyle("transparent")}>
+                Edit Details
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ---- Pick lineup ---- */}
+        {step === "pickLineup" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <button onClick={() => setStep("actions")} style={{
+                background: "none", border: "none", color: "rgba(255,255,255,0.5)",
+                cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0,
+              }}>&larr;</button>
+              <h2 style={{ color: C.white, fontFamily: fontDisplay, fontSize: 20, fontWeight: 700, margin: 0 }}>
+                Load Lineup
+              </h2>
+            </div>
+
+            {savedLineups.length === 0 ? (
+              <div style={{ textAlign: "center", padding: 30, color: "rgba(255,255,255,0.3)", fontSize: 13, fontStyle: "italic" }}>
+                No saved lineups. Save one from the Lineup tab first.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {savedLineups.map((s, i) => (
+                  <div key={i} onClick={() => {
+                    handleLoadLineup({
+                      formation: s.formation,
+                      lineup: s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null),
+                      inactiveIds: s.inactiveIds,
+                      roster: s.roster,
+                      name: s.name,
+                    });
+                  }} style={{
+                    display: "flex", alignItems: "center", padding: "12px 14px", borderRadius: 8,
+                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                    cursor: "pointer",
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: C.white }}>{s.name}</div>
+                      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
+                        {s.formation} · {s.date}
+                      </div>
+                    </div>
+                    <span style={{ color: C.orange, fontSize: 12, fontWeight: 700 }}>Select</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ---- Edit details ---- */}
+        {step === "edit" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <button onClick={() => setStep("actions")} style={{
+                background: "none", border: "none", color: "rgba(255,255,255,0.5)",
+                cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0,
+              }}>&larr;</button>
+              <h2 style={{ color: C.white, fontFamily: fontDisplay, fontSize: 20, fontWeight: 700, margin: 0 }}>
+                Edit Game
+              </h2>
+            </div>
+
+            <label style={{ display: "block", color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+              Opponent Name
+            </label>
+            <input type="text" value={opponent} onChange={(e) => setOpponent(e.target.value)}
+              style={{ ...inputStyle, marginBottom: 16 }} />
+
+            <label style={{ display: "block", color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+              Date
+            </label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+              style={{ ...inputStyle, marginBottom: error ? 8 : 20, colorScheme: "dark" }} />
+
+            {error && <p style={{ color: "#F15F5E", fontSize: 13, margin: "0 0 16px", fontWeight: 600 }}>{error}</p>}
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setStep("actions")} style={{ ...actionBtnStyle("transparent"), flex: 1 }}>Cancel</button>
+              <button onClick={handleSaveEdits} disabled={saving} style={{ ...actionBtnStyle(C.orange), flex: 2 }}>
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // GamesTab
 // ---------------------------------------------------------------------------
 export default function GamesTab() {
@@ -392,6 +604,12 @@ export default function GamesTab() {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState(null);
+
+  const refreshGames = useCallback(() => {
+    setLoading(true);
+    listGames().then((data) => { setGames(data); setLoading(false); });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -411,6 +629,16 @@ export default function GamesTab() {
       setGames((prev) => prev.filter((g) => g.id !== gameId));
     }
   }, []);
+
+  const handleGameClick = useCallback((game) => {
+    if (game.status === "completed") {
+      navigate(`/games/${game.id}/summary`);
+    } else if (game.status === "setup") {
+      setSelectedGame(game);
+    } else {
+      navigate(`/games/${game.id}`);
+    }
+  }, [navigate]);
 
   return (
     <div
@@ -446,7 +674,7 @@ export default function GamesTab() {
           <GameCard
             key={game.id}
             game={game}
-            onClick={() => navigate(game.status === "completed" ? `/games/${game.id}/summary` : `/games/${game.id}`)}
+            onClick={() => handleGameClick(game)}
             onDelete={handleDelete}
           />
         ))
@@ -482,8 +710,12 @@ export default function GamesTab() {
 
       {showModal && <GameSetupModal onClose={() => setShowModal(false)} onGameCreated={() => {
         setShowModal(false);
-        setLoading(true);
-        listGames().then((data) => { setGames(data); setLoading(false); });
+        refreshGames();
+      }} />}
+
+      {selectedGame && <GameDetailModal game={selectedGame} onClose={() => setSelectedGame(null)} onUpdated={() => {
+        setSelectedGame(null);
+        refreshGames();
       }} />}
     </div>
   );
