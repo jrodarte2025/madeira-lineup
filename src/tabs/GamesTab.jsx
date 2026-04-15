@@ -223,6 +223,11 @@ function GameSetupModal({ onClose, onGameCreated }) {
     borderRadius: 8,
     color: C.white,
     outline: "none",
+    WebkitAppearance: "none",
+    MozAppearance: "none",
+    appearance: "none",
+    maxWidth: "100%",
+    minWidth: 0,
   };
 
   const actionBtnStyle = (bg) => ({
@@ -247,7 +252,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
       <div style={{
         background: C.navyDark, border: "1px solid rgba(255,255,255,0.12)",
         borderRadius: 14, padding: 24, width: "100%", maxWidth: 400, fontFamily: fontBase,
-        maxHeight: "85dvh", overflowY: "auto", boxSizing: "border-box",
+        maxHeight: "85dvh", overflowY: "auto", overflowX: "hidden", boxSizing: "border-box",
       }}>
         {/* ---- Step 1: Details ---- */}
         {step === "details" && (
