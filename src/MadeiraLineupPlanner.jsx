@@ -158,8 +158,8 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
     }} onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{
         background: C.navyLight, borderRadius: isMobile ? "14px 14px 0 0" : 14,
-        padding: isMobile ? "16px 16px 20px" : 24,
-        width: isMobile ? "100%" : 360, maxHeight: isMobile ? "60vh" : "80vh",
+        padding: isMobile ? "16px 16px calc(20px + env(safe-area-inset-bottom, 0px))" : 24,
+        width: isMobile ? "100%" : 360, maxHeight: isMobile ? "85dvh" : "80vh",
         border: `1px solid rgba(255,255,255,0.12)`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
         display: "flex", flexDirection: "column",
       }}>
@@ -829,7 +829,21 @@ export default function MadeiraLineupPlanner() {
       // selectedPlayer is cleared inside assignPlayer
     }
   };
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    const printContent = document.querySelector('.print-view');
+    if (!printContent) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
+    let styleHTML = '';
+    styles.forEach((s) => { styleHTML += s.outerHTML; });
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Madeira FC Lineup</title>${styleHTML}
+      <style>.print-view { display: flex !important; flex-direction: column; width: 100%; padding: 12px 18px; background: white !important; font-family: ${fontBase}; }
+      .screen-view { display: none !important; } @page { size: portrait; margin: 0.3in; }</style>
+      </head><body>${printContent.outerHTML}</body></html>`);
+    printWindow.document.close();
+    printWindow.onload = () => { printWindow.focus(); printWindow.print(); };
+  };
 
   const pitchBg = "repeating-linear-gradient(to bottom, #338740 0px, #338740 28px, #2E7D39 28px, #2E7D39 56px)";
   const sidebarWidth = isTablet ? 190 : 230;
