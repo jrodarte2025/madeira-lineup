@@ -171,7 +171,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
   // Load saved lineups from localStorage when entering lineup picker
   const loadSavedLineups = () => {
     try {
-      const stored = localStorage.getItem("savedLineups");
+      const stored = localStorage.getItem("madeira_savedLineups");
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   };
@@ -399,7 +399,7 @@ function GameDetailModal({ game, onClose, onUpdated }) {
 
   const loadSavedLineups = () => {
     try {
-      const stored = localStorage.getItem("savedLineups");
+      const stored = localStorage.getItem("madeira_savedLineups");
       return stored ? JSON.parse(stored) : [];
     } catch { return []; }
   };
