@@ -5,6 +5,7 @@ import GamesTab from "./tabs/GamesTab.jsx";
 import StatsTab from "./tabs/StatsTab.jsx";
 import LiveGameScreen from "./games/LiveGameScreen.jsx";
 import GameSummaryScreen from "./games/GameSummaryScreen.jsx";
+import SharedLineupView from "./games/SharedLineupView.jsx";
 
 // ---------------------------------------------------------------------------
 // TabBar
@@ -85,8 +86,9 @@ function AppShell() {
         <Route path="/games/:id/summary" element={<GameSummaryScreen />} />
         <Route path="/games/:id" element={<LiveGameScreen />} />
         <Route path="/stats" element={<StatsTab />} />
+        <Route path="/shared" element={<SharedLineupView />} />
       </Routes>
-      {!isGameScreen && <TabBar />}
+      {!isGameScreen && !location.pathname.startsWith("/shared") && <TabBar />}
     </div>
   );
 }

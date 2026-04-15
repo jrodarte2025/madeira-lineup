@@ -90,7 +90,7 @@ export function decodeLineup(encoded) {
 // =============================================
 export function buildShareUrl(data) {
   const base = window.location.origin + window.location.pathname;
-  return `${base}#/lineup?lineup=${encodeLineup(data)}`;
+  return `${base}#/shared?lineup=${encodeLineup(data)}`;
 }
 
 export async function shareLineup(data) {
