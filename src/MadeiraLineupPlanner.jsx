@@ -13,7 +13,7 @@ import FieldPosition from "./shared/FieldPosition";
 // =============================================
 // ROSTER PLAYER CHIP
 // =============================================
-function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, onToggleInactive, showRemove, showEdit }) {
+function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, onToggleInactive, showRemove, showEdit, isMobile }) {
   const canInteract = !isDimmed;
   return (
     <div draggable={canInteract} onDragStart={canInteract ? onDragStart : undefined} onDragEnd={onDragEnd}
@@ -35,9 +35,9 @@ function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onD
       <div style={{ fontSize: isDimmed ? 12 : 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
         {player.name}
       </div>
-      {showEdit && !isDimmed && onToggleInactive && (
+      {(showEdit || isMobile) && !isDimmed && onToggleInactive && (
         <button onClick={(e) => { e.stopPropagation(); onToggleInactive(); }}
-          style={{ background: "rgba(255,120,80,0.15)", border: "none", color: "rgba(255,120,80,0.7)", borderRadius: 4, cursor: "pointer", fontSize: 10, padding: "2px 6px", flexShrink: 0, lineHeight: 1, fontWeight: 700 }}>SIT</button>
+          style={{ background: "rgba(255,120,80,0.15)", border: "none", color: "rgba(255,120,80,0.7)", borderRadius: 4, cursor: "pointer", fontSize: isMobile ? 11 : 10, padding: isMobile ? "4px 10px" : "2px 6px", flexShrink: 0, lineHeight: 1, fontWeight: 700, minHeight: isMobile ? 32 : "auto" }}>SIT</button>
       )}
       {showRemove && !isDimmed && (
         <button onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -231,7 +231,7 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
 // =============================================
 function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
   handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive, newName, setNewName, newNum, setNewNum,
-  addPlayer, clearAll, inactiveHover, setInactiveHover }) {
+  addPlayer, clearAll, inactiveHover, setInactiveHover, isMobile }) {
 
   const handleInactiveDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setInactiveHover(true); };
   const handleInactiveDragLeave = () => setInactiveHover(false);
@@ -263,7 +263,7 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
         {availablePlayers.map((p) => (
           <PlayerChip key={p.id} player={p} isSelected={selectedPlayer === p.id} isDimmed={false} isInactive={false}
             onDragStart={(e) => handleDragStart(e, p.id, "roster")} onDragEnd={handleDragEnd}
-            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} onToggleInactive={() => toggleInactive(p.id)} showRemove={showEdit} showEdit={showEdit} />
+            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} onToggleInactive={() => toggleInactive(p.id)} showRemove={showEdit} showEdit={showEdit} isMobile={isMobile} />
         ))}
 
         {onFieldPlayers.length > 0 && (
@@ -313,16 +313,18 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
           </span>
         </div>
         {inactivePlayers.map((p) => (
-          <div key={p.id} draggable
-            onDragStart={(e) => handleDragStart(e, p.id, "inactive")}
-            onDragEnd={handleDragEnd}
+          <div key={p.id} draggable={!isMobile}
+            onDragStart={!isMobile ? (e) => handleDragStart(e, p.id, "inactive") : undefined}
+            onDragEnd={!isMobile ? handleDragEnd : undefined}
             onClick={() => toggleInactive(p.id)}
             style={{
-              display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", borderRadius: 6,
-              cursor: "grab", opacity: 0.55,
+              display: "flex", alignItems: "center", gap: 8,
+              padding: isMobile ? "8px 10px" : "5px 8px", borderRadius: 6,
+              cursor: "pointer", opacity: 0.55,
               background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
               textDecoration: "line-through", textDecorationColor: "rgba(255,255,255,0.2)",
               transition: "all 0.15s ease", userSelect: "none",
+              minHeight: isMobile ? 44 : "auto",
             }}>
             <div style={{
               width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.08)",
@@ -332,6 +334,9 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
             <div style={{ fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, color: "rgba(255,255,255,0.5)" }}>
               {p.name}
             </div>
+            {isMobile && (
+              <span style={{ fontSize: 10, fontWeight: 700, color: C.statDefensive, flexShrink: 0 }}>ACTIVATE</span>
+            )}
             {showEdit && (
               <button onClick={(e) => { e.stopPropagation(); removePlayer(p.id); }}
                 style={{ background: "rgba(255,80,80,0.15)", border: "none", color: "#ff7b7b", borderRadius: 4, cursor: "pointer", fontSize: 12, padding: "2px 6px", flexShrink: 0, lineHeight: 1 }}>×</button>
@@ -856,7 +861,7 @@ export default function MadeiraLineupPlanner() {
     handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive,
     newName, setNewName, newNum, setNewNum, addPlayer, clearAll,
     inactiveHover, setInactiveHover,
-    rosterHover,
+    rosterHover, isMobile,
   };
 
   return (
