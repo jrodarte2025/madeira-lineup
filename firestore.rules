@@ -33,5 +33,10 @@ service cloud.firestore {
     match /seasonStats/{seasonId} {
       allow read, write: if true;
     }
+
+    // Shared lineups (short-link sharing)
+    match /sharedLineups/{docId} {
+      allow read, write: if true;
+    }
   }
 }

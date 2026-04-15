@@ -35,6 +35,7 @@ const db = getFirestore(app);
 
 const PUBLISHED_DOC = doc(db, "lineups", "published");
 const gamesCol = collection(db, "games");
+const sharedCol = collection(db, "sharedLineups");
 
 export async function loadPublishedLineup() {
   try {
@@ -61,6 +62,34 @@ export async function savePublishedLineup({ formation, lineup, inactiveIds, rost
   } catch (err) {
     console.error("Failed to publish lineup:", err);
     return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Shared Lineups
+// ---------------------------------------------------------------------------
+
+export async function saveSharedLineup({ formation, lineup, inactiveIds, roster, name }) {
+  try {
+    const ref = await addDoc(sharedCol, {
+      formation, lineup, inactiveIds, roster, name: name || "",
+      createdAt: serverTimestamp(),
+    });
+    return ref.id;
+  } catch (err) {
+    console.error("Failed to save shared lineup:", err);
+    return null;
+  }
+}
+
+export async function loadSharedLineup(id) {
+  try {
+    const snap = await getDoc(doc(db, "sharedLineups", id));
+    if (snap.exists()) return snap.data();
+    return null;
+  } catch (err) {
+    console.warn("Failed to load shared lineup:", err);
+    return null;
   }
 }
 

@@ -1,24 +1,45 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
-import { decodeLineup, abbreviateName } from "../shared/utils";
+import { decodeLineup, encodeLineup, abbreviateName } from "../shared/utils";
+import { loadSharedLineup } from "../firebase";
 import PitchSVG from "../shared/PitchSVG";
 
 export default function SharedLineupView() {
   const location = useLocation();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+
+    // New short link: ?id=abc123
+    const id = params.get("id");
+    if (id) {
+      loadSharedLineup(id).then((doc) => {
+        if (doc) { setData(doc); }
+        else { navigate("/lineup", { replace: true }); }
+        setLoading(false);
+      });
+      return;
+    }
+
+    // Legacy inline link: ?lineup=base64...
     const encoded = params.get("lineup");
     if (encoded) {
       const decoded = decodeLineup(encoded);
-      if (decoded) { setData(decoded); return; }
+      if (decoded) { setData(decoded); setLoading(false); return; }
     }
+
     navigate("/lineup", { replace: true });
   }, [location, navigate]);
 
+  if (loading) return (
+    <div style={{ minHeight: "100vh", background: C.navyDark, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.4)", fontFamily: fontBase, fontSize: 15 }}>
+      Loading lineup...
+    </div>
+  );
   if (!data) return null;
 
   const { formation, lineup, inactiveIds = [], roster = [], name } = data;
@@ -153,8 +174,7 @@ export default function SharedLineupView() {
 
       {/* Open in Editor button */}
       <button onClick={() => {
-        const params = new URLSearchParams(location.search);
-        navigate(`/lineup?lineup=${params.get("lineup")}`, { replace: true });
+        navigate(`/lineup?lineup=${encodeLineup(data)}`, { replace: true });
       }} style={{
         marginTop: 24, padding: "12px 28px", background: "rgba(255,255,255,0.08)",
         border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10,

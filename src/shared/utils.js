@@ -86,15 +86,25 @@ export function decodeLineup(encoded) {
 }
 
 // =============================================
-// SHARE URL — kept as-is; Plan 04-02 will update for HashRouter
+// SHARE URL
 // =============================================
-export function buildShareUrl(data) {
+import { saveSharedLineup } from "../firebase";
+
+export function buildShareUrl(id) {
+  const base = window.location.origin + window.location.pathname;
+  return `${base}#/shared?id=${id}`;
+}
+
+// Legacy: build URL with inline data (fallback if Firestore save fails)
+export function buildShareUrlInline(data) {
   const base = window.location.origin + window.location.pathname;
   return `${base}#/shared?lineup=${encodeLineup(data)}`;
 }
 
 export async function shareLineup(data) {
-  const url = buildShareUrl(data);
+  // Save to Firestore for a short URL
+  const id = await saveSharedLineup(data);
+  const url = id ? buildShareUrl(id) : buildShareUrlInline(data);
   const title = data.name ? `Madeira FC — ${data.name}` : "Madeira FC Lineup";
 
   if (navigator.share) {
