@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { saveSharedLineup } from "../firebase";
 
 // =============================================
 // POSITION GROUP RESOLVER
@@ -88,7 +89,6 @@ export function decodeLineup(encoded) {
 // =============================================
 // SHARE URL
 // =============================================
-import { saveSharedLineup } from "../firebase";
 
 export function buildShareUrl(id) {
   const base = window.location.origin + window.location.pathname;
@@ -104,6 +104,7 @@ export function buildShareUrlInline(data) {
 export async function shareLineup(data) {
   // Save to Firestore for a short URL
   const id = await saveSharedLineup(data);
+  console.log("[share] Firestore id:", id, id ? "using short URL" : "falling back to inline");
   const url = id ? buildShareUrl(id) : buildShareUrlInline(data);
   const title = data.name ? `Madeira FC — ${data.name}` : "Madeira FC Lineup";
 
