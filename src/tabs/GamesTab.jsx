@@ -226,7 +226,6 @@ function GameSetupModal({ onClose, onGameCreated }) {
   };
 
   const actionBtnStyle = (bg) => ({
-    width: "100%",
     padding: "13px 0",
     fontSize: 15,
     fontWeight: 700,
@@ -237,6 +236,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
     color: C.white,
     cursor: saving ? "not-allowed" : "pointer",
     opacity: saving ? 0.5 : 1,
+    boxSizing: "border-box",
   });
 
   return (
@@ -247,7 +247,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
       <div style={{
         background: C.navyDark, border: "1px solid rgba(255,255,255,0.12)",
         borderRadius: 14, padding: 24, width: "100%", maxWidth: 400, fontFamily: fontBase,
-        maxHeight: "85dvh", overflowY: "auto",
+        maxHeight: "85dvh", overflowY: "auto", boxSizing: "border-box",
       }}>
         {/* ---- Step 1: Details ---- */}
         {step === "details" && (
@@ -271,7 +271,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
             {error && <p style={{ color: "#F15F5E", fontSize: 13, margin: "0 0 16px", fontWeight: 600 }}>{error}</p>}
 
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={onClose} style={actionBtnStyle("transparent")}>Cancel</button>
+              <button onClick={onClose} style={{ ...actionBtnStyle("transparent"), flex: 1 }}>Cancel</button>
               <button onClick={handleNext} style={{ ...actionBtnStyle(C.orange), flex: 2 }}>Next</button>
             </div>
           </>
@@ -314,13 +314,13 @@ function GameSetupModal({ onClose, onGameCreated }) {
             {error && <p style={{ color: "#F15F5E", fontSize: 13, margin: "0 0 16px", fontWeight: 600 }}>{error}</p>}
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button onClick={() => doCreate(true)} disabled={saving} style={actionBtnStyle(C.orange)}>
+              <button onClick={() => doCreate(true)} disabled={saving} style={{ ...actionBtnStyle(C.orange), width: "100%" }}>
                 {saving ? "Creating..." : "Start Game Now"}
               </button>
-              <button onClick={() => setStep("pickLineup")} disabled={saving} style={actionBtnStyle(C.navyLight)}>
+              <button onClick={() => setStep("pickLineup")} disabled={saving} style={{ ...actionBtnStyle(C.navyLight), width: "100%" }}>
                 Load Lineup
               </button>
-              <button onClick={() => doCreate(false)} disabled={saving} style={actionBtnStyle("transparent")}>
+              <button onClick={() => doCreate(false)} disabled={saving} style={{ ...actionBtnStyle("transparent"), width: "100%" }}>
                 {saving ? "Saving..." : "Save for Later"}
               </button>
             </div>
