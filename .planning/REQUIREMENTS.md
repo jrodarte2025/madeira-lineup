@@ -11,11 +11,11 @@
 
 Extract Madeira-specific values out of code into per-deployment config so a second `.env` + second Firebase project produces a clean, isolated instance.
 
-- [ ] **CFG-01**: Firebase connection config (apiKey, authDomain, projectId, etc.) loaded from environment variables, not hardcoded in `src/firebase.js`
+- [x] **CFG-01**: Firebase connection config (apiKey, authDomain, projectId, etc.) loaded from environment variables, not hardcoded in `src/firebase.js`
 - [ ] **CFG-02**: Team name loaded from per-deployment config — replaces hardcoded "Madeira" strings in branding, headers, and share cards
 - [ ] **CFG-03**: Initial roster loaded from per-deployment config (not hardcoded in `constants.js`)
 - [ ] **CFG-04**: Allowed formation set loaded from per-deployment config, so 7v7 formations do not appear in Madeira's instance
-- [ ] **CFG-05**: Game-structure model (`halves` vs `quarters`) loaded from per-deployment config
+- [x] **CFG-05**: Game-structure model (`halves` vs `quarters`) loaded from per-deployment config
 - [ ] **CFG-06**: Field circles, bench entries, and share cards render gracefully when a player's jersey number is missing (`null`) — name-only display, no broken chips or empty digits
 
 ### Formations
@@ -100,11 +100,11 @@ Bodhi, Kurry, Henry, Will, Broderick, Nurdil, Lucas, Crew, Max, Mason, Cooper �
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | Phase 8 | Pending |
+| CFG-01 | Phase 8 | Complete |
 | CFG-02 | Phase 8 | Pending |
 | CFG-03 | Phase 8 | Pending |
 | CFG-04 | Phase 8 | Pending |
-| CFG-05 | Phase 8 | Pending |
+| CFG-05 | Phase 8 | Complete |
 | CFG-06 | Phase 8 | Pending |
 | FORM-01 | Phase 9 | Pending |
 | FORM-02 | Phase 9 | Pending |

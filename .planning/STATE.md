@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — Multi-Deployment Support
-status: ready_to_plan
-stopped_at: "Roadmap created — Phase 8 ready to plan"
-last_updated: "2026-04-19"
-last_activity: "2026-04-19 — v3.0 roadmap created (Phases 8-11, 21/21 requirements mapped)"
+status: executing
+stopped_at: Completed 08-01-PLAN.md — pausing before Wave 2 (08-02)
+last_updated: "2026-04-19T19:10:11.131Z"
+last_activity: "2026-04-19 — 08-01 complete (CFG-01, CFG-05). Pausing before Wave 2 (game this afternoon)."
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 4
+  completed_plans: 1
+  percent: 25
 ---
 
 # Project State
@@ -21,34 +21,36 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Coaches can manage lineups, track live games, and review player stats from phone or desktop
-**Current focus:** v3.0 Multi-Deployment Support — Phase 8 (Config Layer Extraction) ready to plan
+**Current focus:** v3.0 Multi-Deployment Support — Phase 8 Wave 2 (08-02 team name swap) next
 
 ## Current Position
 
-Phase: 8 of 11 (Config Layer Extraction) — pending
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-04-19 — v3.0 roadmap created, 21/21 requirements mapped across Phases 8-11
+Phase: 8 of 11 (Config Layer Extraction) — in progress
+Plan: Wave 2 — 08-02 next (08-01 complete)
+Status: Paused before Wave 2 (game this afternoon — clean pause boundary)
+Last activity: 2026-04-19 — 08-01 shipped, CFG-01 + CFG-05 complete, user approved human-verify
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 25% (1 of 4 Phase 8 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v3.0)
-- Average duration: — (pending first plan)
-- Total execution time: —
+- Total plans completed: 1 (v3.0)
+- Average duration: ~15 min
+- Total execution time: ~15 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 8. Config Layer Extraction | 0 | — | — |
+| 8. Config Layer Extraction | 1/4 | 15 min | 15 min |
 | 9. Formations Gating + 7v7 Library | 0 | — | — |
 | 10. Quarter-Based Game Model | 0 | — | — |
 | 11. Second Deployment + Docs | 0 | — | — |
 
 *Updated after each plan completion*
+
+| Phase 08-config-layer-extraction P01 | 15 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -71,6 +73,14 @@ v3.0 roadmap decisions (2026-04-19):
 - MAD-01 / MAD-02 co-located with Phase 10 (highest regression risk during game-flow code changes)
 - Phase 10 may split into sub-plans during `/gsd:plan-phase 10` (lineup prebuild vs live timer + rolling subs vs summary/season stats)
 
+Plan 08-01 decisions (2026-04-19):
+- src/config.js is the ONLY module that reads `import.meta.env` — all downstream consumers import named exports
+- Invalid VITE_GAME_STRUCTURE values throw at import time (fail-fast), not silent-default, to catch typos before Firebase init
+- VITE_GAME_STRUCTURE is lowercase-normalized before validation (tolerates 'Halves' from editor auto-cap)
+- DEPLOYMENT umbrella object reserves undefined keys for teamName/roster/formations so 08-02 and 08-03 can fill them without restructuring imports
+- VITE_DEPLOYMENT_ID is populated in .env.local but not yet consumed — reserved for Phase 11 DEPLOYMENT.md
+- GAME_STRUCTURE is exported-but-unused in Phase 8; Phase 10 is the first consumer (quarter game flow)
+
 ### Pending Todos
 
 None.
@@ -81,6 +91,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-19
-Stopped at: v3.0 roadmap created, Phase 8 ready to plan
-Resume file: None — next step is `/gsd:plan-phase 8`
+Last session: 2026-04-19T19:10:11.130Z
+Stopped at: Completed 08-01-PLAN.md — pausing before Wave 2 (08-02)
+Resume file: None — next step is `/gsd:execute-phase 08` (will pick up 08-02-PLAN.md)

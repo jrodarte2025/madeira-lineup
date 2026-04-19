@@ -58,7 +58,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 **Plans**: 4 plans (Waves 1-4, sequential due to file overlap on MadeiraLineupPlanner.jsx / SharedLineupView.jsx)
 
 Plans:
-- [ ] 08-01-PLAN.md — Create per-deployment config module (src/config.js) + Vite env plumbing + Firebase config from env vars (CFG-01, CFG-05)
+- [x] 08-01-PLAN.md — Create per-deployment config module (src/config.js) + Vite env plumbing + Firebase config from env vars (CFG-01, CFG-05) — completed 2026-04-19
 - [ ] 08-02-PLAN.md — Replace hardcoded "Madeira FC" / "MADEIRA FC" strings with config-driven TEAM_NAME (CFG-02)
 - [ ] 08-03-PLAN.md — Extract roster + formations to per-deployment modules (src/deployments/*.js) + null-safe jersey number rendering (CFG-03, CFG-04, CFG-06)
 - [ ] 08-04-PLAN.md — Friend FC deployment fixture + `build:friend` script + smoke-verify both bundles (re-verifies CFG-01..06)
@@ -120,7 +120,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 (decimal insertions land 
 | 5. Live Game | v2.0 | 5/5 | Complete | 2026-03-16 |
 | 6. Post-Game Summary + Exports | v2.0 | 2/2 | Complete | 2026-03-17 |
 | 7. Season Dashboard + Player Profiles | v2.0 | 3/3 | Complete | 2026-03-17 |
-| 8. Config Layer Extraction | v3.0 | 0/4 | Planned | - |
+| 8. Config Layer Extraction | v3.0 | 1/4 | In Progress | - |
 | 9. Formations Gating + 7v7 Library | v3.0 | 0/TBD | Not started | - |
 | 10. Quarter-Based Game Model | v3.0 | 0/TBD | Not started | - |
 | 11. Second Deployment + Docs | v3.0 | 0/TBD | Not started | - |
