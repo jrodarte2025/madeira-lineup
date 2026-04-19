@@ -98,37 +98,41 @@ Bodhi, Kurry, Henry, Will, Broderick, Nurdil, Lucas, Crew, Max, Mason, Cooper �
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | TBD | Pending |
-| CFG-02 | TBD | Pending |
-| CFG-03 | TBD | Pending |
-| CFG-04 | TBD | Pending |
-| CFG-05 | TBD | Pending |
-| CFG-06 | TBD | Pending |
-| FORM-01 | TBD | Pending |
-| FORM-02 | TBD | Pending |
-| FORM-03 | TBD | Pending |
-| QTR-01 | TBD | Pending |
-| QTR-02 | TBD | Pending |
-| QTR-03 | TBD | Pending |
-| QTR-04 | TBD | Pending |
-| QTR-05 | TBD | Pending |
-| QTR-06 | TBD | Pending |
-| MAD-01 | TBD | Pending |
-| MAD-02 | TBD | Pending |
-| DEPLOY-01 | TBD | Pending |
-| DEPLOY-02 | TBD | Pending |
-| DEPLOY-03 | TBD | Pending |
-| DEPLOY-04 | TBD | Pending |
+| CFG-01 | Phase 8 | Pending |
+| CFG-02 | Phase 8 | Pending |
+| CFG-03 | Phase 8 | Pending |
+| CFG-04 | Phase 8 | Pending |
+| CFG-05 | Phase 8 | Pending |
+| CFG-06 | Phase 8 | Pending |
+| FORM-01 | Phase 9 | Pending |
+| FORM-02 | Phase 9 | Pending |
+| FORM-03 | Phase 9 | Pending |
+| QTR-01 | Phase 10 | Pending |
+| QTR-02 | Phase 10 | Pending |
+| QTR-03 | Phase 10 | Pending |
+| QTR-04 | Phase 10 | Pending |
+| QTR-05 | Phase 10 | Pending |
+| QTR-06 | Phase 10 | Pending |
+| MAD-01 | Phase 10 | Pending |
+| MAD-02 | Phase 10 | Pending |
+| DEPLOY-01 | Phase 11 | Pending |
+| DEPLOY-02 | Phase 11 | Pending |
+| DEPLOY-03 | Phase 11 | Pending |
+| DEPLOY-04 | Phase 11 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 21 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21 ✓
+- Unmapped: 0
+
+**Phase-to-requirement rollup:**
+- Phase 8 (Config Layer Extraction): CFG-01, CFG-02, CFG-03, CFG-04, CFG-05, CFG-06 — 6 requirements
+- Phase 9 (Formations Gating + 7v7 Library): FORM-01, FORM-02, FORM-03 — 3 requirements
+- Phase 10 (Quarter-Based Game Model): QTR-01, QTR-02, QTR-03, QTR-04, QTR-05, QTR-06, MAD-01, MAD-02 — 8 requirements
+- Phase 11 (Second Deployment + Docs): DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04 — 4 requirements
 
 ---
 *Requirements defined: 2026-04-19*
-*Last updated: 2026-04-19 after initial definition*
+*Last updated: 2026-04-19 after roadmap creation — all 21 v3.0 requirements mapped to Phases 8-11*
