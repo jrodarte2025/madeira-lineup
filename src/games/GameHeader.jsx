@@ -76,25 +76,27 @@ function ScoreColumn({ value, side, label, onScoreChange }) {
   );
 }
 
+const HALF_SECONDS = 1800;
+
 function formatCountdown(elapsed) {
-  const remaining = Math.max(0, 1500 - elapsed);
+  const remaining = Math.max(0, HALF_SECONDS - elapsed);
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 function formatStoppage(elapsed) {
-  const extra = elapsed - 1500;
+  const extra = elapsed - HALF_SECONDS;
   const m = Math.floor(extra / 60);
   const s = extra % 60;
   return `+${m}:${String(s).padStart(2, "0")}`;
 }
 
 function getTimerDisplay(gameStatus, displaySeconds) {
-  if (gameStatus === "setup") return "25:00";
+  if (gameStatus === "setup") return "30:00";
   if (gameStatus === "halftime") return "HT";
   if (gameStatus === "completed") return "FT";
-  if (displaySeconds < 1500) return formatCountdown(displaySeconds);
+  if (displaySeconds < HALF_SECONDS) return formatCountdown(displaySeconds);
   return formatStoppage(displaySeconds);
 }
 
@@ -112,7 +114,7 @@ export default function GameHeader({
   const timerStr = getTimerDisplay(gameStatus, displaySeconds);
   const isStoppage =
     (gameStatus === "1st-half" || gameStatus === "2nd-half") &&
-    displaySeconds >= 1500;
+    displaySeconds >= HALF_SECONDS;
   const showEndHalf = gameStatus === "1st-half";
   const showStartSecondHalf = gameStatus === "halftime";
   const showEndGame = gameStatus === "2nd-half";
