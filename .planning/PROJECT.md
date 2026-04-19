@@ -50,16 +50,34 @@ Coaches can manage lineups, track live games, and review player stats — all fr
 
 ### Active
 
-(None — next milestone requirements TBD)
+See `.planning/REQUIREMENTS.md` for v3.0 — Multi-Deployment Support requirements.
 
 ### Out of Scope
 
 - Real-time live score sharing to spectators — coach-only for now, sharing designed for later
 - Video/photo capture during games — too complex, not core to stat tracking
-- Opponent team tracking — focus is on Madeira FC players only
-- Multiple team management — single team (Madeira FC) for now
+- Opponent team tracking — focus is on coaching staff's own players
+- True multi-tenant SaaS (one Firebase project, signup flow, team-scoped data) — deferred; v3.0 ships deployment-per-team instead
+- Real authentication (Firebase Auth, email/password) — v3.0 keeps open Firestore rules; auth is a future milestone
 - React Native / native app — PWA is sufficient
 - CSV export of game stats — descoped during v2.0; utility function exists if needed later
+
+## Current Milestone: v3.0 Multi-Deployment Support
+
+**Goal:** Make the app deployable as an isolated instance for a second coach (7v7, different team) without sharing data with Madeira, and without changing the Madeira instance's behavior.
+
+**Target features:**
+- Extract Madeira-specific values (Firebase config, team name, initial roster, allowed formations, game-structure model) from code into per-deployment config
+- Add 7v7 formations (exposed only on the friend's instance)
+- Add quarter-based game model for the friend's instance: 4 × 12-min quarters, 8 pre-built segment lineups (Q1, Q1.5, Q2, Q2.5, Q3, Q3.5, Q4, Q4.5), rolling subs, clock stops only at halftime
+- Preserve Madeira's instance unchanged: 2 × 25-min halves, 9v9 formations, existing stat/summary behavior
+- Ship a second Firebase project + second hosting URL for the friend's instance with its own config and separate Firestore data
+
+**Scope boundaries:**
+- No shared Firestore, no shared auth, no cross-instance features
+- Open Firestore rules preserved on both instances (same posture as today)
+- Team name swap only — keep navy/orange palette on both (no per-instance theming)
+- "Just this friend" scale — no admin UI, no signup flow, no true multi-tenancy
 
 ## Context
 
@@ -101,4 +119,4 @@ Coaches can manage lineups, track live games, and review player stats — all fr
 | Firestore rules in version control | Track changes, deploy via CLI | ✓ Good |
 
 ---
-*Last updated: 2026-03-17 after v2.0 milestone completion*
+*Last updated: 2026-04-19 after starting v3.0 milestone*
