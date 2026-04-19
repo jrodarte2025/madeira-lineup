@@ -55,10 +55,13 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
   2. A Madeira coach completes a full existing-flow pass (build 1st- and 2nd-half lineup, publish, open live game, run timer, record stats, view summary, view season dashboard) with zero UI or behavior differences from pre-v3.0.
   3. A smoke-level build using a second config file (e.g. `.env.friend`) with team name "Friend FC", the 11-player null-numbered roster (Bodhi, Kurry, Henry, Will, Broderick, Nurdil, Lucas, Crew, Max, Mason, Cooper), a placeholder Firebase config, and `quarters` game model produces a working bundle that renders the roster, branding, and formation list from config — no Firebase project required yet.
   4. Any bench chip, field circle, or share card renders a player whose `num` is `null` as name-only with no broken chip, empty digit slot, or layout break.
-**Plans**: TBD
+**Plans**: 4 plans (Waves 1-4, sequential due to file overlap on MadeiraLineupPlanner.jsx / SharedLineupView.jsx)
 
 Plans:
-- [ ] 08-01: TBD (scoped during `/gsd:plan-phase 8`)
+- [ ] 08-01-PLAN.md — Create per-deployment config module (src/config.js) + Vite env plumbing + Firebase config from env vars (CFG-01, CFG-05)
+- [ ] 08-02-PLAN.md — Replace hardcoded "Madeira FC" / "MADEIRA FC" strings with config-driven TEAM_NAME (CFG-02)
+- [ ] 08-03-PLAN.md — Extract roster + formations to per-deployment modules (src/deployments/*.js) + null-safe jersey number rendering (CFG-03, CFG-04, CFG-06)
+- [ ] 08-04-PLAN.md — Friend FC deployment fixture + `build:friend` script + smoke-verify both bundles (re-verifies CFG-01..06)
 
 ### Phase 9: Formations Gating + 7v7 Library
 **Goal**: The formation library contains both 9v9 and 7v7 formations, and each instance's UI only exposes formations its config allows.
@@ -117,7 +120,7 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 (decimal insertions land 
 | 5. Live Game | v2.0 | 5/5 | Complete | 2026-03-16 |
 | 6. Post-Game Summary + Exports | v2.0 | 2/2 | Complete | 2026-03-17 |
 | 7. Season Dashboard + Player Profiles | v2.0 | 3/3 | Complete | 2026-03-17 |
-| 8. Config Layer Extraction | v3.0 | 0/TBD | Not started | - |
+| 8. Config Layer Extraction | v3.0 | 0/4 | Planned | - |
 | 9. Formations Gating + 7v7 Library | v3.0 | 0/TBD | Not started | - |
 | 10. Quarter-Based Game Model | v3.0 | 0/TBD | Not started | - |
 | 11. Second Deployment + Docs | v3.0 | 0/TBD | Not started | - |
