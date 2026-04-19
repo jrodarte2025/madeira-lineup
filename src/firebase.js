@@ -15,22 +15,9 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
+import { FIREBASE_CONFIG } from "./config";
 
-// =============================================================
-// TODO: Replace these values with your Firebase web app config.
-// Firebase Console → Project Settings → Your Apps → Web app
-// =============================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyAH8wCDYl7d751nr-mpW6_WOGJfIRtyXmI",
-  authDomain: "madeira-fc-lineups.firebaseapp.com",
-  projectId: "madeira-fc-lineups",
-  storageBucket: "madeira-fc-lineups.firebasestorage.app",
-  messagingSenderId: "275318113105",
-  appId: "1:275318113105:web:10c66108571df4a1588970",
-  measurementId: "G-3XPY82HK3K",
-};
-
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 
 const PUBLISHED_DOC = doc(db, "lineups", "published");
