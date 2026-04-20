@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Madeira Game-Day Polish
-status: phase_complete
-stopped_at: "Phase 12 complete — ready for Phase 13 planning"
+status: milestone_code_complete
+stopped_at: "All v2.1 phases code-complete — awaiting human UAT on dev server"
 last_updated: "2026-04-20"
-last_activity: "2026-04-20 — Phase 12 complete (LUX-01..04): isSelected ring, handleBenchTap, 44px SIT button, inactiveIds load guard"
+last_activity: "2026-04-20 — Phases 12, 13, 14, 15 code-complete + committed. 84 tests pass. Human verification bundled at end per user instruction (AFK session)."
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 25
+  completed_phases: 4
+  total_plans: 6
+  completed_plans: 6
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-20)
 
 ## Current Position
 
-Phase: Phase 13 — Stat System + Badge Fix (next to plan)
+Phase: v2.1 complete (Phases 12 → 15 all shipped in code)
 Plan: —
-Status: Phase 12 complete. Next action is `/gsd:plan-phase 13`.
-Last activity: 2026-04-20 — Phase 12 complete (code gaps fixed: isSelected visual, handleBenchTap, 44px SIT button, inactiveIds load guard). Human verification deferred to end of v2.1 per user instruction (AFK).
+Status: All 18 requirements implemented. Awaiting Jim's UAT — start `npm run dev` and work through the success-criteria scenarios per phase.
+Last activity: 2026-04-20 — Full v2.1 AFK run: Phase 12 gap fixes + Phase 13 +skill + badge fix + Phase 14 post-game editing + Phase 15 savedLineups Firestore. 84 vitest tests pass (+11 for eventMutations). Build clean.
 
 ### v2.1 Phase Order
 

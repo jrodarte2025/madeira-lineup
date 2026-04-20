@@ -11,37 +11,37 @@
 
 Gaps discovered during live-game use of the lineup builder.
 
-- [ ] **LUX-01**: Coach can drag a field player onto another field player to swap their positions (e.g., RM → LM via drag)
-- [ ] **LUX-02**: Coach can tap-tap swap between two field players (tap first, tap second → positions swap)
-- [ ] **LUX-03**: Tap-to-sub works in BOTH directions — tap a bench player to send to field AND tap a field player to send to bench
-- [ ] **LUX-04**: Inactive ("unavailable") players are reliably excluded from the bench across all app states (initial load, Firestore sync, mobile tap-to-toggle) — investigate current tap/sync reliability and fix root cause
+- [x] **LUX-01**: Coach can drag a field player onto another field player to swap their positions (e.g., RM → LM via drag)
+- [x] **LUX-02**: Coach can tap-tap swap between two field players (tap first, tap second → positions swap)
+- [x] **LUX-03**: Tap-to-sub works in BOTH directions — tap a bench player to send to field AND tap a field player to send to bench
+- [x] **LUX-04**: Inactive ("unavailable") players are reliably excluded from the bench across all app states (initial load, Firestore sync, mobile tap-to-toggle) — investigate current tap/sync reliability and fix root cause
 
 ### Stat System Improvements
 
-- [ ] **STAT-01**: New `+skill` stat type added to the stat library — neutral gray color, for crediting skillful plays (good dribbles, moves, etc.)
-- [ ] **STAT-02**: `+skill` button available for ALL position groups (GK, DEF, MID, FWD) during live game stat entry
-- [ ] **STAT-03**: `+skill` events tracked per-player, surfaced in post-game summary table, and rolled up into season stats just like existing stats
-- [ ] **STAT-04**: Stat count badges on live-game field circles display whole-game running totals (not reset at halftime)
+- [x] **STAT-01**: New `+skill` stat type added to the stat library — neutral gray color, for crediting skillful plays (good dribbles, moves, etc.)
+- [x] **STAT-02**: `+skill` button available for ALL position groups (GK, DEF, MID, FWD) during live game stat entry
+- [x] **STAT-03**: `+skill` events tracked per-player, surfaced in post-game summary table, and rolled up into season stats just like existing stats
+- [x] **STAT-04**: Stat count badges on live-game field circles display whole-game running totals (not reset at halftime)
 
 ### Post-Game Stat Editing
 
 Coach rewatches film post-game and wants to correct stats. The edit UI lives on the Game Summary Screen. Shared summary URLs and the Share Image feature reflect current state (live-updating — no frozen snapshot).
 
-- [ ] **EDIT-01**: Game Summary Screen shows each player's stat events as an editable list with timestamps
-- [ ] **EDIT-02**: Coach can ADD a new stat event (any stat type, including `+skill`) attributed to any player on any completed game
-- [ ] **EDIT-03**: Coach can DELETE any existing stat event
-- [ ] **EDIT-04**: Coach can REASSIGN an event to a different player
-- [ ] **EDIT-05**: Edits persist to Firestore via existing `replaceGameEvents`; per-player totals and season stats recompute automatically without manual refresh
-- [ ] **EDIT-06**: Shared summary URL and Share Image PNG (on re-download) reflect current edited stats — no separate snapshot-at-finalize behavior
+- [x] **EDIT-01**: Game Summary Screen shows each player's stat events as an editable list with timestamps
+- [x] **EDIT-02**: Coach can ADD a new stat event (any stat type, including `+skill`) attributed to any player on any completed game
+- [x] **EDIT-03**: Coach can DELETE any existing stat event
+- [x] **EDIT-04**: Coach can REASSIGN an event to a different player
+- [x] **EDIT-05**: Edits persist to Firestore via existing `replaceGameEvents`; per-player totals and season stats recompute automatically without manual refresh
+- [x] **EDIT-06**: Shared summary URL and Share Image PNG (on re-download) reflect current edited stats — no separate snapshot-at-finalize behavior
 
 ### Saved Lineups Durability
 
 Safari/iOS clears PWA localStorage after ~7 days (ITP). Saved lineups need durable Firestore storage with localStorage as a cache for offline use.
 
-- [ ] **SAVE-01**: Saved lineups persist to a new Firestore collection (data survives localStorage wipes)
-- [ ] **SAVE-02**: One-shot migration: on first post-upgrade load, any existing localStorage `savedLineups` entries push to Firestore
-- [ ] **SAVE-03**: localStorage retained as read-through cache — app loads instantly from local, then reconciles with Firestore in the background for offline resilience
-- [ ] **SAVE-04**: Save/edit/delete operations write to Firestore AND update the localStorage cache
+- [x] **SAVE-01**: Saved lineups persist to a new Firestore collection (data survives localStorage wipes)
+- [x] **SAVE-02**: One-shot migration: on first post-upgrade load, any existing localStorage `savedLineups` entries push to Firestore
+- [x] **SAVE-03**: localStorage retained as read-through cache — app loads instantly from local, then reconciles with Firestore in the background for offline resilience
+- [x] **SAVE-04**: Save/edit/delete operations write to Firestore AND update the localStorage cache
 
 ## Deferred / Future (not v2.1)
 
@@ -84,24 +84,24 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LUX-01 | Phase 12 — Lineup UX Fixes | Pending |
-| LUX-02 | Phase 12 — Lineup UX Fixes | Pending |
-| LUX-03 | Phase 12 — Lineup UX Fixes | Pending |
-| LUX-04 | Phase 12 — Lineup UX Fixes | Pending |
-| STAT-01 | Phase 13 — Stat System + Badge Fix | Pending |
-| STAT-02 | Phase 13 — Stat System + Badge Fix | Pending |
-| STAT-03 | Phase 13 — Stat System + Badge Fix | Pending |
-| STAT-04 | Phase 13 — Stat System + Badge Fix | Pending |
-| EDIT-01 | Phase 14 — Post-Game Stat Editing | Pending |
-| EDIT-02 | Phase 14 — Post-Game Stat Editing | Pending |
-| EDIT-03 | Phase 14 — Post-Game Stat Editing | Pending |
-| EDIT-04 | Phase 14 — Post-Game Stat Editing | Pending |
-| EDIT-05 | Phase 14 — Post-Game Stat Editing | Pending |
-| EDIT-06 | Phase 14 — Post-Game Stat Editing | Pending |
-| SAVE-01 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
-| SAVE-02 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
-| SAVE-03 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
-| SAVE-04 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
+| LUX-01 | Phase 12 — Lineup UX Fixes | Shipped (code) 2026-04-20 |
+| LUX-02 | Phase 12 — Lineup UX Fixes | Shipped (code) 2026-04-20 |
+| LUX-03 | Phase 12 — Lineup UX Fixes | Shipped (code) 2026-04-20 |
+| LUX-04 | Phase 12 — Lineup UX Fixes | Shipped (code) 2026-04-20 |
+| STAT-01 | Phase 13 — Stat System + Badge Fix | Shipped (code) 2026-04-20 |
+| STAT-02 | Phase 13 — Stat System + Badge Fix | Shipped (code) 2026-04-20 |
+| STAT-03 | Phase 13 — Stat System + Badge Fix | Shipped (code) 2026-04-20 |
+| STAT-04 | Phase 13 — Stat System + Badge Fix | Shipped (code) 2026-04-20 |
+| EDIT-01 | Phase 14 — Post-Game Stat Editing | Shipped (code) 2026-04-20 |
+| EDIT-02 | Phase 14 — Post-Game Stat Editing | Shipped (code) 2026-04-20 |
+| EDIT-03 | Phase 14 — Post-Game Stat Editing | Shipped (code) 2026-04-20 |
+| EDIT-04 | Phase 14 — Post-Game Stat Editing | Shipped (code) 2026-04-20 |
+| EDIT-05 | Phase 14 — Post-Game Stat Editing | Shipped (code) 2026-04-20 |
+| EDIT-06 | Phase 14 — Post-Game Stat Editing | Shipped (code) 2026-04-20 |
+| SAVE-01 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
+| SAVE-02 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
+| SAVE-03 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
+| SAVE-04 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
 
 **Coverage:**
 - v2.1 requirements: 18 total

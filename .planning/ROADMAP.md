@@ -5,7 +5,7 @@
 - ✅ **v1.0 — UX Improvements** - Phases 1-3 (shipped 2026-03-16)
 - ✅ **v2.0 — Live Game Tracking & Stats** - Phases 4-7 (shipped 2026-03-17)
 - ⏸️ **v3.0 — Multi-Deployment Support** - Phases 8-11 (paused — see MILESTONES.md for resume instructions)
-- 🚧 **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (in progress)
+- 🚧 **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (code complete 2026-04-20 — human verification pending)
 
 ## Phases
 
@@ -58,7 +58,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - [x] **Phase 12: Lineup UX Fixes** - Field-to-field swaps (drag + tap), two-way tap-to-sub, reliable inactive filtering — completed 2026-04-20
 - [x] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime — completed 2026-04-20
 - [x] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute — completed 2026-04-20
-- [ ] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration
+- [x] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration — completed 2026-04-20
 
 ## Phase Details
 
@@ -179,7 +179,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 15-01: TBD (scoped during `/gsd:plan-phase 15`)
+- [x] 15-01-PLAN.md — Firestore savedLineups CRUD + read-through cache + one-shot migration (SAVE-01..04) — completed 2026-04-20
 
 ## Progress
 
