@@ -9,6 +9,7 @@ import { computeSeasonDeltaDiff } from "../shared/eventMutations";
 import { loadGame, replaceGameEvents, updateSeasonStats } from "../firebase";
 import ShareCard from "./ShareCard";
 import EventEditor from "./EventEditor";
+import RewatchMode from "./RewatchMode";
 
 // =============================================
 // GAME SUMMARY SCREEN
@@ -26,6 +27,7 @@ export default function GameSummaryScreen() {
   const [error, setError] = useState(null);
   const [toastMsg, setToastMsg] = useState("");
   const [editing, setEditing] = useState(false);
+  const [rewatching, setRewatching] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const cardRef = useRef(null);
@@ -294,15 +296,36 @@ export default function GameSummaryScreen() {
             Share Image
           </button>
           <button
-            style={{ ...exportBtnStyle, backgroundColor: editing ? C.navy : "#4b5563" }}
-            onClick={() => setEditing((v) => !v)}
+            style={{ ...exportBtnStyle, backgroundColor: rewatching ? C.navy : "#4b5563" }}
+            onClick={() => {
+              setRewatching((v) => !v);
+              setEditing(false);
+            }}
           >
-            {editing ? "Done Editing" : "Edit Stats"}
+            {rewatching ? "Done Rewatching" : "Rewatch"}
+          </button>
+          <button
+            style={{ ...exportBtnStyle, backgroundColor: editing ? C.navy : "#4b5563" }}
+            onClick={() => {
+              setEditing((v) => !v);
+              setRewatching(false);
+            }}
+          >
+            {editing ? "Done Editing" : "Edit List"}
           </button>
         </div>
       )}
 
-      {/* Event editor — coach mode only, when editing */}
+      {/* Rewatch mode — tap-to-log-stats flow, mirrors live game */}
+      {!isPublic && rewatching && (
+        <RewatchMode
+          game={game}
+          disabled={saving}
+          onEventAdd={(evt) => handleEventsChange([...(game.events || []), evt])}
+        />
+      )}
+
+      {/* Event editor — form-based add/delete/reassign */}
       {!isPublic && editing && (
         <EventEditor
           events={game.events || []}
