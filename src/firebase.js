@@ -18,13 +18,15 @@ import {
 import { FIREBASE_CONFIG } from "./config";
 
 const app = initializeApp(FIREBASE_CONFIG);
-// Auto-detect long-polling when the default WebChannel transport is blocked
-// (common in iOS Safari private mode, iMessage/LinkedIn/etc. in-app browsers,
-// and some corporate proxies). Prevents the "Fetch API cannot load …
-// firestore.googleapis.com … Listen/channel … due to access control checks"
-// failure that kept share links from loading for some recipients.
+// Force HTTP long-polling instead of the default WebChannel transport.
+// Auto-detection still probes WebChannel first, and on iOS Safari / in-app
+// browsers that probe fails with "access control checks" — keeping share
+// links from loading. Forcing long-polling skips the probe entirely and
+// gets us a single reliable transport. Slightly higher latency than
+// WebChannel, but for this app's traffic profile (one coach, small reads)
+// it's imperceptible.
 const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling: true,
+  experimentalForceLongPolling: true,
 });
 
 const PUBLISHED_DOC = doc(db, "lineups", "published");
