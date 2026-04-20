@@ -1289,7 +1289,9 @@ export default function MadeiraLineupPlanner() {
                 const isTouchDragOver = touchDragState.overTarget === `field-${idx}`;
                 return (
                   <FieldPosition key={`${formation}-${idx}`} pos={pos} player={player}
-                    isHighlighted={!!selectedPlayer && !player} compact={false}
+                    isHighlighted={!!selectedPlayer && !player}
+                    isSelected={!!player && player.id === selectedPlayer}
+                    compact={false}
                     dragSource={dragSource} idx={idx}
                     isTouchDragOver={isTouchDragOver}
                     onDragStart={(e) => handleDragStart(e, player.id, idx)} onDragEnd={handleDragEnd}
