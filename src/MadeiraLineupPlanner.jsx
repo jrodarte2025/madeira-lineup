@@ -37,7 +37,8 @@ function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onD
       </div>
       {(showEdit || isMobile) && !isDimmed && onToggleInactive && (
         <button onClick={(e) => { e.stopPropagation(); onToggleInactive(); }}
-          style={{ background: "rgba(255,120,80,0.15)", border: "none", color: "rgba(255,120,80,0.7)", borderRadius: 4, cursor: "pointer", fontSize: isMobile ? 11 : 10, padding: isMobile ? "4px 10px" : "2px 6px", flexShrink: 0, lineHeight: 1, fontWeight: 700, minHeight: isMobile ? 32 : "auto" }}>SIT</button>
+          aria-label={`Sit out ${player.name}`}
+          style={{ background: "rgba(255,120,80,0.15)", border: "none", color: "rgba(255,120,80,0.7)", borderRadius: 4, cursor: "pointer", fontSize: isMobile ? 12 : 10, padding: isMobile ? "10px 14px" : "2px 6px", flexShrink: 0, lineHeight: 1, fontWeight: 700, minHeight: isMobile ? 44 : "auto", minWidth: isMobile ? 44 : "auto" }}>SIT</button>
       )}
       {showRemove && !isDimmed && (
         <button onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -607,7 +608,7 @@ export default function MadeiraLineupPlanner() {
         if (data.roster) setRoster(data.roster);
         setFormation(data.formation);
         setLineup([...data.lineup]);
-        setInactiveIds([...data.inactiveIds]);
+        setInactiveIds(data.inactiveIds ? [...data.inactiveIds] : []);
         if (data.name) setSharedName(data.name);
         window.history.replaceState({}, "", window.location.pathname);
         setCloudLoaded(true);
@@ -622,7 +623,9 @@ export default function MadeiraLineupPlanner() {
         // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
         if (data.lineup) setLineup([...data.lineup]);
         else if (data.lineups) setLineup([...(data.lineups["1"] || Array(9).fill(null))]);
-        if (data.inactiveIds) setInactiveIds([...data.inactiveIds]);
+        // Always set inactiveIds — treat missing field as empty so a stale
+        // localStorage value never leaks inactives back onto the bench (LUX-04).
+        setInactiveIds(data.inactiveIds ? [...data.inactiveIds] : []);
       }
       setCloudLoaded(true);
     });
