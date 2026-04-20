@@ -4,7 +4,8 @@
 
 - ✅ **v1.0 — UX Improvements** - Phases 1-3 (shipped 2026-03-16)
 - ✅ **v2.0 — Live Game Tracking & Stats** - Phases 4-7 (shipped 2026-03-17)
-- 🚧 **v3.0 — Multi-Deployment Support** - Phases 8-11 (in progress)
+- ⏸️ **v3.0 — Multi-Deployment Support** - Phases 8-11 (paused — see MILESTONES.md for resume instructions)
+- 🚧 **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (in progress)
 
 ## Phases
 
@@ -31,7 +32,9 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 </details>
 
-### 🚧 v3.0 — Multi-Deployment Support (In Progress)
+### ⏸️ v3.0 — Multi-Deployment Support (Paused 2026-04-20)
+
+**Status:** Paused mid-Phase 8 to prioritize Madeira polish (v2.1). See `.planning/MILESTONES.md` for shipped/reverted state and resume instructions. Entry point on resumption: `/gsd:resume-work` or `/gsd:execute-phase 8` (picks up at 08-02).
 
 **Milestone Goal:** Make the app deployable as an isolated instance for a second coach (7v7, quarter-based, different team) without sharing data with Madeira and without changing Madeira's behavior. Ship a second Firebase project + hosting URL driven by per-deployment config, built from the same single repo.
 
@@ -39,10 +42,23 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - Integer phases (8, 9, 10, 11): Planned v3.0 work
 - Decimal phases (e.g., 10.1): Reserved for urgent insertions if needed
 
-- [ ] **Phase 8: Config Layer Extraction** - Pull Madeira-specific values (Firebase, team name, roster, formations, game model) out of code into per-deployment config
+- [~] **Phase 8: Config Layer Extraction** - Partial (08-01 complete, 08-02 reverted, 08-03/04 not started)
 - [ ] **Phase 9: Formations Gating + 7v7 Library** - Add 7v7 formations and gate the selectable formation set by deployment config
 - [ ] **Phase 10: Quarter-Based Game Model** - Add 4×12-min quarter game flow with 8 pre-built segment lineups, rolling mid-quarter subs, and coach-triggered quarter restarts
 - [ ] **Phase 11: Second Deployment + Docs** - Stand up the friend's Firebase project and ship the documented spin-up workflow
+
+### 🚧 v2.1 — Madeira Game-Day Polish (In Progress)
+
+**Milestone Goal:** Fix and extend Madeira's live-game experience based on feedback from the first real game use. Every change scoped to the Madeira instance — no multi-deploy work. Firestore rules remain open (no auth).
+
+**Phase Numbering:**
+- Integer phases (12, 13, 14, 15): Planned v2.1 work (v3.0 reserves 8-11 for future resumption)
+- Decimal phases (e.g., 13.1): Reserved for urgent insertions if needed
+
+- [ ] **Phase 12: Lineup UX Fixes** - Field-to-field swaps (drag + tap), two-way tap-to-sub, reliable inactive filtering
+- [ ] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime
+- [ ] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute
+- [ ] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration
 
 ## Phase Details
 
@@ -59,7 +75,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 Plans:
 - [x] 08-01-PLAN.md — Create per-deployment config module (src/config.js) + Vite env plumbing + Firebase config from env vars (CFG-01, CFG-05) — completed 2026-04-19
-- [ ] 08-02-PLAN.md — Replace hardcoded "Madeira FC" / "MADEIRA FC" strings with config-driven TEAM_NAME (CFG-02)
+- [ ] 08-02-PLAN.md — Replace hardcoded "Madeira FC" / "MADEIRA FC" strings with config-driven TEAM_NAME (CFG-02) — *committed then reverted 2026-04-20; to redo on resume*
 - [ ] 08-03-PLAN.md — Extract roster + formations to per-deployment modules (src/deployments/*.js) + null-safe jersey number rendering (CFG-03, CFG-04, CFG-06)
 - [ ] 08-04-PLAN.md — Friend FC deployment fixture + `build:friend` script + smoke-verify both bundles (re-verifies CFG-01..06)
 
@@ -106,10 +122,69 @@ Plans:
 Plans:
 - [ ] 11-01: TBD (scoped during `/gsd:plan-phase 11`)
 
+### Phase 12: Lineup UX Fixes
+**Goal**: The lineup-builder's drag, tap, and inactive-filtering gaps surfaced in the first real game use are all closed — field-to-field swaps work via both drag and tap, tap-to-sub works in both directions between bench and field, and inactive players never leak back onto the bench regardless of how the toggle was changed.
+**Depends on**: Phase 7 (v2.0 complete) — no v3.0 dependency; operates only on Madeira codepaths
+**Requirements**: LUX-01, LUX-02, LUX-03, LUX-04
+**Success Criteria** (what must be TRUE):
+  1. A coach drags a field player (e.g., RM) onto another field player (e.g., LM) and the two swap positions — both players end up on the field, neither goes to the bench, and the swap persists after reload.
+  2. A coach taps a field player, then taps a second field player, and the two swap positions (equivalent to the drag path, but touch-first for mobile use on the sideline).
+  3. Tap-to-sub works in both directions: tapping a bench player moves them onto the field (replacing a field player per existing rules) AND tapping a field player moves them to the bench, making the vacated position assignable again.
+  4. Toggling a player to inactive from any entry point (desktop click, mobile tap, Firestore sync from another device) immediately removes them from the bench and keeps them off across reload, Firestore sync, and tab switches — the root cause of the sync/tap reliability issue is identified and fixed, not worked around.
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01: TBD (scoped during `/gsd:plan-phase 12`)
+
+### Phase 13: Stat System + Badge Fix
+**Goal**: The stat library supports a new `+skill` stat end-to-end (live game buttons → stat badges → post-game summary → season dashboard) across all position groups, and stat badges on field circles during live games display whole-game running totals that survive halftime.
+**Depends on**: Phase 7 (v2.0 complete). Must ship BEFORE Phase 14 because EDIT-02 (add stat event) depends on `+skill` existing as a selectable stat type.
+**Requirements**: STAT-01, STAT-02, STAT-03, STAT-04
+**Success Criteria** (what must be TRUE):
+  1. During a live game, every position group's stat sheet (GK, DEF, MID, FWD) exposes a `+skill` button styled in neutral gray (#6b7280), visually distinguishable from the orange offensive and teal defensive buttons.
+  2. A `+skill` event logged on a player during live play shows up in the recent-events feed, contributes to that player's on-circle stat badge count, appears in the post-game summary stats table, and rolls up into season stats on the season dashboard — full stack, one logged event, four visible surfaces.
+  3. In a simulated game run where a player earns stats in the 1st half, halftime starts, and additional stats are earned in the 2nd half, that player's on-field stat badge shows the combined 1H+2H count for the entire 2nd half (not reset to zero at kickoff of the 2nd half).
+  4. The recent-events feed and single-tap undo work unchanged for `+skill` events just like all other stat types.
+**Plans**: TBD
+
+Plans:
+- [ ] 13-01: TBD (scoped during `/gsd:plan-phase 13`)
+
+### Phase 14: Post-Game Stat Editing
+**Goal**: A coach can open a completed game, add/delete/reassign any stat event (including `+skill` backfills) with changes persisting to Firestore, recomputing per-player totals and season stats without manual refresh, and reflected live in shared summary URLs and Share Image re-downloads — all without an audit trail (silent edits).
+**Depends on**: Phase 13 (needs `+skill` as a selectable stat type for EDIT-02 backfill path)
+**Requirements**: EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06
+**Success Criteria** (what must be TRUE):
+  1. Opening a completed game's summary screen shows each player's stat events as an editable list with timestamps, grouped or filterable per player, with controls to add, delete, and reassign events visible on the same screen.
+  2. Full end-to-end walk: open a completed game → tap "Add event" → pick a player and stat type (including a `+skill` backfill or a missed goal) → save → the summary table, per-player totals, and season dashboard all reflect the new event within the same session, no manual refresh needed.
+  3. Full end-to-end walk: open a completed game → delete an existing event → the summary table, per-player totals, and season dashboard all decrement correctly; reassigning an event to a different player moves the credit from player A to player B in both the game summary and season totals with one consistent recompute.
+  4. After any edit (add / delete / reassign), opening the shared summary URL in a fresh browser tab shows the current edited stats (no snapshot-at-finalize), and re-downloading the Share Image PNG from the coach's device produces an image rendered from the current edited stats.
+  5. Edits are silent — no audit log, no "edited" badge, no edit history UI appears anywhere (matches the user's explicit decision).
+**Plans**: TBD
+
+Plans:
+- [ ] 14-01: TBD (scoped during `/gsd:plan-phase 14` — likely split across edit UI, event mutation + `replaceGameEvents` wiring, and season-stat delta computation)
+
+### Phase 15: Saved Lineups Firestore Persistence
+**Goal**: Saved lineups survive the Safari/iOS 7-day ITP localStorage wipe by persisting to Firestore, with localStorage kept as a read-through cache for instant loads and offline resilience. Existing saved lineups migrate in a single one-shot operation on first post-upgrade load.
+**Depends on**: None — orthogonal to Phases 12-14; can ship in any order (sequenced last here for a solo-coder's cadence and to isolate Firestore collection work)
+**Requirements**: SAVE-01, SAVE-02, SAVE-03, SAVE-04
+**Success Criteria** (what must be TRUE):
+  1. On first post-upgrade load, any existing localStorage `madeira_savedLineups` entries are detected, pushed to the new Firestore `savedLineups` collection, and a migration flag is set so the migration runs exactly once per device.
+  2. After migration, a coach on the same device can save, edit, and delete lineups and each operation writes to Firestore AND updates the localStorage cache, keeping both in sync.
+  3. Wipe simulation: clearing localStorage for the app domain and reloading shows all previously saved lineups re-appear in the Saved Lineups list — they were read from Firestore and rehydrated into localStorage.
+  4. Offline / cache-first load: a cold page load shows the locally cached lineups instantly (no network wait), then the app reconciles in the background with Firestore and updates the list if any remote-only lineups are found.
+**Plans**: TBD
+
+Plans:
+- [ ] 15-01: TBD (scoped during `/gsd:plan-phase 15`)
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 8 → 9 → 10 → 11 (decimal insertions land between their surrounding integers if used)
+- v2.1 active path: Phase 12 → 13 → 14 → 15 (13 must precede 14 because EDIT-02 depends on `+skill` existing; 15 is orthogonal and runs last for solo-dev cadence)
+- v3.0 paused: Phases 8-11 resume after v2.1 stable; 8 picks up at 08-02
+- Decimal insertions land between their surrounding integers if used
 
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
@@ -120,7 +195,11 @@ Phases execute in numeric order: 8 → 9 → 10 → 11 (decimal insertions land 
 | 5. Live Game | v2.0 | 5/5 | Complete | 2026-03-16 |
 | 6. Post-Game Summary + Exports | v2.0 | 2/2 | Complete | 2026-03-17 |
 | 7. Season Dashboard + Player Profiles | v2.0 | 3/3 | Complete | 2026-03-17 |
-| 8. Config Layer Extraction | v3.0 | 1/4 | In Progress | - |
-| 9. Formations Gating + 7v7 Library | v3.0 | 0/TBD | Not started | - |
-| 10. Quarter-Based Game Model | v3.0 | 0/TBD | Not started | - |
-| 11. Second Deployment + Docs | v3.0 | 0/TBD | Not started | - |
+| 8. Config Layer Extraction | v3.0 | 1/4 | Paused (08-01 complete, 08-02 reverted, 08-03/04 not started) | - |
+| 9. Formations Gating + 7v7 Library | v3.0 | 0/TBD | Paused | - |
+| 10. Quarter-Based Game Model | v3.0 | 0/TBD | Paused | - |
+| 11. Second Deployment + Docs | v3.0 | 0/TBD | Paused | - |
+| 12. Lineup UX Fixes | v2.1 | 0/TBD | Not started | - |
+| 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
+| 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
+| 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |

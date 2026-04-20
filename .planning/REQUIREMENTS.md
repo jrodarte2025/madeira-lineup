@@ -82,34 +82,33 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LUX-01 | TBD | Pending |
-| LUX-02 | TBD | Pending |
-| LUX-03 | TBD | Pending |
-| LUX-04 | TBD | Pending |
-| STAT-01 | TBD | Pending |
-| STAT-02 | TBD | Pending |
-| STAT-03 | TBD | Pending |
-| STAT-04 | TBD | Pending |
-| EDIT-01 | TBD | Pending |
-| EDIT-02 | TBD | Pending |
-| EDIT-03 | TBD | Pending |
-| EDIT-04 | TBD | Pending |
-| EDIT-05 | TBD | Pending |
-| EDIT-06 | TBD | Pending |
-| SAVE-01 | TBD | Pending |
-| SAVE-02 | TBD | Pending |
-| SAVE-03 | TBD | Pending |
-| SAVE-04 | TBD | Pending |
+| LUX-01 | Phase 12 — Lineup UX Fixes | Pending |
+| LUX-02 | Phase 12 — Lineup UX Fixes | Pending |
+| LUX-03 | Phase 12 — Lineup UX Fixes | Pending |
+| LUX-04 | Phase 12 — Lineup UX Fixes | Pending |
+| STAT-01 | Phase 13 — Stat System + Badge Fix | Pending |
+| STAT-02 | Phase 13 — Stat System + Badge Fix | Pending |
+| STAT-03 | Phase 13 — Stat System + Badge Fix | Pending |
+| STAT-04 | Phase 13 — Stat System + Badge Fix | Pending |
+| EDIT-01 | Phase 14 — Post-Game Stat Editing | Pending |
+| EDIT-02 | Phase 14 — Post-Game Stat Editing | Pending |
+| EDIT-03 | Phase 14 — Post-Game Stat Editing | Pending |
+| EDIT-04 | Phase 14 — Post-Game Stat Editing | Pending |
+| EDIT-05 | Phase 14 — Post-Game Stat Editing | Pending |
+| EDIT-06 | Phase 14 — Post-Game Stat Editing | Pending |
+| SAVE-01 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
+| SAVE-02 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
+| SAVE-03 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
+| SAVE-04 | Phase 15 — Saved Lineups Firestore Persistence | Pending |
 
 **Coverage:**
 - v2.1 requirements: 18 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18 ✓
+- Unmapped: 0
+- Coverage: 100%
 
 ---
 *Requirements defined: 2026-04-20*
-*Last updated: 2026-04-20 after initial definition*
+*Last updated: 2026-04-20 after roadmap creation — all 18 v2.1 requirements mapped to Phases 12-15*
