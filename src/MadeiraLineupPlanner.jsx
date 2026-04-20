@@ -635,12 +635,13 @@ export default function MadeiraLineupPlanner() {
   const inactivePlayers = roster.filter((p) => inactiveIds.includes(p.id));
   const getPlayer = (id) => roster.find((p) => p.id === id);
 
-  // Detect duplicate first names among bench players for disambiguation
+  // Detect duplicate first names across the full roster so a bench player
+  // still shows a last initial when their namesake is on the field.
   const dupFirstNames = useMemo(() => {
     const counts = {};
-    availablePlayers.forEach((p) => { const f = p.name.split(" ")[0]; counts[f] = (counts[f] || 0) + 1; });
+    roster.forEach((p) => { const f = p.name.split(" ")[0]; counts[f] = (counts[f] || 0) + 1; });
     return new Set(Object.keys(counts).filter((f) => counts[f] > 1));
-  }, [availablePlayers]);
+  }, [roster]);
   const benchDisplayName = (p) => {
     const parts = p.name.split(" ");
     if (dupFirstNames.has(parts[0]) && parts.length > 1) return `${parts[0]} ${parts[parts.length - 1][0]}.`;
