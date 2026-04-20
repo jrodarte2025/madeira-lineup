@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay, STAT_LABELS, INITIAL_ROSTER } from "../shared/constants";
 import { getSeasonId } from "../shared/seasonUtils";
 import { buildSummaryRows, STAT_ORDER } from "../shared/summaryUtils";
-import { loadSeasonStats, listSeasons, listGames } from "../firebase";
+import { listGames } from "../firebase";
 import { computeSeasonDeltas } from "../shared/seasonUtils";
 
 // =============================================
@@ -31,7 +31,14 @@ export default function StatsTab() {
 
   const defaultSeason = getSeasonId(new Date().toISOString());
 
-  const [seasonData, setSeasonData] = useState(null);
+  // seasonAggBySeason: { [seasonId]: { players: { [playerId]: stats } } }
+  // Always computed client-side from completed games so the dashboard reflects
+  // post-game stat edits without needing the seasonStats Firestore doc to stay
+  // in sync. Previous implementation read from seasonStats/{seasonId} and
+  // only fell back to client-compute if the doc was missing entirely, which
+  // left partially-populated docs stuck showing zeros. Deriving from games
+  // directly is the source of truth.
+  const [seasonAggBySeason, setSeasonAggBySeason] = useState({});
   const [seasons, setSeasons] = useState([defaultSeason]);
   const [currentSeason, setCurrentSeason] = useState(defaultSeason);
   const [sortKey, setSortKey] = useState("totalEvents");
@@ -41,72 +48,58 @@ export default function StatsTab() {
   const [loadingGames, setLoadingGames] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load season data and season list on mount
   useEffect(() => {
     let cancelled = false;
     async function fetchInitial() {
       setLoading(true);
-      let [data, fetchedSeasons] = await Promise.all([
-        loadSeasonStats(defaultSeason),
-        listSeasons(),
-      ]);
-      if (cancelled) return;
-      // Backfill: if no Firestore season data, compute client-side from completed games
-      if (!data) {
-        try {
-          const allGames = await listGames();
-          const completed = allGames.filter((g) => g.status === "completed");
-          const agg = {};
-          const seenSeasons = new Set();
-          for (const game of completed) {
-            const sid = getSeasonId(game.date);
-            if (!sid) continue;
-            seenSeasons.add(sid);
-            const deltas = computeSeasonDeltas(
-              game,
-              game.playerIntervals || {},
-              game.halfIntervals || []
-            );
-            if (!agg[sid]) agg[sid] = {};
-            for (const [pid, stats] of Object.entries(deltas)) {
-              if (!agg[sid][pid]) agg[sid][pid] = {};
-              for (const [key, val] of Object.entries(stats)) {
-                agg[sid][pid][key] = (agg[sid][pid][key] || 0) + val;
-              }
+      try {
+        const allGames = await listGames();
+        if (cancelled) return;
+        const completed = allGames.filter((g) => g.status === "completed");
+        const agg = {};
+        const seenSeasons = new Set();
+        for (const game of completed) {
+          const sid = getSeasonId(game.date);
+          if (!sid) continue;
+          seenSeasons.add(sid);
+          const deltas = computeSeasonDeltas(
+            game,
+            game.playerIntervals || {},
+            game.halfIntervals || []
+          );
+          if (!agg[sid]) agg[sid] = { players: {} };
+          for (const [pid, stats] of Object.entries(deltas)) {
+            if (!agg[sid].players[pid]) agg[sid].players[pid] = {};
+            for (const [key, val] of Object.entries(stats)) {
+              agg[sid].players[pid][key] =
+                (agg[sid].players[pid][key] || 0) + val;
             }
           }
-          if (agg[defaultSeason]) {
-            data = { players: agg[defaultSeason] };
-          }
-          fetchedSeasons = [...seenSeasons].sort().reverse();
-        } catch (err) {
-          console.error("Client-side backfill failed:", err);
         }
+        if (cancelled) return;
+        const mergedSeasons = [
+          defaultSeason,
+          ...[...seenSeasons].sort().reverse().filter((s) => s !== defaultSeason),
+        ];
+        setSeasonAggBySeason(agg);
+        setSeasons(mergedSeasons);
+      } catch (err) {
+        console.error("Failed to load season stats from games:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      if (cancelled) return;
-      // Ensure current season always appears in dropdown
-      const mergedSeasons = [
-        defaultSeason,
-        ...fetchedSeasons.filter((s) => s !== defaultSeason),
-      ];
-      setSeasonData(data);
-      setSeasons(mergedSeasons);
-      setLoading(false);
     }
     fetchInitial();
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reload season data when season selector changes
-  async function handleSeasonChange(newSeason) {
+  function handleSeasonChange(newSeason) {
     setCurrentSeason(newSeason);
     setExpandedPlayerId(null);
     setGamesByPlayer({});
-    setLoading(true);
-    const data = await loadSeasonStats(newSeason);
-    setSeasonData(data);
-    setLoading(false);
   }
+
+  const seasonData = seasonAggBySeason[currentSeason] || null;
 
   // Sort column header handler
   function handleSort(key) {
