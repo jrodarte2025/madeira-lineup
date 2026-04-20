@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import {
-  getFirestore,
+  initializeFirestore,
   doc,
   getDoc,
   getDocs,
@@ -18,7 +18,14 @@ import {
 import { FIREBASE_CONFIG } from "./config";
 
 const app = initializeApp(FIREBASE_CONFIG);
-const db = getFirestore(app);
+// Auto-detect long-polling when the default WebChannel transport is blocked
+// (common in iOS Safari private mode, iMessage/LinkedIn/etc. in-app browsers,
+// and some corporate proxies). Prevents the "Fetch API cannot load …
+// firestore.googleapis.com … Listen/channel … due to access control checks"
+// failure that kept share links from loading for some recipients.
+const db = initializeFirestore(app, {
+  experimentalAutoDetectLongPolling: true,
+});
 
 const PUBLISHED_DOC = doc(db, "lineups", "published");
 const gamesCol = collection(db, "games");
