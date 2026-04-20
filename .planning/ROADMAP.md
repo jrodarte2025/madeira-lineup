@@ -131,10 +131,12 @@ Plans:
   2. A coach taps a field player, then taps a second field player, and the two swap positions (equivalent to the drag path, but touch-first for mobile use on the sideline).
   3. Tap-to-sub works in both directions: tapping a bench player moves them onto the field (replacing a field player per existing rules) AND tapping a field player moves them to the bench, making the vacated position assignable again.
   4. Toggling a player to inactive from any entry point (desktop click, mobile tap, Firestore sync from another device) immediately removes them from the bench and keeps them off across reload, Firestore sync, and tab switches — the root cause of the sync/tap reliability issue is identified and fixed, not worked around.
-**Plans**: TBD
+**Plans**: 3 plans (Waves 1-3, sequential due to shared file `src/MadeiraLineupPlanner.jsx`; each ends in a human-verify checkpoint)
 
 Plans:
-- [ ] 12-01: TBD (scoped during `/gsd:plan-phase 12`)
+- [ ] 12-01-PLAN.md — Field-to-field swap (drag + tap) across desktop and mobile, plus visible selected-state ring on occupied positions (LUX-01, LUX-02)
+- [ ] 12-02-PLAN.md — Two-way tap-to-sub: bench-tap-to-sub-off for field-selected player, preserving existing bench-to-field tap (LUX-03)
+- [ ] 12-03-PLAN.md — Investigate + fix inactive reliability root cause; enlarge mobile SIT target, add realtime sync if diagnosis requires (LUX-04)
 
 ### Phase 13: Stat System + Badge Fix
 **Goal**: The stat library supports a new `+skill` stat end-to-end (live game buttons → stat badges → post-game summary → season dashboard) across all position groups, and stat badges on field circles during live games display whole-game running totals that survive halftime.
@@ -199,7 +201,7 @@ Plans:
 | 9. Formations Gating + 7v7 Library | v3.0 | 0/TBD | Paused | - |
 | 10. Quarter-Based Game Model | v3.0 | 0/TBD | Paused | - |
 | 11. Second Deployment + Docs | v3.0 | 0/TBD | Paused | - |
-| 12. Lineup UX Fixes | v2.1 | 0/TBD | Not started | - |
+| 12. Lineup UX Fixes | v2.1 | 0/3 | Planned (ready to execute) | - |
 | 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
 | 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
 | 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |

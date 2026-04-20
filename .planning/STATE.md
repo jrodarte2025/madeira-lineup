@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Madeira Game-Day Polish
-status: roadmap_complete
-stopped_at: "Roadmap complete — awaiting /gsd:plan-phase 12"
+status: phase_planned
+stopped_at: "Phase 12 planned (3 plans) — awaiting /gsd:execute-phase 12"
 last_updated: "2026-04-20"
-last_activity: "2026-04-20 — v2.1 roadmap created (Phases 12-15, 18/18 requirements mapped)"
+last_activity: "2026-04-20 — Phase 12 planned: 3 plans across 3 waves (LUX-01..04)"
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
   percent: 0
 ---
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-20)
 
 ## Current Position
 
-Phase: Phase 12 — Lineup UX Fixes (next to plan)
-Plan: —
-Status: Roadmap complete; next action is `/gsd:plan-phase 12`
-Last activity: 2026-04-20 — v2.1 roadmap created with Phases 12-15; all 18 requirements mapped
+Phase: Phase 12 — Lineup UX Fixes (planned, awaiting execution)
+Plan: 12-01 next (Wave 1)
+Status: 3 plans written (12-01, 12-02, 12-03); next action is `/gsd:execute-phase 12`
+Last activity: 2026-04-20 — Phase 12 plans written; plan-checker + verification skipped per user (orchestrator failed silently mid-run, recovered manually)
 
 ### v2.1 Phase Order
 
