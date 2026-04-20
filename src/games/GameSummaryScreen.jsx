@@ -36,14 +36,26 @@ export default function GameSummaryScreen() {
     let cancelled = false;
     async function fetchGame() {
       setLoading(true);
-      const data = await loadGame(gameId);
-      if (cancelled) return;
-      if (!data) {
-        setError("Game not found.");
-      } else {
-        setGame(data);
+      setError(null);
+      try {
+        if (!gameId) {
+          throw new Error("Missing game id in URL");
+        }
+        const data = await loadGame(gameId);
+        if (cancelled) return;
+        if (!data) {
+          setError(`Game not found (id: ${gameId}). This link may be broken or the game was deleted.`);
+        } else {
+          setGame(data);
+        }
+      } catch (err) {
+        console.error("[summary] fetchGame failed:", err);
+        if (!cancelled) {
+          setError(`Could not load game: ${err.message || "unknown error"}`);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     }
     fetchGame();
     return () => { cancelled = true; };
@@ -377,6 +389,41 @@ export default function GameSummaryScreen() {
           </tbody>
         </table>
       </div>
+
+      {/* Stat legend — explain non-obvious stat types for parents */}
+      {activeCols.includes("skill") && (
+        <div
+          style={{
+            margin: "0 16px 16px",
+            padding: "10px 14px",
+            background: C.white,
+            borderRadius: 8,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+            fontFamily: fontBase,
+            fontSize: 13,
+            lineHeight: 1.5,
+            color: "#4b5563",
+          }}
+        >
+          <span
+            style={{
+              display: "inline-block",
+              background: "#6b7280",
+              color: C.white,
+              fontWeight: 700,
+              fontSize: 11,
+              letterSpacing: "0.3px",
+              padding: "2px 8px",
+              borderRadius: 4,
+              marginRight: 8,
+              verticalAlign: "middle",
+            }}
+          >
+            +Skill
+          </span>
+          When a player uses a practiced move — a pullback, an Iniesta turn, or any other trick the team works on in training.
+        </div>
+      )}
 
       {/* Off-screen ShareCard for image export */}
       {!isPublic && (
