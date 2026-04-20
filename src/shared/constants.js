@@ -82,11 +82,40 @@ export const STAT_TYPES = {
 // =============================================
 // POSITION STATS — stat list keyed by position group (Phase 5+)
 // =============================================
+// Each position sees its primary stats first, then adjacent categories, then
+// skill at the end. Ordering per position (user-requested):
+//   GK:  GK-specific → DEF → MID → OFF → skill
+//   DEF: DEF → MID → OFF → skill
+//   MID: MID → OFF → DEF → skill
+//   FWD: OFF → MID → DEF → skill
+// All field positions get the full library so a defender can log a great pass
+// and a striker can log a tackle.
 export const POSITION_STATS = {
-  GK: ["save", "distribution", "clearance", "fifty_fifty", "skill"],
-  DEF: ["tackle", "interception", "clearance", "block", "fifty_fifty", "skill"],
-  MID: ["goal", "assist", "great_pass", "shot_on_target", "tackle", "interception", "fifty_fifty", "skill"],
-  FWD: ["goal", "assist", "great_pass", "shot_on_target", "fifty_fifty", "skill"],
+  GK: [
+    "save", "distribution",
+    "tackle", "interception", "clearance", "block",
+    "great_pass", "fifty_fifty",
+    "goal", "assist", "shot_on_target",
+    "skill",
+  ],
+  DEF: [
+    "tackle", "interception", "clearance", "block",
+    "great_pass", "fifty_fifty",
+    "goal", "assist", "shot_on_target",
+    "skill",
+  ],
+  MID: [
+    "great_pass", "fifty_fifty",
+    "goal", "assist", "shot_on_target",
+    "tackle", "interception", "clearance", "block",
+    "skill",
+  ],
+  FWD: [
+    "goal", "assist", "shot_on_target",
+    "great_pass", "fifty_fifty",
+    "tackle", "interception", "clearance", "block",
+    "skill",
+  ],
 };
 
 // =============================================
