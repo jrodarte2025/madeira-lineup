@@ -56,7 +56,7 @@ const clearGameStorage = () => {
 // ---------------------------------------------------------------------------
 // Bench chip for the horizontal bench strip
 // ---------------------------------------------------------------------------
-function BenchChip({ player, minuteCount, onClick, isSubSelected }) {
+function BenchChip({ player, displayName, minuteCount, onClick, isSubSelected }) {
   return (
     <div
       onClick={onClick}
@@ -107,7 +107,7 @@ function BenchChip({ player, minuteCount, onClick, isSubSelected }) {
           textAlign: "center",
         }}
       >
-        {player.name.split(" ")[0]}
+        {displayName || player.name.split(" ")[0]}
       </div>
       {minuteCount > 0 && (
         <div style={{
@@ -742,6 +742,30 @@ export default function LiveGameScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minuteTick, displayMinute, playerIntervals, halfIntervals, fieldPositions, benchPlayers]);
 
+  // Duplicate first-name detection across the FULL in-game roster (field +
+  // bench). A bench chip for "Avery" must display a last-initial when another
+  // Avery is on the field — matches the planner's disambiguation.
+  const dupFirstNames = useMemo(() => {
+    const counts = {};
+    fieldPositions.forEach(({ player }) => {
+      if (!player) return;
+      const f = player.name.split(" ")[0];
+      counts[f] = (counts[f] || 0) + 1;
+    });
+    benchPlayers.forEach((p) => {
+      const f = p.name.split(" ")[0];
+      counts[f] = (counts[f] || 0) + 1;
+    });
+    return new Set(Object.keys(counts).filter((f) => counts[f] > 1));
+  }, [fieldPositions, benchPlayers]);
+  const benchDisplayName = useCallback((p) => {
+    const parts = p.name.split(" ");
+    if (dupFirstNames.has(parts[0]) && parts.length > 1) {
+      return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+    }
+    return parts[0];
+  }, [dupFirstNames]);
+
   // ---------------------------------------------------------------------------
   // Stat recording handlers
   // ---------------------------------------------------------------------------
@@ -979,6 +1003,7 @@ export default function LiveGameScreen() {
                 <BenchChip
                   key={player.id}
                   player={player}
+                  displayName={benchDisplayName(player)}
                   minuteCount={playerMinutes[player.id] || 0}
                   onClick={() => handleBenchTap(player)}
                   isSubSelected={subSource?.id === player.id}
