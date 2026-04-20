@@ -57,7 +57,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 - [x] **Phase 12: Lineup UX Fixes** - Field-to-field swaps (drag + tap), two-way tap-to-sub, reliable inactive filtering — completed 2026-04-20
 - [x] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime — completed 2026-04-20
-- [ ] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute
+- [x] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute — completed 2026-04-20
 - [ ] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration
 
 ## Phase Details
@@ -165,7 +165,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 14-01: TBD (scoped during `/gsd:plan-phase 14` — likely split across edit UI, event mutation + `replaceGameEvents` wiring, and season-stat delta computation)
+- [x] 14-01-PLAN.md — EventEditor UI + eventMutations helpers + GameSummaryScreen wiring (EDIT-01..06) — completed 2026-04-20
 
 ### Phase 15: Saved Lineups Firestore Persistence
 **Goal**: Saved lineups survive the Safari/iOS 7-day ITP localStorage wipe by persisting to Firestore, with localStorage kept as a read-through cache for instant loads and offline resilience. Existing saved lineups migrate in a single one-shot operation on first post-upgrade load.

@@ -1,6 +1,12 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { loadPublishedLineup, savePublishedLineup } from "./firebase";
+import {
+  loadPublishedLineup,
+  savePublishedLineup,
+  listSavedLineups,
+  createSavedLineup,
+  deleteSavedLineup,
+} from "./firebase";
 import { C, fontBase, fontDisplay, FORMATIONS, INITIAL_ROSTER } from "./shared/constants";
 import { abbreviateName, useMediaQuery, encodeLineup, decodeLineup, buildShareUrl, shareLineup } from "./shared/utils";
 import PitchSVG from "./shared/PitchSVG";
@@ -631,6 +637,37 @@ export default function MadeiraLineupPlanner() {
     });
   }, []);
 
+  // Saved lineups: load from Firestore, migrate any local-only entries once
+  useEffect(() => {
+    let cancelled = false;
+    async function reconcileSavedLineups() {
+      try {
+        const local = loadStored("savedLineups", []);
+        const alreadyMigrated = loadStored("savedLineups_migrated", false);
+        // Migration: push local-only entries (without a Firestore id) once.
+        if (!alreadyMigrated && local.length > 0) {
+          const localOnly = local.filter((l) => !l.id);
+          for (const entry of localOnly) {
+            const id = await createSavedLineup(entry);
+            if (id) entry.id = id;
+          }
+          saveStored("savedLineups_migrated", true);
+        }
+        const remote = await listSavedLineups();
+        if (cancelled) return;
+        if (remote && remote.length >= 0) {
+          // Treat remote as source of truth post-migration.
+          setSavedLineups(remote);
+          saveStored("savedLineups", remote);
+        }
+      } catch (err) {
+        console.warn("Saved lineups reconcile failed, keeping local cache:", err);
+      }
+    }
+    reconcileSavedLineups();
+    return () => { cancelled = true; };
+  }, []);
+
   const positions = FORMATIONS[formation];
   const assignedIds = lineup.filter(Boolean);
   const availablePlayers = roster.filter((p) => !assignedIds.includes(p.id) && !inactiveIds.includes(p.id));
@@ -732,12 +769,22 @@ export default function MadeiraLineupPlanner() {
       roster: roster.map((p) => ({ ...p })),
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     };
-    setSavedLineups((prev) => [...prev, snapshot]);
     setModalOpen(false);
-    // Publish to Firestore so all devices see this lineup
-    const ok = await savePublishedLineup(snapshot);
-    if (ok) showToast("Lineup saved & published!");
-    else showToast("Saved locally (cloud sync failed)");
+
+    // Write to Firestore (SAVE-01). Fall back to local-only if offline — the
+    // reconcile effect will migrate it on the next successful load.
+    const id = await createSavedLineup(snapshot);
+    const entry = id ? { ...snapshot, id } : snapshot;
+    setSavedLineups((prev) => [...prev, entry]);
+
+    // Also publish the currently-edited lineup to lineups/published so other
+    // devices see the same working state — separate concern from savedLineups.
+    const publishedOk = await savePublishedLineup(snapshot);
+
+    if (id && publishedOk) showToast("Lineup saved & published!");
+    else if (id) showToast("Saved (publish failed)");
+    else if (publishedOk) showToast("Saved locally (cloud sync failed)");
+    else showToast("Saved locally");
   };
   const loadLineup = (index) => {
     const s = savedLineups[index];
@@ -751,7 +798,13 @@ export default function MadeiraLineupPlanner() {
     setModalOpen(false);
   };
   const deleteLineup = (index) => {
+    const entry = savedLineups[index];
     setSavedLineups((prev) => prev.filter((_, i) => i !== index));
+    if (entry?.id) {
+      deleteSavedLineup(entry.id).catch((err) =>
+        console.warn("Firestore delete failed (will retry on next reconcile):", err)
+      );
+    }
   };
 
   // --- SHARE ---

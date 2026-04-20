@@ -23,6 +23,7 @@ const db = getFirestore(app);
 const PUBLISHED_DOC = doc(db, "lineups", "published");
 const gamesCol = collection(db, "games");
 const sharedCol = collection(db, "sharedLineups");
+const savedLineupsCol = collection(db, "savedLineups");
 
 export async function loadPublishedLineup() {
   try {
@@ -354,4 +355,60 @@ export async function backfillSeasonStats(getSeasonIdFn, computeDeltasFn) {
   }
 
   return completed.length;
+}
+
+// ---------------------------------------------------------------------------
+// Saved Lineups (Firestore-durable presets)
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns all saved lineups, sorted by savedAt desc (falling back to legacy `date`).
+ * @returns {Promise<Array<Object>>} Array of saved lineup objects with id.
+ */
+export async function listSavedLineups() {
+  try {
+    const snap = await getDocs(savedLineupsCol);
+    const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    rows.sort((a, b) => {
+      const aKey = a.savedAt || a.date || "";
+      const bKey = b.savedAt || b.date || "";
+      return bKey.localeCompare(aKey);
+    });
+    return rows;
+  } catch (err) {
+    console.warn("Failed to list saved lineups:", err);
+    return [];
+  }
+}
+
+/**
+ * Creates a saved lineup doc. Returns the new doc id or null on failure.
+ * @param {Object} snapshot  Lineup snapshot
+ * @returns {Promise<string|null>}
+ */
+export async function createSavedLineup(snapshot) {
+  try {
+    const payload = { ...snapshot, savedAt: new Date().toISOString() };
+    delete payload.id;
+    const ref = await addDoc(savedLineupsCol, payload);
+    return ref.id;
+  } catch (err) {
+    console.error("Failed to create saved lineup:", err);
+    return null;
+  }
+}
+
+/**
+ * Deletes a saved lineup doc.
+ * @param {string} id  Firestore doc id
+ * @returns {Promise<boolean>}
+ */
+export async function deleteSavedLineup(id) {
+  try {
+    await deleteDoc(doc(db, "savedLineups", id));
+    return true;
+  } catch (err) {
+    console.error("Failed to delete saved lineup:", err);
+    return false;
+  }
 }
