@@ -56,7 +56,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - Decimal phases (e.g., 13.1): Reserved for urgent insertions if needed
 
 - [x] **Phase 12: Lineup UX Fixes** - Field-to-field swaps (drag + tap), two-way tap-to-sub, reliable inactive filtering — completed 2026-04-20
-- [ ] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime
+- [x] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime — completed 2026-04-20
 - [ ] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute
 - [ ] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration
 
@@ -150,7 +150,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 13-01: TBD (scoped during `/gsd:plan-phase 13`)
+- [x] 13-01-PLAN.md — Add `skill` to POSITION_STATS/STAT_COLORS/STAT_LABELS + STAT_ORDER/MVP_ABBREV; fix `statCounts` half filter (STAT-01..04) — completed 2026-04-20
 
 ### Phase 14: Post-Game Stat Editing
 **Goal**: A coach can open a completed game, add/delete/reassign any stat event (including `+skill` backfills) with changes persisting to Firestore, recomputing per-player totals and season stats without manual refresh, and reflected live in shared summary URLs and Share Image re-downloads — all without an audit trail (silent edits).

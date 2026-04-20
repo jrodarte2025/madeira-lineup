@@ -4,8 +4,11 @@ import { toBlob } from "html-to-image";
 import { C, fontBase, fontDisplay, STAT_LABELS } from "../shared/constants";
 import { abbreviateName } from "../shared/utils";
 import { buildSummaryRows } from "../shared/summaryUtils";
-import { loadGame } from "../firebase";
+import { getSeasonId } from "../shared/seasonUtils";
+import { computeSeasonDeltaDiff } from "../shared/eventMutations";
+import { loadGame, replaceGameEvents, updateSeasonStats } from "../firebase";
 import ShareCard from "./ShareCard";
+import EventEditor from "./EventEditor";
 
 // =============================================
 // GAME SUMMARY SCREEN
@@ -22,6 +25,8 @@ export default function GameSummaryScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toastMsg, setToastMsg] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const cardRef = useRef(null);
 
@@ -45,6 +50,28 @@ export default function GameSummaryScreen() {
   function showToast(msg) {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 2000);
+  }
+
+  async function handleEventsChange(newEvents) {
+    if (!game) return;
+    setSaving(true);
+    const oldEvents = game.events || [];
+    const ok = await replaceGameEvents(gameId, newEvents);
+    if (!ok) {
+      showToast("Save failed");
+      setSaving(false);
+      return;
+    }
+    const seasonId = getSeasonId(game.date);
+    if (seasonId) {
+      const diffs = computeSeasonDeltaDiff(oldEvents, newEvents);
+      for (const [pid, deltas] of Object.entries(diffs)) {
+        await updateSeasonStats(seasonId, pid, deltas);
+      }
+    }
+    setGame((prev) => (prev ? { ...prev, events: newEvents } : prev));
+    setSaving(false);
+    showToast("Saved");
   }
 
   // ---- Derived data (only when game is loaded) ----
@@ -266,7 +293,23 @@ export default function GameSummaryScreen() {
           <button style={exportBtnStyle} onClick={handleShareImage}>
             Share Image
           </button>
+          <button
+            style={{ ...exportBtnStyle, backgroundColor: editing ? C.navy : "#4b5563" }}
+            onClick={() => setEditing((v) => !v)}
+          >
+            {editing ? "Done Editing" : "Edit Stats"}
+          </button>
         </div>
+      )}
+
+      {/* Event editor — coach mode only, when editing */}
+      {!isPublic && editing && (
+        <EventEditor
+          events={game.events || []}
+          roster={game.lineup?.roster || []}
+          onEventsChange={handleEventsChange}
+          disabled={saving}
+        />
       )}
 
       {/* Stats table */}
