@@ -83,10 +83,10 @@ export const STAT_TYPES = {
 // POSITION STATS — stat list keyed by position group (Phase 5+)
 // =============================================
 export const POSITION_STATS = {
-  GK: ["save", "distribution", "clearance", "fifty_fifty"],
-  DEF: ["tackle", "interception", "clearance", "block", "fifty_fifty"],
-  MID: ["goal", "assist", "great_pass", "shot_on_target", "tackle", "interception", "fifty_fifty"],
-  FWD: ["goal", "assist", "great_pass", "shot_on_target", "fifty_fifty"],
+  GK: ["save", "distribution", "clearance", "fifty_fifty", "skill"],
+  DEF: ["tackle", "interception", "clearance", "block", "fifty_fifty", "skill"],
+  MID: ["goal", "assist", "great_pass", "shot_on_target", "tackle", "interception", "fifty_fifty", "skill"],
+  FWD: ["goal", "assist", "great_pass", "shot_on_target", "fifty_fifty", "skill"],
 };
 
 // =============================================
@@ -107,6 +107,7 @@ export const STAT_COLORS = {
   // Neutral
   fifty_fifty: C.statNeutral,
   distribution: C.statNeutral,
+  skill: C.statNeutral,
   // Legacy
   shot: C.statOffensive,
   foul: C.statNeutral,
@@ -127,6 +128,7 @@ export const STAT_LABELS = {
   block: "Block",
   fifty_fifty: "50/50 Won",
   distribution: "Distribution",
+  skill: "+Skill",
   // Legacy
   shot: "Shot",
   foul: "Foul",

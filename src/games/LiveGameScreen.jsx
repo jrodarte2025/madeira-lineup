@@ -836,20 +836,18 @@ export default function LiveGameScreen() {
     }
   }, [gameId, events]);
 
-  // Stat badge counts — per field player for current half only
-  const currentHalf = gameStatus === "1st-half" ? 1 : gameStatus === "2nd-half" ? 2 : null;
-
+  // Stat badge counts — per field player, whole-game running total (both halves).
+  // Previously filtered by current half, which reset badges at halftime (STAT-04).
   const statCounts = useMemo(() => {
     const counts = {};
-    if (!currentHalf) return counts;
     events.forEach((e) => {
-      if (e.type === "stat" && e.half === currentHalf) {
+      if (e.type === "stat") {
         counts[e.playerId] = (counts[e.playerId] || 0) + 1;
       }
     });
     return counts;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events.length, currentHalf]);
+  }, [events.length]);
 
   // ---------------------------------------------------------------------------
   // Render

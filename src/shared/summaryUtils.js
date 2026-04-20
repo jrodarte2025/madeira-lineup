@@ -18,6 +18,7 @@ const MVP_ABBREV = {
   interception: "Int",
   fifty_fifty: "50/50",
   distribution: "Dist",
+  skill: "Sk",
   // Legacy
   shot: "Sh",
   foul: "F",
@@ -36,6 +37,7 @@ export const STAT_ORDER = [
   "interception",
   "fifty_fifty",
   "distribution",
+  "skill",
   "shot",
   "foul",
 ];
