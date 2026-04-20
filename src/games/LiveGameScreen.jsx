@@ -151,6 +151,7 @@ export default function LiveGameScreen() {
 
   // --- Tap-to-sub state (tap bench player, then tap field position to swap) ---
   const [subSource, setSubSource] = useState(null); // bench player selected for sub
+  const [pendingSwapIdx, setPendingSwapIdx] = useState(null); // field idx awaiting swap target
 
   // --- Stat selection state ---
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
@@ -778,8 +779,27 @@ export default function LiveGameScreen() {
     setSelectedPlayerId(null); // clear stat selection when picking a sub
   }, [isInteractive]);
 
-  // Tap a field position — if a bench sub is queued, perform the swap; otherwise select for stats
+  // Tap a field position — priority order:
+  //   1. pending field-to-field swap → swap the two positions
+  //   2. pending bench sub → sub bench player in
+  //   3. otherwise → select for stats (active half only)
   const handleFieldTap = useCallback((idx) => {
+    if (pendingSwapIdx !== null) {
+      if (pendingSwapIdx === idx) {
+        // Tapped the same player — cancel swap mode
+        setPendingSwapIdx(null);
+        return;
+      }
+      const source = fieldPositions[pendingSwapIdx];
+      if (source?.player) {
+        handleSubstitution(
+          { type: "field", idx: pendingSwapIdx, player: source.player },
+          idx
+        );
+      }
+      setPendingSwapIdx(null);
+      return;
+    }
     if (subSource) {
       handleSubstitution({ type: "bench", idx: null, player: subSource }, idx);
       setSubSource(null);
@@ -788,7 +808,19 @@ export default function LiveGameScreen() {
     const player = fieldPositions[idx]?.player;
     if (!player || !isActiveHalfForStats) return;
     setSelectedPlayerId((prev) => (prev === player.id ? null : player.id));
-  }, [subSource, fieldPositions, isActiveHalfForStats, handleSubstitution]);
+  }, [pendingSwapIdx, subSource, fieldPositions, isActiveHalfForStats, handleSubstitution]);
+
+  // Swap button in StatBar — park the currently-selected field player as the
+  // swap source; next field tap picks the partner.
+  const handleSwapInitiate = useCallback(() => {
+    if (!selectedPlayerId) return;
+    const sourceIdx = fieldPositions.findIndex(
+      ({ player }) => player?.id === selectedPlayerId
+    );
+    if (sourceIdx === -1) return;
+    setPendingSwapIdx(sourceIdx);
+    setSelectedPlayerId(null);
+  }, [selectedPlayerId, fieldPositions]);
 
   // Determine the selected player's position group
   const selectedPositionGroup = useMemo(() => {
@@ -1099,7 +1131,7 @@ export default function LiveGameScreen() {
                     ? String(playerMinutes[player.id] ?? 0)
                     : null
                 }
-                isSelected={!!player && player.id === selectedPlayerId}
+                isSelected={(!!player && player.id === selectedPlayerId) || pendingSwapIdx === idx}
                 statCount={player ? (statCounts[player.id] || 0) : 0}
                 onClick={isInteractive ? () => handleFieldTap(idx) : undefined}
               />
@@ -1125,8 +1157,43 @@ export default function LiveGameScreen() {
           positionGroup={selectedPositionGroup}
           playerName={selectedPlayerName}
           onStatTap={handleStatTap}
+          onSwap={handleSwapInitiate}
           disabled={false}
         />
+      )}
+
+      {/* Swap-pending banner */}
+      {pendingSwapIdx !== null && (
+        <div
+          onClick={() => setPendingSwapIdx(null)}
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: C.orange,
+            color: C.white,
+            padding: "14px 16px calc(14px + env(safe-area-inset-bottom, 0px))",
+            fontFamily: fontBase,
+            fontSize: 14,
+            fontWeight: 700,
+            textAlign: "center",
+            letterSpacing: "0.3px",
+            cursor: "pointer",
+            zIndex: 100,
+            boxShadow: "0 -2px 10px rgba(0,0,0,0.3)",
+          }}
+        >
+          Tap another field player to swap with{" "}
+          <span style={{ textDecoration: "underline" }}>
+            {fieldPositions[pendingSwapIdx]?.player
+              ? abbreviateName(fieldPositions[pendingSwapIdx].player.name)
+              : ""}
+          </span>
+          <span style={{ opacity: 0.75, fontWeight: 500, marginLeft: 8 }}>
+            · tap to cancel
+          </span>
+        </div>
       )}
 
     </div>

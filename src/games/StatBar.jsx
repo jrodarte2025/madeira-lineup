@@ -3,7 +3,7 @@ import { C, fontBase, POSITION_STATS, STAT_COLORS, STAT_LABELS } from "../shared
 // =============================================
 // STAT BAR — position-aware stat buttons (wrapping grid, only visible when player selected)
 // =============================================
-export default function StatBar({ positionGroup, playerName, onStatTap, disabled }) {
+export default function StatBar({ positionGroup, playerName, onStatTap, onSwap, disabled }) {
   if (!positionGroup) return null; // hidden when no player selected
 
   const isActive = !disabled;
@@ -24,18 +24,52 @@ export default function StatBar({ positionGroup, playerName, onStatTap, disabled
         WebkitBackdropFilter: "blur(8px)",
       }}
     >
-      {/* Player name label */}
+      {/* Player name label + optional swap button */}
       <div
         style={{
-          fontFamily: fontBase,
-          fontSize: 10,
-          fontWeight: 600,
-          color: "rgba(255,255,255,0.45)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           marginBottom: 6,
-          letterSpacing: "0.3px",
         }}
       >
-        <span style={{ color: C.orange, fontWeight: 700 }}>{playerName}</span>
+        <div
+          style={{
+            fontFamily: fontBase,
+            fontSize: 10,
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.45)",
+            letterSpacing: "0.3px",
+          }}
+        >
+          <span style={{ color: C.orange, fontWeight: 700 }}>{playerName}</span>
+        </div>
+        {onSwap && (
+          <button
+            onClick={isActive ? onSwap : undefined}
+            disabled={!isActive}
+            aria-label={`Swap ${playerName} with another field player`}
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: 6,
+              color: C.white,
+              fontFamily: fontBase,
+              fontSize: 11,
+              fontWeight: 700,
+              padding: "6px 10px",
+              minHeight: 32,
+              cursor: isActive ? "pointer" : "not-allowed",
+              letterSpacing: "0.3px",
+              WebkitTapHighlightColor: "transparent",
+              userSelect: "none",
+              touchAction: "manipulation",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ⇄ Swap
+          </button>
+        )}
       </div>
 
       {/* Stat buttons — wrapping grid */}
