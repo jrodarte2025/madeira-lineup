@@ -18,15 +18,14 @@ import {
 import { FIREBASE_CONFIG } from "./config";
 
 const app = initializeApp(FIREBASE_CONFIG);
-// Force HTTP long-polling instead of the default WebChannel transport.
-// Auto-detection still probes WebChannel first, and on iOS Safari / in-app
-// browsers that probe fails with "access control checks" — keeping share
-// links from loading. Forcing long-polling skips the probe entirely and
-// gets us a single reliable transport. Slightly higher latency than
-// WebChannel, but for this app's traffic profile (one coach, small reads)
-// it's imperceptible.
+// Force HTTP long-polling AND disable fetch streams. iOS Safari's
+// "access control checks" error applies to the fetch-based transport as
+// well, so we need both flags to guarantee the SDK uses plain XHR for
+// every request. This is the stable path for restrictive browser
+// environments (iOS Safari, in-app browsers, strict content blockers).
 const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
+  useFetchStreams: false,
 });
 
 const PUBLISHED_DOC = doc(db, "lineups", "published");
