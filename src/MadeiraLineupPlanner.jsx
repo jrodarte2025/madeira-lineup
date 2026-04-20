@@ -809,6 +809,15 @@ export default function MadeiraLineupPlanner() {
     setDragSource(null);
   };
   const handlePlayerClick = (playerId) => setSelectedPlayer((prev) => (prev === playerId ? null : playerId));
+  // Tap the bench background (not a chip) while a field player is selected → sub them off.
+  const handleBenchTap = (e) => {
+    if (e.target !== e.currentTarget) return;
+    if (!selectedPlayer) return;
+    const selectedPosIndex = lineup.indexOf(selectedPlayer);
+    if (selectedPosIndex === -1) return;
+    removeFromPosition(selectedPosIndex);
+    setSelectedPlayer(null);
+  };
   const handlePositionClick = (posIndex) => {
     if (!selectedPlayer) {
       // No selection — select the field player at this position (if any)
@@ -1129,6 +1138,7 @@ export default function MadeiraLineupPlanner() {
                 <div
                   ref={chipStripRef}
                   data-drop-id="chipstrip"
+                  onClick={handleBenchTap}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={(e) => handleTouchEnd(e, null)}
                   onTouchCancel={handleTouchCancel}
@@ -1313,11 +1323,13 @@ export default function MadeiraLineupPlanner() {
         {!isMobile && (
           <div
             onDragOver={handleRosterDragOver} onDrop={handleRosterDrop} onDragLeave={handleRosterDragLeave}
+            onClick={handleBenchTap}
             style={{
               padding: "9px 24px",
               borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", alignItems: "center",
               gap: 14, background: rosterHover ? "rgba(232,100,32,0.08)" : "rgba(0,0,0,0.12)",
               transition: "background 0.2s ease",
+              cursor: selectedPlayer && lineup.indexOf(selectedPlayer) !== -1 ? "pointer" : "default",
             }}>
             <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "2px", color: "rgba(255,255,255,0.25)", textTransform: "uppercase", flexShrink: 0 }}>BENCH</div>
             <div style={{ display: "flex", gap: 5, flex: 1, overflowX: "auto", padding: "2px 0" }}>
@@ -1346,7 +1358,11 @@ export default function MadeiraLineupPlanner() {
               </div>
             )}
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", flexShrink: 0, fontStyle: "italic" }}>
-              {selectedPlayer ? "Tap a position to assign" : "Click or drag players"}
+              {selectedPlayer
+                ? (lineup.indexOf(selectedPlayer) !== -1
+                    ? "Tap a position to swap, or tap bench to sub out"
+                    : "Tap a position to assign")
+                : "Click or drag players"}
             </div>
           </div>
         )}
