@@ -6,3 +6,6 @@ dist
 # Per-deployment secrets
 .env.local
 .env.*.local
+
+# Firebase CLI cache
+.firebase/
