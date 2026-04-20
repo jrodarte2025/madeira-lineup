@@ -7,12 +7,15 @@ import { C, fontBase, fontDisplay } from "../shared/constants";
 
 function ScoreColumn({ value, side, label, onScoreChange }) {
   const longPressRef = useRef(null);
+  const touchHandledRef = useRef(false);
   const isHome = side === "home";
 
   const handleTouchStart = useCallback((e) => {
     e.preventDefault();
+    touchHandledRef.current = false;
     longPressRef.current = setTimeout(() => {
       longPressRef.current = null;
+      touchHandledRef.current = true;
       onScoreChange(side, -1);
     }, 500);
   }, [side, onScoreChange]);
@@ -22,14 +25,34 @@ function ScoreColumn({ value, side, label, onScoreChange }) {
     if (longPressRef.current) {
       clearTimeout(longPressRef.current);
       longPressRef.current = null;
+      touchHandledRef.current = true;
       onScoreChange(side, 1);
     }
+  }, [side, onScoreChange]);
+
+  // Desktop fallback: touch events never fire, so onClick handles the +1 path.
+  // Long-press decrement is touch-only (mouse can't long-press meaningfully);
+  // desktop users can right-click instead.
+  const handleClick = useCallback(() => {
+    if (touchHandledRef.current) {
+      touchHandledRef.current = false;
+      return;
+    }
+    onScoreChange(side, 1);
+  }, [side, onScoreChange]);
+
+  const handleContextMenu = useCallback((e) => {
+    e.preventDefault();
+    onScoreChange(side, -1);
   }, [side, onScoreChange]);
 
   return (
     <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
+      onClick={handleClick}
+      onContextMenu={handleContextMenu}
+      title={isHome ? "Tap +1 · long-press or right-click -1" : "Tap +1 · long-press or right-click -1"}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -38,8 +61,10 @@ function ScoreColumn({ value, side, label, onScoreChange }) {
         userSelect: "none",
         WebkitUserSelect: "none",
         touchAction: "manipulation",
-        padding: "2px 10px",
+        padding: "6px 14px",
         borderRadius: 8,
+        minWidth: 56,
+        minHeight: 44,
       }}
     >
       <div
