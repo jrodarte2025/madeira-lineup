@@ -50,7 +50,11 @@ Coaches can manage lineups, track live games, and review player stats — all fr
 
 ### Active
 
-See `.planning/REQUIREMENTS.md` for v3.0 — Multi-Deployment Support requirements.
+(Next milestone requirements TBD — defining v2.1)
+
+### Paused
+
+v3.0 Multi-Deployment Support is paused mid-Phase 8. See `.planning/MILESTONES.md` for what shipped, what reverted, and resume instructions.
 
 ### Out of Scope
 
@@ -62,7 +66,11 @@ See `.planning/REQUIREMENTS.md` for v3.0 — Multi-Deployment Support requiremen
 - React Native / native app — PWA is sufficient
 - CSV export of game stats — descoped during v2.0; utility function exists if needed later
 
-## Current Milestone: v3.0 Multi-Deployment Support
+## Current Milestone: v3.0 PAUSED — v2.1 starting
+
+v3.0 Multi-Deployment Support is paused after Plan 08-01 (CFG-01 + CFG-05 shipped). Starting v2.1 Madeira Game-Day Polish to address feedback from live game use. See `.planning/MILESTONES.md` for the paused v3.0 section with resume instructions.
+
+### Paused v3.0 goal (for reference when resuming)
 
 **Goal:** Make the app deployable as an isolated instance for a second coach (7v7, different team) without sharing data with Madeira, and without changing the Madeira instance's behavior.
 
