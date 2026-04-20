@@ -1,85 +1,72 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: — Multi-Deployment Support
-status: executing
-stopped_at: Completed 08-01-PLAN.md — pausing before Wave 2 (08-02)
-last_updated: "2026-04-19T19:10:11.131Z"
-last_activity: "2026-04-19 — 08-01 complete (CFG-01, CFG-05). Pausing before Wave 2 (game this afternoon)."
+milestone: v2.1
+milestone_name: — Madeira Game-Day Polish
+status: defining_requirements
+stopped_at: "Defining requirements for v2.1"
+last_updated: "2026-04-20"
+last_activity: "2026-04-20 — Milestone v2.1 started (v3.0 paused)"
 progress:
-  total_phases: 4
+  total_phases: 0
   completed_phases: 0
-  total_plans: 4
-  completed_plans: 1
-  percent: 25
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-19)
+See: .planning/PROJECT.md (updated 2026-04-20)
 
 **Core value:** Coaches can manage lineups, track live games, and review player stats from phone or desktop
-**Current focus:** v3.0 Multi-Deployment Support — Phase 8 Wave 2 (08-02 team name swap) next
+**Current focus:** v2.1 Madeira Game-Day Polish — defining requirements
 
 ## Current Position
 
-Phase: 8 of 11 (Config Layer Extraction) — in progress
-Plan: Wave 2 — 08-02 next (08-01 complete)
-Status: Paused before Wave 2 (game this afternoon — clean pause boundary)
-Last activity: 2026-04-19 — 08-01 shipped, CFG-01 + CFG-05 complete, user approved human-verify
-
-Progress: [██░░░░░░░░] 25% (1 of 4 Phase 8 plans complete)
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 1 (v3.0)
-- Average duration: ~15 min
-- Total execution time: ~15 min
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 8. Config Layer Extraction | 1/4 | 15 min | 15 min |
-| 9. Formations Gating + 7v7 Library | 0 | — | — |
-| 10. Quarter-Based Game Model | 0 | — | — |
-| 11. Second Deployment + Docs | 0 | — | — |
-
-*Updated after each plan completion*
-
-| Phase 08-config-layer-extraction P01 | 15 min | 2 tasks | 6 files |
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-20 — Milestone v2.1 started after pausing v3.0 mid-Phase-8
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
+See .planning/PROJECT.md Key Decisions table for full history.
 
-v3.0 scope decisions locked during questioning (2026-04-19):
-- Scale: "just this friend" — build minimum config-driven second deployment, no multi-tenancy
-- Auth: open Firestore rules on both instances (same as today)
-- Branding: team name swap only, keep navy/orange palette
-- Game structure (friend's instance): 4 × 12-min quarters, 8 pre-built segment lineups (Q1, Q1.5, Q2, Q2.5, Q3, Q3.5, Q4, Q4.5). Rolling subs mid-quarter (clock keeps running at 6:00 sub swap). Clock STOPS at end of each quarter (Q1, halftime, Q3, Q4) and requires coach to restart.
-- Friend's initial roster (11 players): Bodhi, Kurry, Henry, Will, Broderick, Nurdil, Lucas, Crew, Max, Mason, Cooper — all with `num: null`, coach fills numbers via existing roster UI.
-- Game structure (Madeira instance): unchanged — 2 × 25-min halves, 9v9
-- Formations: add 7v7 formations gated to friend's instance; Madeira sees only 9v9 formations
-- Research: skipped — refactor + known structural variant, no new tech
+v2.1 scope decisions locked during questioning (2026-04-20):
+- Saved lineups: migrate localStorage → Firestore on first load; keep localStorage as read-through cache for offline use
+- Post-game stat editing: live-updating shares (shared URL reflects current stats; PNG regenerates from current stats on re-download)
+- Post-game stat editing: silent edits (no audit trail / edit history UI)
+- +skill stat: neutral gray color; applies to all positions (GK/DEF/MID/FWD); backfillable on past games via the edit-stats UI (shared infra with stat editing)
+- #6 +skill and #7 stat editing share UI: one post-game edit interface handles both new stats and skill backfill
+- Research: skipped (polish + small features on known codebase, no new tech)
 
-v3.0 roadmap decisions (2026-04-19):
-- 4-phase structure aligns with coarse granularity: Config → Formations → Quarter model → Deployment
-- MAD-01 / MAD-02 co-located with Phase 10 (highest regression risk during game-flow code changes)
-- Phase 10 may split into sub-plans during `/gsd:plan-phase 10` (lineup prebuild vs live timer + rolling subs vs summary/season stats)
+### Feedback items from live game (source of v2.1)
 
-Plan 08-01 decisions (2026-04-19):
-- src/config.js is the ONLY module that reads `import.meta.env` — all downstream consumers import named exports
-- Invalid VITE_GAME_STRUCTURE values throw at import time (fail-fast), not silent-default, to catch typos before Firebase init
-- VITE_GAME_STRUCTURE is lowercase-normalized before validation (tolerates 'Halves' from editor auto-cap)
-- DEPLOYMENT umbrella object reserves undefined keys for teamName/roster/formations so 08-02 and 08-03 can fill them without restructuring imports
-- VITE_DEPLOYMENT_ID is populated in .env.local but not yet consumed — reserved for Phase 11 DEPLOYMENT.md
-- GAME_STRUCTURE is exported-but-unused in Phase 8; Phase 10 is the first consumer (quarter game flow)
+Already hotfixed (live on prod):
+- Portrait orientation lock + no pinch zoom
+- Bench disambiguation compares across full roster (not just bench)
+- Half length 30 min (was 25)
+
+Open in v2.1 scope:
+- #2 Field-to-field player swap (drag or tap)
+- #3 Two-way tap-to-sub
+- #5 Unavailable players reliably hidden from bench (investigate + fix)
+- #6 +skill stat
+- #7 Saved lineups migrate to Firestore (keep localStorage as cache)
+- #8 Stat badges aggregate whole game
+- #9 Post-game stat editing
+
+### v3.0 Paused State (for resumption)
+
+- Phase 8 / Plan 08-01 is LIVE on prod (config module + Firebase from env)
+- Plan 08-02 (TEAM_NAME swap) was committed then reverted on 2026-04-20
+- 08-03, 08-04, Phases 9-11 not started
+- All v3.0 planning artifacts preserved in .planning/ for resumption
+- Entry point: `/gsd:resume-work` or `/gsd:execute-phase 8`
 
 ### Pending Todos
 
@@ -91,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-19T19:10:11.130Z
-Stopped at: Completed 08-01-PLAN.md — pausing before Wave 2 (08-02)
-Resume file: None — next step is `/gsd:execute-phase 08` (will pick up 08-02-PLAN.md)
+Last session: 2026-04-20
+Stopped at: v2.1 requirements definition in progress
+Resume file: None

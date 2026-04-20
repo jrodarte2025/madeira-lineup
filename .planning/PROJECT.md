@@ -66,9 +66,23 @@ v3.0 Multi-Deployment Support is paused mid-Phase 8. See `.planning/MILESTONES.m
 - React Native / native app — PWA is sufficient
 - CSV export of game stats — descoped during v2.0; utility function exists if needed later
 
-## Current Milestone: v3.0 PAUSED — v2.1 starting
+## Current Milestone: v2.1 Madeira Game-Day Polish
 
-v3.0 Multi-Deployment Support is paused after Plan 08-01 (CFG-01 + CFG-05 shipped). Starting v2.1 Madeira Game-Day Polish to address feedback from live game use. See `.planning/MILESTONES.md` for the paused v3.0 section with resume instructions.
+**Goal:** Fix and extend Madeira's live-game experience based on feedback from the first real game use. Every change scoped to the Madeira instance — no multi-deploy work.
+
+**Target features:**
+- Field-to-field player swap (drag and tap both)
+- Two-way tap-to-sub (bench↔field works in both directions)
+- Reliable inactive-player filtering on bench (investigate + fix sync/tap bugs)
+- New `+skill` stat (neutral gray, all positions) — including backfill support for past games
+- Saved lineups migrate to Firestore with localStorage kept as read-through cache
+- Stat badges on field circles show whole-game running totals, not per-half
+- Post-game stat editing (add/delete/modify events) in Game Summary Screen; live-updating shares; silent edits
+
+**Scope boundaries:**
+- No minute-interval editing (too complex, not in scope for #7)
+- No edit audit trail (Jim wants silent edits)
+- No multi-deployment, no 7v7, no quarter game model (those are paused v3.0 scope)
 
 ### Paused v3.0 goal (for reference when resuming)
 
@@ -127,4 +141,4 @@ v3.0 Multi-Deployment Support is paused after Plan 08-01 (CFG-01 + CFG-05 shippe
 | Firestore rules in version control | Track changes, deploy via CLI | ✓ Good |
 
 ---
-*Last updated: 2026-04-19 after starting v3.0 milestone*
+*Last updated: 2026-04-20 after pausing v3.0 and starting v2.1 Madeira Game-Day Polish*
