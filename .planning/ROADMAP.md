@@ -55,7 +55,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - Integer phases (12, 13, 14, 15): Planned v2.1 work (v3.0 reserves 8-11 for future resumption)
 - Decimal phases (e.g., 13.1): Reserved for urgent insertions if needed
 
-- [ ] **Phase 12: Lineup UX Fixes** - Field-to-field swaps (drag + tap), two-way tap-to-sub, reliable inactive filtering
+- [x] **Phase 12: Lineup UX Fixes** - Field-to-field swaps (drag + tap), two-way tap-to-sub, reliable inactive filtering — completed 2026-04-20
 - [ ] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime
 - [ ] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute
 - [ ] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration
@@ -134,9 +134,9 @@ Plans:
 **Plans**: 3 plans (Waves 1-3, sequential due to shared file `src/MadeiraLineupPlanner.jsx`; each ends in a human-verify checkpoint)
 
 Plans:
-- [ ] 12-01-PLAN.md — Field-to-field swap (drag + tap) across desktop and mobile, plus visible selected-state ring on occupied positions (LUX-01, LUX-02)
-- [ ] 12-02-PLAN.md — Two-way tap-to-sub: bench-tap-to-sub-off for field-selected player, preserving existing bench-to-field tap (LUX-03)
-- [ ] 12-03-PLAN.md — Investigate + fix inactive reliability root cause; enlarge mobile SIT target, add realtime sync if diagnosis requires (LUX-04)
+- [x] 12-01-PLAN.md — Field-to-field swap (drag + tap) across desktop and mobile, plus visible selected-state ring on occupied positions (LUX-01, LUX-02) — completed 2026-04-20
+- [x] 12-02-PLAN.md — Two-way tap-to-sub: bench-tap-to-sub-off for field-selected player, preserving existing bench-to-field tap (LUX-03) — completed 2026-04-20
+- [x] 12-03-PLAN.md — Investigate + fix inactive reliability root cause; enlarge mobile SIT target, add realtime sync if diagnosis requires (LUX-04) — completed 2026-04-20
 
 ### Phase 13: Stat System + Badge Fix
 **Goal**: The stat library supports a new `+skill` stat end-to-end (live game buttons → stat badges → post-game summary → season dashboard) across all position groups, and stat badges on field circles during live games display whole-game running totals that survive halftime.
