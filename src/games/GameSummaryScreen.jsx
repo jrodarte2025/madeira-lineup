@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { toBlob } from "html-to-image";
+import { TEAM_NAME } from "../config";
 import { C, fontBase, fontDisplay, STAT_LABELS } from "../shared/constants";
 import { abbreviateName } from "../shared/utils";
 import { buildSummaryRows } from "../shared/summaryUtils";
@@ -59,7 +60,7 @@ export default function GameSummaryScreen() {
     if (!game) return;
     if (navigator.share) {
       try {
-        await navigator.share({ title: `Madeira FC vs ${game.opponent}`, url: shareUrl });
+        await navigator.share({ title: `${TEAM_NAME} FC vs ${game.opponent}`, url: shareUrl });
         return;
       } catch (err) {
         if (err.name === "AbortError") return;
@@ -83,7 +84,7 @@ export default function GameSummaryScreen() {
       if (navigator.share && navigator.canShare) {
         const file = new File([blob], "game-summary.png", { type: "image/png" });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "Madeira FC Game Summary", url: shareUrl });
+          await navigator.share({ files: [file], title: `${TEAM_NAME} FC Game Summary`, url: shareUrl });
           return;
         }
       }
@@ -91,7 +92,8 @@ export default function GameSummaryScreen() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `madeira-vs-${(game.opponent || "opponent").toLowerCase().replace(/\s+/g, "-")}.png`;
+      const teamSlug = TEAM_NAME.toLowerCase().replace(/\s+/g, "-");
+      a.download = `${teamSlug}-vs-${(game.opponent || "opponent").toLowerCase().replace(/\s+/g, "-")}.png`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -252,7 +254,7 @@ export default function GameSummaryScreen() {
           </button>
         )}
         <p style={scoreStyle}>
-          Madeira FC {homeScore} – {awayScore} {game.opponent}
+          {TEAM_NAME} FC {homeScore} – {awayScore} {game.opponent}
         </p>
         <p style={dateStyle}>{formatDate(game.date)}</p>
       </div>
