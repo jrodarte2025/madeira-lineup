@@ -20,12 +20,30 @@ function statusColor(status) {
   return C.orange;
 }
 
+// Returns "W" | "L" | "T" from a score object, or null if game hasn't finished.
+function resultFromScore(score) {
+  if (!score) return null;
+  const home = score.home ?? 0;
+  const away = score.away ?? 0;
+  if (home > away) return "W";
+  if (home < away) return "L";
+  return "T";
+}
+
+function resultColor(result) {
+  if (result === "W") return "#10b981"; // success green
+  if (result === "L") return "#ef4444"; // red
+  return C.statNeutral; // T
+}
+
 // ---------------------------------------------------------------------------
 // GameCard with swipe-to-delete
 // ---------------------------------------------------------------------------
 function GameCard({ game, onClick, onDelete }) {
-  const label = STATUS_LABELS[game.status] || game.status;
-  const color = statusColor(game.status);
+  const isCompleted = game.status === "completed";
+  const result = isCompleted ? resultFromScore(game.score) : null;
+  const label = isCompleted && result ? result : STATUS_LABELS[game.status] || game.status;
+  const color = isCompleted && result ? resultColor(result) : statusColor(game.status);
   const dateStr = game.date
     ? new Date(game.date + "T12:00:00").toLocaleDateString("en-US", {
         month: "short",

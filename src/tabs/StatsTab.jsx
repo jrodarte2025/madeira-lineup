@@ -31,7 +31,7 @@ export default function StatsTab() {
 
   const defaultSeason = getSeasonId(new Date().toISOString());
 
-  // seasonAggBySeason: { [seasonId]: { players: { [playerId]: stats } } }
+  // seasonAggBySeason: { [seasonId]: { players: { [playerId]: stats }, record: { w, l, t } } }
   // Always computed client-side from completed games so the dashboard reflects
   // post-game stat edits without needing the seasonStats Firestore doc to stay
   // in sync. Previous implementation read from seasonStats/{seasonId} and
@@ -62,12 +62,20 @@ export default function StatsTab() {
           const sid = getSeasonId(game.date);
           if (!sid) continue;
           seenSeasons.add(sid);
+          if (!agg[sid]) agg[sid] = { players: {}, record: { w: 0, l: 0, t: 0 } };
+
+          // Tally W/L/T from score
+          const home = game.score?.home ?? 0;
+          const away = game.score?.away ?? 0;
+          if (home > away) agg[sid].record.w += 1;
+          else if (home < away) agg[sid].record.l += 1;
+          else agg[sid].record.t += 1;
+
           const deltas = computeSeasonDeltas(
             game,
             game.playerIntervals || {},
             game.halfIntervals || []
           );
-          if (!agg[sid]) agg[sid] = { players: {} };
           for (const [pid, stats] of Object.entries(deltas)) {
             if (!agg[sid].players[pid]) agg[sid].players[pid] = {};
             for (const [key, val] of Object.entries(stats)) {
@@ -340,9 +348,30 @@ export default function StatsTab() {
 
   return (
     <div style={containerStyle}>
-      {/* Header with season selector */}
+      {/* Header with season selector + overall record */}
       <div style={headerStyle}>
-        <p style={titleStyle}>Season Stats</p>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
+          <p style={{ ...titleStyle, margin: 0 }}>Season Stats</p>
+          {seasonData?.record && (seasonData.record.w + seasonData.record.l + seasonData.record.t > 0) && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontFamily: fontDisplay,
+              }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1.5px", color: "rgba(255,255,255,0.5)", textTransform: "uppercase" }}>
+                Record
+              </span>
+              <span style={{ color: "#10b981", fontWeight: 800, fontSize: 18 }}>{seasonData.record.w}</span>
+              <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>–</span>
+              <span style={{ color: "#ef4444", fontWeight: 800, fontSize: 18 }}>{seasonData.record.l}</span>
+              <span style={{ color: "rgba(255,255,255,0.3)", fontWeight: 600 }}>–</span>
+              <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 800, fontSize: 18 }}>{seasonData.record.t}</span>
+            </div>
+          )}
+        </div>
         <select
           style={selectStyle}
           value={currentSeason}
