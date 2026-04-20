@@ -5,6 +5,7 @@ import {
   savePublishedLineup,
   listSavedLineups,
   createSavedLineup,
+  updateSavedLineup,
   deleteSavedLineup,
 } from "./firebase";
 import { C, fontBase, fontDisplay, FORMATIONS, INITIAL_ROSTER } from "./shared/constants";
@@ -154,9 +155,11 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
 // =============================================
 // SAVE / LOAD MODAL
 // =============================================
-function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, onShare, onClose, isMobile }) {
+function SaveLoadModal({ isOpen, mode, savedLineups, currentSavedLineup, onSave, onUpdate, onLoad, onDelete, onShare, onClose, isMobile }) {
   const [name, setName] = useState("");
+  const [saveAsNewMode, setSaveAsNewMode] = useState(false);
   if (!isOpen) return null;
+  const canUpdate = mode === "save" && !!currentSavedLineup && !saveAsNewMode;
 
   return (
     <div style={{
@@ -179,21 +182,52 @@ function SaveLoadModal({ isOpen, mode, savedLineups, onSave, onLoad, onDelete, o
           <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
         </div>
 
-        {mode === "save" && (
+        {mode === "save" && canUpdate && (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: isMobile ? "center" : "flex-start", gap: 10 }}>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontFamily: fontBase, marginBottom: 2 }}>
+              Currently editing: <span style={{ color: C.orange, fontWeight: 600 }}>{currentSavedLineup.name}</span>
+            </div>
+            <button onClick={() => onUpdate()}
+              style={{
+                width: "100%", padding: isMobile ? 12 : 10, background: C.orange, border: "none", borderRadius: 8,
+                color: C.white, fontSize: isMobile ? 14 : 14, fontWeight: 700, cursor: "pointer", fontFamily: fontBase,
+              }}>
+              Update "{currentSavedLineup.name}"
+            </button>
+            <button onClick={() => setSaveAsNewMode(true)}
+              style={{
+                width: "100%", padding: isMobile ? 10 : 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8,
+                color: C.white, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: fontBase,
+              }}>
+              Save as new…
+            </button>
+          </div>
+        )}
+
+        {mode === "save" && !canUpdate && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: isMobile ? "center" : "flex-start" }}>
             <input placeholder="Lineup name (e.g. vs. Anderson Twp)" value={name} onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onSave(name.trim()); setName(""); } }}
+              onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onSave(name.trim()); setName(""); setSaveAsNewMode(false); } }}
               style={{
                 width: "100%", padding: isMobile ? "8px 10px" : "10px 12px", background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: C.white,
                 fontSize: isMobile ? 16 : 14, fontFamily: fontBase, outline: "none", marginBottom: 8,
               }} autoFocus />
-            <button onClick={() => { if (name.trim()) { onSave(name.trim()); setName(""); } }}
+            <button onClick={() => { if (name.trim()) { onSave(name.trim()); setName(""); setSaveAsNewMode(false); } }}
               style={{
                 width: "100%", padding: isMobile ? 8 : 10, background: C.orange, border: "none", borderRadius: 8,
                 color: C.white, fontSize: isMobile ? 13 : 14, fontWeight: 700, cursor: "pointer", fontFamily: fontBase,
                 opacity: name.trim() ? 1 : 0.4,
               }}>Save</button>
+            {currentSavedLineup && saveAsNewMode && (
+              <button onClick={() => setSaveAsNewMode(false)}
+                style={{
+                  width: "100%", padding: isMobile ? 8 : 6, background: "transparent", border: "none",
+                  color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer", fontFamily: fontBase, marginTop: 6,
+                }}>
+                ← Back to update "{currentSavedLineup.name}"
+              </button>
+            )}
           </div>
         )}
 
@@ -567,6 +601,9 @@ export default function MadeiraLineupPlanner() {
   const [newName, setNewName] = useState("");
   const [newNum, setNewNum] = useState("");
   const [savedLineups, setSavedLineups] = useState(() => loadStored("savedLineups", []));
+  // Tracks which saved lineup the working state came from (null = brand new).
+  // Drives the Save modal's "Update existing" vs "Save as new" choice.
+  const [currentSavedLineupId, setCurrentSavedLineupId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("save");
   const [rosterOpen, setRosterOpen] = useState(false);
@@ -728,6 +765,7 @@ export default function MadeiraLineupPlanner() {
     setLineup(Array(9).fill(null));
     setInactiveIds([]);
     setSelectedPlayer(null);
+    setCurrentSavedLineupId(null);
   };
 
   // --- INACTIVE ---
@@ -786,6 +824,8 @@ export default function MadeiraLineupPlanner() {
     }
     const entry = id ? { ...snapshot, id } : snapshot;
     setSavedLineups((prev) => [...prev, entry]);
+    // The new entry is now the "current" one — future Save actions target it.
+    if (id) setCurrentSavedLineupId(id);
 
     // Also publish the currently-edited lineup to lineups/published so other
     // devices see the same working state — separate concern from savedLineups.
@@ -795,6 +835,38 @@ export default function MadeiraLineupPlanner() {
     else if (id) showToast("Saved (publish failed)");
     else if (publishedOk) showToast("Saved locally — cloud save failed");
     else showToast("Saved locally only");
+  };
+
+  // Overwrite the currently-loaded saved lineup with the working state.
+  const updateLineup = async () => {
+    if (!currentSavedLineupId) return;
+    const existing = savedLineups.find((s) => s.id === currentSavedLineupId);
+    if (!existing) {
+      showToast("Couldn't find that lineup to update");
+      return;
+    }
+    const snapshot = {
+      name: existing.name,
+      formation,
+      lineup: [...lineup],
+      inactiveIds: [...inactiveIds],
+      roster: roster.map((p) => ({ ...p })),
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    };
+    setModalOpen(false);
+
+    const ok = await updateSavedLineup(currentSavedLineupId, snapshot);
+    if (ok) {
+      setSavedLineups((prev) =>
+        prev.map((s) =>
+          s.id === currentSavedLineupId ? { ...snapshot, id: currentSavedLineupId } : s
+        )
+      );
+      const publishedOk = await savePublishedLineup(snapshot);
+      showToast(publishedOk ? `Updated "${existing.name}"` : `Updated (publish failed)`);
+    } else {
+      showToast("Update failed — try again");
+    }
   };
   const loadLineup = (index) => {
     const s = savedLineups[index];
@@ -814,6 +886,8 @@ export default function MadeiraLineupPlanner() {
       // give the impression the entry disappeared.
       setInactiveIds(Array.isArray(s.inactiveIds) ? [...s.inactiveIds] : []);
       setSelectedPlayer(null);
+      // Track the loaded lineup so Save can offer an "Update" option.
+      setCurrentSavedLineupId(s.id || null);
       setModalOpen(false);
     } catch (err) {
       console.error("[savedLineups] loadLineup failed:", err, s);
@@ -823,6 +897,7 @@ export default function MadeiraLineupPlanner() {
   const deleteLineup = (index) => {
     const entry = savedLineups[index];
     setSavedLineups((prev) => prev.filter((_, i) => i !== index));
+    if (entry?.id === currentSavedLineupId) setCurrentSavedLineupId(null);
     if (entry?.id) {
       deleteSavedLineup(entry.id).catch((err) =>
         console.warn("Firestore delete failed (will retry on next reconcile):", err)
@@ -1481,7 +1556,8 @@ export default function MadeiraLineupPlanner() {
 
       {/* SAVE/LOAD MODAL */}
       <SaveLoadModal isOpen={modalOpen} mode={modalMode} savedLineups={savedLineups} isMobile={isMobile}
-        onSave={saveLineup} onLoad={loadLineup} onDelete={deleteLineup} onShare={handleShareSaved} onClose={() => setModalOpen(false)} />
+        currentSavedLineup={savedLineups.find((s) => s.id === currentSavedLineupId) || null}
+        onSave={saveLineup} onUpdate={updateLineup} onLoad={loadLineup} onDelete={deleteLineup} onShare={handleShareSaved} onClose={() => setModalOpen(false)} />
 
       {/* SHARED LINEUP NOTICE — subtle pill, auto-dismisses */}
       {sharedName && (

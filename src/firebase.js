@@ -407,6 +407,25 @@ export async function createSavedLineup(snapshot) {
 }
 
 /**
+ * Overwrites an existing saved lineup doc with a new snapshot. Returns true on
+ * success, false on failure.
+ * @param {string} id         Firestore doc id of the existing saved lineup
+ * @param {Object} snapshot   Replacement lineup snapshot
+ * @returns {Promise<boolean>}
+ */
+export async function updateSavedLineup(id, snapshot) {
+  try {
+    const payload = { ...snapshot, savedAt: new Date().toISOString() };
+    delete payload.id;
+    await setDoc(doc(db, "savedLineups", id), payload);
+    return true;
+  } catch (err) {
+    console.error("Failed to update saved lineup:", err);
+    return false;
+  }
+}
+
+/**
  * Deletes a saved lineup doc.
  * @param {string} id  Firestore doc id
  * @returns {Promise<boolean>}
