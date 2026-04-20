@@ -773,7 +773,17 @@ export default function MadeiraLineupPlanner() {
 
     // Write to Firestore (SAVE-01). Fall back to local-only if offline — the
     // reconcile effect will migrate it on the next successful load.
-    const id = await createSavedLineup(snapshot);
+    let id = null;
+    try {
+      id = await createSavedLineup(snapshot);
+    } catch (err) {
+      console.error("[savedLineups] createSavedLineup threw:", err);
+    }
+    if (id) {
+      console.log("[savedLineups] saved to Firestore:", id, name);
+    } else {
+      console.warn("[savedLineups] write failed — entry is local-only:", name);
+    }
     const entry = id ? { ...snapshot, id } : snapshot;
     setSavedLineups((prev) => [...prev, entry]);
 
@@ -783,19 +793,32 @@ export default function MadeiraLineupPlanner() {
 
     if (id && publishedOk) showToast("Lineup saved & published!");
     else if (id) showToast("Saved (publish failed)");
-    else if (publishedOk) showToast("Saved locally (cloud sync failed)");
-    else showToast("Saved locally");
+    else if (publishedOk) showToast("Saved locally — cloud save failed");
+    else showToast("Saved locally only");
   };
   const loadLineup = (index) => {
     const s = savedLineups[index];
-    if (s.roster) setRoster(s.roster.map((p) => ({ ...p })));
-    setFormation(s.formation);
-    // Support both new shape (lineup: [...]) and legacy saved (lineups: {"1": [...]})
-    if (s.lineup) setLineup([...s.lineup]);
-    else if (s.lineups) setLineup([...(s.lineups["1"] || Array(9).fill(null))]);
-    setInactiveIds([...s.inactiveIds]);
-    setSelectedPlayer(null);
-    setModalOpen(false);
+    if (!s) {
+      console.warn("[savedLineups] loadLineup called with invalid index", index);
+      return;
+    }
+    try {
+      if (Array.isArray(s.roster)) setRoster(s.roster.map((p) => ({ ...p })));
+      if (s.formation) setFormation(s.formation);
+      // Support both new shape (lineup: [...]) and legacy saved (lineups: {"1": [...]})
+      if (Array.isArray(s.lineup)) setLineup([...s.lineup]);
+      else if (s.lineups) setLineup([...(s.lineups["1"] || Array(9).fill(null))]);
+      // Defensive: older saves (or a Firestore doc that dropped the field)
+      // may be missing inactiveIds. Treat missing as empty to avoid a
+      // "[...undefined]" throw that would leave the modal stuck open and
+      // give the impression the entry disappeared.
+      setInactiveIds(Array.isArray(s.inactiveIds) ? [...s.inactiveIds] : []);
+      setSelectedPlayer(null);
+      setModalOpen(false);
+    } catch (err) {
+      console.error("[savedLineups] loadLineup failed:", err, s);
+      showToast("Couldn't load that lineup");
+    }
   };
   const deleteLineup = (index) => {
     const entry = savedLineups[index];
