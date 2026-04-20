@@ -1,5 +1,4 @@
 import { forwardRef } from "react";
-import { TEAM_NAME } from "../config";
 import { getTopMVPs, formatMVPStats } from "../shared/summaryUtils";
 import { abbreviateName } from "../shared/utils";
 
@@ -118,7 +117,7 @@ const ShareCard = forwardRef(function ShareCard({ game, rows }, ref) {
   return (
     <div ref={ref} style={cardStyle}>
       {/* Team label */}
-      <p style={teamLabelStyle}>{TEAM_NAME.toUpperCase()} FC</p>
+      <p style={teamLabelStyle}>MADEIRA FC</p>
 
       {/* Score */}
       <p style={scoreStyle}>{homeScore} – {awayScore}</p>

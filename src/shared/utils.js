@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { saveSharedLineup } from "../firebase";
-import { TEAM_NAME } from "../config";
 
 // =============================================
 // POSITION GROUP RESOLVER
@@ -107,7 +106,7 @@ export async function shareLineup(data) {
   const id = await saveSharedLineup(data);
   console.log("[share] Firestore id:", id, id ? "using short URL" : "falling back to inline");
   const url = id ? buildShareUrl(id) : buildShareUrlInline(data);
-  const title = data.name ? `${TEAM_NAME} FC — ${data.name}` : `${TEAM_NAME} FC Lineup`;
+  const title = data.name ? `Madeira FC — ${data.name}` : "Madeira FC Lineup";
 
   if (navigator.share) {
     try {
