@@ -11,6 +11,15 @@ import {
 import { C, fontBase, fontDisplay } from "./shared/constants";
 import { TEAM_NAME, ROSTER, ALLOWED_FORMATIONS } from "./config";
 import { abbreviateName, useMediaQuery, encodeLineup, decodeLineup, buildShareUrl, shareLineup, formatJerseyNum } from "./shared/utils";
+
+// Per-deployment defaults derived from the allowed formation set.
+// Madeira: "3-3-2" (9 positions). Friend: "2-3-1" (7 positions).
+// All formations within a single deployment have the same position
+// count, so one DEFAULT_POSITION_COUNT covers every formation in
+// this bundle.
+const DEFAULT_FORMATION = Object.keys(ALLOWED_FORMATIONS)[0];
+const DEFAULT_POSITION_COUNT = ALLOWED_FORMATIONS[DEFAULT_FORMATION].length;
+const emptyLineup = () => Array(DEFAULT_POSITION_COUNT).fill(null);
 import PitchSVG from "./shared/PitchSVG";
 import FieldPosition from "./shared/FieldPosition";
 
@@ -602,8 +611,19 @@ export default function MadeiraLineupPlanner() {
 
   const [roster, setRoster] = useState(() => loadStored("roster", ROSTER));
   const [inactiveIds, setInactiveIds] = useState(() => loadStored("inactiveIds", []));
-  const [formation, setFormation] = useState(() => loadStored("formation", "3-3-2"));
-  const [lineup, setLineup] = useState(() => loadStored("lineup", Array(9).fill(null)));
+  const [formation, setFormation] = useState(() => {
+    const stored = loadStored("formation", null);
+    // Reject stored values that aren't in this deployment's allowlist
+    // (e.g., Madeira's "3-3-2" leaking into the friend bundle via shared-
+    // origin localStorage during dev, or a stale value after a coach
+    // changed the allowlist).
+    return (stored && stored in ALLOWED_FORMATIONS) ? stored : DEFAULT_FORMATION;
+  });
+  const [lineup, setLineup] = useState(() => {
+    const stored = loadStored("lineup", null);
+    if (Array.isArray(stored) && stored.length === DEFAULT_POSITION_COUNT) return stored;
+    return emptyLineup();
+  });
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [dragSource, setDragSource] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
@@ -674,7 +694,7 @@ export default function MadeiraLineupPlanner() {
         if (data.formation) setFormation(data.formation);
         // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
         if (data.lineup) setLineup([...data.lineup]);
-        else if (data.lineups) setLineup([...(data.lineups["1"] || Array(9).fill(null))]);
+        else if (data.lineups) setLineup([...(data.lineups["1"] || emptyLineup())]);
         // Always set inactiveIds — treat missing field as empty so a stale
         // localStorage value never leaks inactives back onto the bench (LUX-04).
         setInactiveIds(data.inactiveIds ? [...data.inactiveIds] : []);
@@ -771,7 +791,7 @@ export default function MadeiraLineupPlanner() {
   });
 
   const clearAll = () => {
-    setLineup(Array(9).fill(null));
+    setLineup(emptyLineup());
     setInactiveIds([]);
     setSelectedPlayer(null);
     setCurrentSavedLineupId(null);
@@ -888,7 +908,7 @@ export default function MadeiraLineupPlanner() {
       if (s.formation) setFormation(s.formation);
       // Support both new shape (lineup: [...]) and legacy saved (lineups: {"1": [...]})
       if (Array.isArray(s.lineup)) setLineup([...s.lineup]);
-      else if (s.lineups) setLineup([...(s.lineups["1"] || Array(9).fill(null))]);
+      else if (s.lineups) setLineup([...(s.lineups["1"] || emptyLineup())]);
       // Defensive: older saves (or a Firestore doc that dropped the field)
       // may be missing inactiveIds. Treat missing as empty to avoid a
       // "[...undefined]" throw that would leave the modal stuck open and
@@ -918,7 +938,7 @@ export default function MadeiraLineupPlanner() {
   const handleShareSaved = async (index) => {
     const s = savedLineups[index];
     // Support both new shape and legacy saved lineups
-    const shareData = s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null);
+    const shareData = s.lineup || (s.lineups && s.lineups["1"]) || emptyLineup();
     const result = await shareLineup({ formation: s.formation, lineup: shareData, inactiveIds: s.inactiveIds, roster: s.roster || roster, name: s.name });
     if (result === "copied") showToast("Link copied to clipboard!");
     else if (result === "shared") showToast("Lineup shared!");
