@@ -24,6 +24,8 @@ export const ROSTER = [
   { id: 111, name: "Cooper",    num: null },
 ];
 
-// Phase 8: reuse Madeira's 4 formations so the bundle builds and renders.
-// Phase 9 replaces this with the 7v7 starter set.
-export const ALLOWED_FORMATION_KEYS = ["3-3-2", "3-2-3", "2-3-3", "4-3-1"];
+// Phase 9: 7v7 starter set. The friend's team plays 7v7, so the picker
+// UI only exposes these three formations. The 9v9 formations remain in
+// the library (src/shared/formations.js) for saved-game back-compat but
+// are not selectable in this deployment.
+export const ALLOWED_FORMATION_KEYS = ["2-3-1", "3-2-1", "2-2-2"];

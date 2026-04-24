@@ -56,6 +56,16 @@ describe("deployment resolver — VITE_DEPLOYMENT_ID=madeira", () => {
       ["2-3-3", "3-2-3", "3-3-2", "4-3-1"].sort()
     );
   });
+
+  it("Madeira picker does NOT contain any 7v7 formation (FORM-02 anti-leakage)", async () => {
+    stubBaseEnv({ VITE_DEPLOYMENT_ID: "madeira" });
+
+    const { ALLOWED_FORMATIONS } = await import("../config.js");
+    const keys = Object.keys(ALLOWED_FORMATIONS);
+    for (const sevenV7 of ["2-3-1", "3-2-1", "2-2-2"]) {
+      expect(keys).not.toContain(sevenV7);
+    }
+  });
 });
 
 describe("deployment resolver — VITE_DEPLOYMENT_ID=friend", () => {
@@ -80,6 +90,30 @@ describe("deployment resolver — VITE_DEPLOYMENT_ID=friend", () => {
 
     expect(TEAM_NAME).toBe("Friend FC");
     expect(GAME_STRUCTURE).toBe("quarters");
+  });
+
+  it("exposes the friend's 3 7v7 formations (Phase 9 — FORM-03)", async () => {
+    stubBaseEnv({ VITE_DEPLOYMENT_ID: "friend", VITE_TEAM_NAME: "Friend FC", VITE_GAME_STRUCTURE: "quarters" });
+
+    const { ALLOWED_FORMATIONS } = await import("../config.js");
+
+    expect(Object.keys(ALLOWED_FORMATIONS).sort()).toEqual(
+      ["2-2-2", "2-3-1", "3-2-1"].sort()
+    );
+    // Every 7v7 formation has exactly 7 positions
+    for (const positions of Object.values(ALLOWED_FORMATIONS)) {
+      expect(positions).toHaveLength(7);
+    }
+  });
+
+  it("friend picker does NOT contain any 9v9 formation (FORM-03 anti-leakage)", async () => {
+    stubBaseEnv({ VITE_DEPLOYMENT_ID: "friend", VITE_TEAM_NAME: "Friend FC", VITE_GAME_STRUCTURE: "quarters" });
+
+    const { ALLOWED_FORMATIONS } = await import("../config.js");
+    const keys = Object.keys(ALLOWED_FORMATIONS);
+    for (const nineV9 of ["3-3-2", "3-2-3", "2-3-3", "4-3-1"]) {
+      expect(keys).not.toContain(nineV9);
+    }
   });
 });
 

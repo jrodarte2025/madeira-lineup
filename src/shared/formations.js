@@ -30,4 +30,21 @@ export const FORMATIONS = {
     { label: "RCB", x: 61, y: 76 }, { label: "RB", x: 84, y: 72 }, { label: "LM", x: 22, y: 51 },
     { label: "CM", x: 50, y: 54 }, { label: "RM", x: 78, y: 51 }, { label: "ST", x: 50, y: 30 },
   ],
+
+  // ---- 7v7 (Phase 9) ----
+  "2-3-1": [
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 28, y: 70 }, { label: "RB", x: 72, y: 70 },
+    { label: "LM", x: 22, y: 50 }, { label: "CM", x: 50, y: 54 }, { label: "RM", x: 78, y: 50 },
+    { label: "ST", x: 50, y: 28 },
+  ],
+  "3-2-1": [
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 22, y: 73 }, { label: "CB", x: 50, y: 76 },
+    { label: "RB", x: 78, y: 73 }, { label: "LCM", x: 36, y: 52 }, { label: "RCM", x: 64, y: 52 },
+    { label: "ST", x: 50, y: 28 },
+  ],
+  "2-2-2": [
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 28, y: 72 }, { label: "RB", x: 72, y: 72 },
+    { label: "LCM", x: 36, y: 52 }, { label: "RCM", x: 64, y: 52 },
+    { label: "LS", x: 36, y: 28 }, { label: "RS", x: 64, y: 28 },
+  ],
 };
