@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:friend": "vite --mode friend",
     "build": "vite build",
+    "build:friend": "vite build --mode friend",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:friend": "vite preview --mode friend",
+    "test": "vitest"
   },
   "dependencies": {
     "firebase": "^12.10.0",

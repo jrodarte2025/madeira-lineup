@@ -102,14 +102,40 @@ export const TEAM_NAME = resolveTeamName();
 // ---------------------------------------------------------------------------
 // Roster + formations (per-deployment)
 // ---------------------------------------------------------------------------
-// TODO(08-04): select deployment module dynamically by VITE_DEPLOYMENT_ID.
-// For Plan 08-03 this is a static import to madeira to keep the refactor
-// focused. 08-04 introduces the src/deployments/friend.js fixture and a
-// dispatch keyed on VITE_DEPLOYMENT_ID.
-import { ROSTER as MADEIRA_ROSTER, ALLOWED_FORMATION_KEYS as MADEIRA_KEYS } from "./deployments/madeira";
+// The active deployment's data is selected by VITE_DEPLOYMENT_ID. Every
+// registered deployment is statically imported so Vite's tree-shaker and
+// env substitution run at build time — dynamic import() doesn't work here
+// because import.meta.env values are frozen at build time, not at module
+// load. The registry below is the canonical list of supported deployment
+// IDs; add new deployments here when onboarding a new team.
+import * as madeiraDeployment from "./deployments/madeira";
+import * as friendDeployment from "./deployments/friend";
 import { FORMATIONS } from "./shared/formations";
 
-export const ROSTER = MADEIRA_ROSTER;
+const DEPLOYMENTS = {
+  madeira: madeiraDeployment,
+  friend: friendDeployment,
+};
+
+function resolveDeploymentId() {
+  const raw = import.meta.env.VITE_DEPLOYMENT_ID;
+  if (raw === undefined || raw === null || raw === "") {
+    throw new Error(
+      "VITE_DEPLOYMENT_ID is required — set it in .env.local or the deployment env file"
+    );
+  }
+  if (!(raw in DEPLOYMENTS)) {
+    throw new Error(
+      `Unknown VITE_DEPLOYMENT_ID: "${raw}" — must be one of: ${Object.keys(DEPLOYMENTS).join(", ")}`
+    );
+  }
+  return raw;
+}
+
+const DEPLOYMENT_ID = resolveDeploymentId();
+const activeDeployment = DEPLOYMENTS[DEPLOYMENT_ID];
+
+export const ROSTER = activeDeployment.ROSTER;
 
 function buildAllowedFormations(keys) {
   const out = {};
@@ -125,7 +151,7 @@ function buildAllowedFormations(keys) {
   return out;
 }
 
-export const ALLOWED_FORMATIONS = buildAllowedFormations(MADEIRA_KEYS);
+export const ALLOWED_FORMATIONS = buildAllowedFormations(activeDeployment.ALLOWED_FORMATION_KEYS);
 
 // ---------------------------------------------------------------------------
 // Umbrella deployment object
