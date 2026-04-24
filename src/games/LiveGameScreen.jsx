@@ -20,6 +20,7 @@ import FieldPosition from "../shared/FieldPosition";
 import GameHeader from "./GameHeader";
 import StatBar from "./StatBar";
 import EventsFeed from "./EventsFeed";
+import DeleteGameButton from "./DeleteGameButton";
 
 // =============================================
 // LIVE GAME SCREEN — orchestrator
@@ -1191,6 +1192,11 @@ export default function LiveGameScreen() {
 
         {/* Events feed below pitch */}
         <EventsFeed events={events} onUndo={handleUndo} />
+
+        {/* Delete game — subtle danger action at the bottom of the live view */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "16px 12px 8px" }}>
+          <DeleteGameButton gameId={gameId} compact />
+        </div>
 
         {/* Stat bar spacer — only when a player is selected and stat bar visible */}
         {isActiveHalfForStats && selectedPlayerId && <div style={{ height: 110 }} />}

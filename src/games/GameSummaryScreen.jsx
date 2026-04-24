@@ -11,6 +11,7 @@ import { loadGame, replaceGameEvents, updateSeasonStats } from "../firebase";
 import ShareCard from "./ShareCard";
 import EventEditor from "./EventEditor";
 import RewatchMode from "./RewatchMode";
+import DeleteGameButton from "./DeleteGameButton";
 
 // =============================================
 // GAME SUMMARY SCREEN
@@ -424,6 +425,13 @@ export default function GameSummaryScreen() {
             +Skill
           </span>
           When a player uses a practiced move — a pullback, an Iniesta turn, or any other trick the team works on in training.
+        </div>
+      )}
+
+      {/* Delete game — subtle danger action at the bottom, coach-only */}
+      {!isPublic && (
+        <div style={{ display: "flex", justifyContent: "center", padding: "24px 16px 40px" }}>
+          <DeleteGameButton gameId={gameId} />
         </div>
       )}
 
