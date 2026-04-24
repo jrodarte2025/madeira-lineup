@@ -971,7 +971,12 @@ export default function LiveGameScreen() {
     );
   }
 
-  const HEADER_HEIGHT = 56;
+  // Header has a score row (~56px) plus, whenever we're in an active or
+  // break state, a primary-action button row ("End Q1" / "Start Q2" /
+  // "Full Time!" / etc.) that adds ~36px. During setup and completed the
+  // button is hidden so the header is score-row-only.
+  const hasActionButton = isActiveStatus(gameStatus) || isBreakStatus(gameStatus);
+  const HEADER_HEIGHT = hasActionButton ? 92 : 56;
 
   return (
     <div
