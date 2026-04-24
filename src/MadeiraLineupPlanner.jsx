@@ -692,7 +692,7 @@ export default function MadeiraLineupPlanner() {
         }
         const remote = await listSavedLineups();
         if (cancelled) return;
-        if (remote && remote.length >= 0) {
+        if (remote !== null) {
           // Treat remote as source of truth post-migration.
           setSavedLineups(remote);
           saveStored("savedLineups", remote);

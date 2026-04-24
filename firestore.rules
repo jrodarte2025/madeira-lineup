@@ -38,5 +38,10 @@ service cloud.firestore {
     match /sharedLineups/{docId} {
       allow read, write: if true;
     }
+
+    // Saved lineup presets (coach-created, durable across devices)
+    match /savedLineups/{docId} {
+      allow read, write: if true;
+    }
   }
 }

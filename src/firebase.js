@@ -385,7 +385,7 @@ export async function listSavedLineups() {
     return rows;
   } catch (err) {
     console.warn("Failed to list saved lineups:", err);
-    return [];
+    return null;
   }
 }
 
