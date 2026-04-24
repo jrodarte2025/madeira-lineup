@@ -8,9 +8,9 @@ import {
   updateSavedLineup,
   deleteSavedLineup,
 } from "./firebase";
-import { C, fontBase, fontDisplay, FORMATIONS, INITIAL_ROSTER } from "./shared/constants";
-import { TEAM_NAME } from "./config";
-import { abbreviateName, useMediaQuery, encodeLineup, decodeLineup, buildShareUrl, shareLineup } from "./shared/utils";
+import { C, fontBase, fontDisplay } from "./shared/constants";
+import { TEAM_NAME, ROSTER, ALLOWED_FORMATIONS } from "./config";
+import { abbreviateName, useMediaQuery, encodeLineup, decodeLineup, buildShareUrl, shareLineup, formatJerseyNum } from "./shared/utils";
 import PitchSVG from "./shared/PitchSVG";
 import FieldPosition from "./shared/FieldPosition";
 
@@ -39,7 +39,7 @@ function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onD
         background: isSelected ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontFamily: fontDisplay, fontSize: isDimmed ? 10 : 12, fontWeight: 800, flexShrink: 0, color: C.white,
-      }}>{player.num}</div>
+      }}>{formatJerseyNum(player.num) ?? ""}</div>
       <div style={{ fontSize: isDimmed ? 12 : 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
         {player.name}
       </div>
@@ -99,10 +99,14 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
                 color: player ? C.navy : "#bbb",
               }}>
                 {player ? (
-                  <>
-                    <span style={{ fontSize: 9, lineHeight: 1 }}>{player.num}</span>
-                    <span style={{ fontSize: 4, letterSpacing: "0.4px", color: C.orange, lineHeight: 1, marginTop: 1 }}>{pos.label}</span>
-                  </>
+                  formatJerseyNum(player.num) != null ? (
+                    <>
+                      <span style={{ fontSize: 9, lineHeight: 1 }}>{formatJerseyNum(player.num)}</span>
+                      <span style={{ fontSize: 4, letterSpacing: "0.4px", color: C.orange, lineHeight: 1, marginTop: 1 }}>{pos.label}</span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: 7, letterSpacing: "0.4px", color: C.orange, lineHeight: 1 }}>{pos.label}</span>
+                  )
                 ) : (
                   <span style={{ fontSize: 5.5 }}>{pos.label}</span>
                 )}
@@ -124,7 +128,9 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
               display: "flex", alignItems: "center", gap: 2, padding: "1px 5px", borderRadius: 6,
               border: `1px solid #ddd`, fontSize: 7, fontFamily: fontBase, color: C.navy,
             }}>
-              <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7 }}>{p.num}</span>
+              {formatJerseyNum(p.num) != null && (
+                <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7 }}>{formatJerseyNum(p.num)}</span>
+              )}
               <span style={{ fontWeight: 600 }}>{p.name}</span>
             </div>
           ))}
@@ -142,7 +148,9 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
                 border: "1px solid #e0e0e0", fontSize: 7, fontFamily: fontBase, color: "#999",
                 textDecoration: "line-through",
               }}>
-                <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7 }}>{p.num}</span>
+                {formatJerseyNum(p.num) != null && (
+                  <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 7 }}>{formatJerseyNum(p.num)}</span>
+                )}
                 <span style={{ fontWeight: 600 }}>{p.name}</span>
               </div>
             ))}
@@ -372,7 +380,7 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
               width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.08)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: fontDisplay, fontSize: 9, fontWeight: 800, flexShrink: 0, color: C.white,
-            }}>{p.num}</div>
+            }}>{formatJerseyNum(p.num) ?? ""}</div>
             <div style={{ fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, color: "rgba(255,255,255,0.5)" }}>
               {p.name}
             </div>
@@ -592,7 +600,7 @@ export default function MadeiraLineupPlanner() {
     try { localStorage.setItem(`madeira_${key}`, JSON.stringify(value)); } catch {}
   };
 
-  const [roster, setRoster] = useState(() => loadStored("roster", INITIAL_ROSTER));
+  const [roster, setRoster] = useState(() => loadStored("roster", ROSTER));
   const [inactiveIds, setInactiveIds] = useState(() => loadStored("inactiveIds", []));
   const [formation, setFormation] = useState(() => loadStored("formation", "3-3-2"));
   const [lineup, setLineup] = useState(() => loadStored("lineup", Array(9).fill(null)));
@@ -706,7 +714,7 @@ export default function MadeiraLineupPlanner() {
     return () => { cancelled = true; };
   }, []);
 
-  const positions = FORMATIONS[formation];
+  const positions = ALLOWED_FORMATIONS[formation];
   const assignedIds = lineup.filter(Boolean);
   const availablePlayers = roster.filter((p) => !assignedIds.includes(p.id) && !inactiveIds.includes(p.id));
   const onFieldPlayers = roster.filter((p) => assignedIds.includes(p.id));
@@ -1118,7 +1126,7 @@ export default function MadeiraLineupPlanner() {
           {/* Formation selector — desktop only in header */}
           {!isMobile && (
             <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3 }}>
-              {Object.keys(FORMATIONS).map((f) => (
+              {Object.keys(ALLOWED_FORMATIONS).map((f) => (
                 <button key={f} onClick={() => setFormation(f)} style={{
                   padding: "7px 16px", borderRadius: 7, border: "none", cursor: "pointer",
                   fontFamily: fontDisplay, fontWeight: 700, fontSize: 13,
@@ -1196,7 +1204,7 @@ export default function MadeiraLineupPlanner() {
                 ROSTER
               </button>
               <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3, flex: 1 }}>
-                {Object.keys(FORMATIONS).map((f) => (
+                {Object.keys(ALLOWED_FORMATIONS).map((f) => (
                   <button key={f} onClick={() => setFormation(f)} style={{
                     padding: "5px 0", borderRadius: 5, border: "none", cursor: "pointer",
                     fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
@@ -1348,7 +1356,7 @@ export default function MadeiraLineupPlanner() {
                           touchAction: "none",
                           opacity: touchDragState.isDragging && touchDragState.playerId === p.id && touchDragState.source === "roster" ? 0.35 : 1,
                         }}>
-                        <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 13, color: selectedPlayer === p.id ? C.white : C.orange }}>{p.num}</span>
+                        <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 13, color: selectedPlayer === p.id ? C.white : C.orange }}>{formatJerseyNum(p.num) ?? ""}</span>
                         <span style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{benchDisplayName(p)}</span>
                       </div>
                     ))
@@ -1501,7 +1509,7 @@ export default function MadeiraLineupPlanner() {
                       border: `1px solid ${selectedPlayer === p.id ? C.orange : "rgba(255,255,255,0.08)"}`,
                       whiteSpace: "nowrap", fontSize: 11, fontWeight: 500, transition: "all 0.15s ease", flexShrink: 0, userSelect: "none",
                     }}>
-                    <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 10 }}>{p.num}</span>
+                    <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 10 }}>{formatJerseyNum(p.num) ?? ""}</span>
                     <span>{benchDisplayName(p)}</span>
                   </div>
                 ))
@@ -1615,7 +1623,7 @@ export default function MadeiraLineupPlanner() {
               boxShadow: `0 4px 20px rgba(0,0,0,0.6), 0 0 20px ${C.orangeGlow}`,
               opacity: 0.92,
             }}>
-              {ghostPlayer ? ghostPlayer.num : "?"}
+              {ghostPlayer ? (formatJerseyNum(ghostPlayer.num) ?? "") : "?"}
             </div>
             {ghostPlayer && (
               <div style={{

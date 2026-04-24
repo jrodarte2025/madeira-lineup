@@ -45,6 +45,18 @@ export function calcMinutes(fieldIntervals, halfIntervals) {
 }
 
 // =============================================
+// JERSEY NUMBER FORMATTING
+// =============================================
+// Returns the display string for a jersey number, or `null` if there
+// is nothing to show. Callers should treat null as "don't render the
+// number element at all" — no "?" placeholder, no "null" text.
+// 0 is a valid jersey number and renders as "0".
+export function formatJerseyNum(num) {
+  if (num === null || num === undefined || num === "") return null;
+  return String(num);
+}
+
+// =============================================
 // NAME ABBREVIATION UTILITY
 // =============================================
 export function abbreviateName(name) {

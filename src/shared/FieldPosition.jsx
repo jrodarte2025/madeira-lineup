@@ -1,5 +1,5 @@
 import { C, fontBase, fontDisplay } from "./constants";
-import { abbreviateName } from "./utils";
+import { abbreviateName, formatJerseyNum } from "./utils";
 
 // =============================================
 // INTERACTIVE FIELD POSITION — player circle on pitch
@@ -57,10 +57,14 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
           transition: "all 0.2s ease",
         }}>
           {has ? (
-            <>
-              <span style={{ fontSize: 16, lineHeight: 1 }}>{player.num}</span>
-              <span style={{ fontSize: 7, letterSpacing: "0.8px", color: "rgba(255,255,255,0.55)", lineHeight: 1, marginTop: 2 }}>{pos.label}</span>
-            </>
+            formatJerseyNum(player.num) != null ? (
+              <>
+                <span style={{ fontSize: 16, lineHeight: 1 }}>{formatJerseyNum(player.num)}</span>
+                <span style={{ fontSize: 7, letterSpacing: "0.8px", color: "rgba(255,255,255,0.55)", lineHeight: 1, marginTop: 2 }}>{pos.label}</span>
+              </>
+            ) : (
+              <span style={{ fontSize: 11, letterSpacing: "0.8px", color: "rgba(255,255,255,0.85)", lineHeight: 1 }}>{pos.label}</span>
+            )
           ) : (
             <span style={{ fontSize: numSize }}>{pos.label}</span>
           )}

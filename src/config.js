@@ -100,17 +100,43 @@ function resolveTeamName() {
 export const TEAM_NAME = resolveTeamName();
 
 // ---------------------------------------------------------------------------
+// Roster + formations (per-deployment)
+// ---------------------------------------------------------------------------
+// TODO(08-04): select deployment module dynamically by VITE_DEPLOYMENT_ID.
+// For Plan 08-03 this is a static import to madeira to keep the refactor
+// focused. 08-04 introduces the src/deployments/friend.js fixture and a
+// dispatch keyed on VITE_DEPLOYMENT_ID.
+import { ROSTER as MADEIRA_ROSTER, ALLOWED_FORMATION_KEYS as MADEIRA_KEYS } from "./deployments/madeira";
+import { FORMATIONS } from "./shared/formations";
+
+export const ROSTER = MADEIRA_ROSTER;
+
+function buildAllowedFormations(keys) {
+  const out = {};
+  for (const key of keys) {
+    if (!(key in FORMATIONS)) {
+      throw new Error(
+        `ALLOWED_FORMATION_KEYS references unknown formation "${key}" — ` +
+        `library has: ${Object.keys(FORMATIONS).join(", ")}`
+      );
+    }
+    out[key] = FORMATIONS[key];
+  }
+  return out;
+}
+
+export const ALLOWED_FORMATIONS = buildAllowedFormations(MADEIRA_KEYS);
+
+// ---------------------------------------------------------------------------
 // Umbrella deployment object
 // ---------------------------------------------------------------------------
-// Later Phase-8 plans (08-03 roster + formations) plug into this same object
-// so downstream consumers never have to restructure imports.
 
 export const DEPLOYMENT = {
   firebase: FIREBASE_CONFIG,
   gameStructure: GAME_STRUCTURE,
-  teamName: TEAM_NAME,   // filled by 08-02
-  roster: undefined,     // filled by 08-03
-  formations: undefined, // filled by 08-03
+  teamName: TEAM_NAME,           // filled by 08-02
+  roster: ROSTER,                // filled by 08-03
+  formations: ALLOWED_FORMATIONS, // filled by 08-03
 };
 
 export default DEPLOYMENT;

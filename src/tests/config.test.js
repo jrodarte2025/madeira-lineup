@@ -171,13 +171,67 @@ describe("TEAM_NAME", () => {
   });
 });
 
-describe("DEPLOYMENT", () => {
-  it("is the umbrella object with firebase + gameStructure + teamName populated and roster/formations as reserved placeholders", async () => {
+describe("ROSTER", () => {
+  it("is a non-empty array of players with id/name/num", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
     vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
-    const { DEPLOYMENT, FIREBASE_CONFIG, GAME_STRUCTURE, TEAM_NAME } = await import(
+    const { ROSTER } = await import("../config.js");
+
+    expect(Array.isArray(ROSTER)).toBe(true);
+    expect(ROSTER.length).toBeGreaterThan(0);
+    for (const p of ROSTER) {
+      expect(p).toHaveProperty("id");
+      expect(p).toHaveProperty("name");
+      expect(p).toHaveProperty("num");
+      expect(typeof p.name).toBe("string");
+      expect(p.name.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("ALLOWED_FORMATIONS", () => {
+  it("is a non-empty object whose keys are a subset of the full formation library", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
+
+    const { ALLOWED_FORMATIONS } = await import("../config.js");
+    const { FORMATIONS } = await import("../shared/formations.js");
+
+    const keys = Object.keys(ALLOWED_FORMATIONS);
+    expect(keys.length).toBeGreaterThan(0);
+    for (const key of keys) {
+      expect(key in FORMATIONS).toBe(true);
+      expect(Array.isArray(ALLOWED_FORMATIONS[key])).toBe(true);
+      expect(ALLOWED_FORMATIONS[key].length).toBeGreaterThanOrEqual(7);
+    }
+  });
+
+  it("each position entry has label/x/y", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
+
+    const { ALLOWED_FORMATIONS } = await import("../config.js");
+    for (const positions of Object.values(ALLOWED_FORMATIONS)) {
+      for (const pos of positions) {
+        expect(pos).toHaveProperty("label");
+        expect(pos).toHaveProperty("x");
+        expect(pos).toHaveProperty("y");
+      }
+    }
+  });
+});
+
+describe("DEPLOYMENT", () => {
+  it("is the umbrella object with firebase + gameStructure + teamName + roster + formations all populated", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
+
+    const { DEPLOYMENT, FIREBASE_CONFIG, GAME_STRUCTURE, TEAM_NAME, ROSTER, ALLOWED_FORMATIONS } = await import(
       "../config.js"
     );
 
@@ -185,13 +239,8 @@ describe("DEPLOYMENT", () => {
     expect(DEPLOYMENT.firebase).toBe(FIREBASE_CONFIG);
     expect(DEPLOYMENT.gameStructure).toBe(GAME_STRUCTURE);
     expect(DEPLOYMENT.teamName).toBe(TEAM_NAME);
-
-    // Reserved placeholder slots — filled by 08-03 (roster, formations).
-    // Keys MUST exist so later plans don't restructure imports.
-    expect("roster" in DEPLOYMENT).toBe(true);
-    expect("formations" in DEPLOYMENT).toBe(true);
-    expect(DEPLOYMENT.roster).toBeUndefined();
-    expect(DEPLOYMENT.formations).toBeUndefined();
+    expect(DEPLOYMENT.roster).toBe(ROSTER);
+    expect(DEPLOYMENT.formations).toBe(ALLOWED_FORMATIONS);
   });
 
   it("is also exposed as the default export", async () => {

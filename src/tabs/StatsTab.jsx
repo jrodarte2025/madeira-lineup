@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { C, fontBase, fontDisplay, STAT_LABELS, INITIAL_ROSTER } from "../shared/constants";
+import { C, fontBase, fontDisplay, STAT_LABELS } from "../shared/constants";
+import { ROSTER } from "../config";
 import { getSeasonId } from "../shared/seasonUtils";
 import { buildSummaryRows, STAT_ORDER } from "../shared/summaryUtils";
 import { listGames } from "../firebase";
@@ -157,8 +158,8 @@ export default function StatsTab() {
     if (!activeCols.includes(s)) activeCols.push(s);
   }
 
-  // Build rows from INITIAL_ROSTER (all players always shown)
-  const tableRows = INITIAL_ROSTER.map((player) => {
+  // Build rows from ROSTER (all players always shown)
+  const tableRows = ROSTER.map((player) => {
     const stats = seasonData?.players?.[String(player.id)] || {};
     const totalEvents = activeCols.reduce((sum, col) => sum + (stats[col] || 0), 0);
     return { player, stats, totalEvents };
@@ -437,7 +438,7 @@ export default function StatsTab() {
             <tbody>
               {tableRows.map(({ player, stats, totalEvents }) => {
                 const isExpanded = expandedPlayerId === String(player.id);
-                const playerLabel = `#${player.num} ${player.name}`;
+                const playerLabel = player.num != null ? `#${player.num} ${player.name}` : player.name;
                 const playerGames = gamesByPlayer[String(player.id)];
 
                 return (

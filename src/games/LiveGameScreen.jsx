@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame, updateSeasonStats } from "../firebase";
 import { getSeasonId, computeSeasonDeltas } from "../shared/seasonUtils";
-import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
-import { calcMinutes, abbreviateName, getPositionGroup } from "../shared/utils";
+import { C, fontBase, fontDisplay } from "../shared/constants";
+import { FORMATIONS } from "../shared/formations";
+import { calcMinutes, abbreviateName, getPositionGroup, formatJerseyNum } from "../shared/utils";
 import PitchSVG from "../shared/PitchSVG";
 import FieldPosition from "../shared/FieldPosition";
 import GameHeader from "./GameHeader";
@@ -92,7 +93,7 @@ function BenchChip({ player, displayName, minuteCount, onClick, isSubSelected })
           color: "rgba(255,255,255,0.8)",
         }}
       >
-        {player.num}
+        {formatJerseyNum(player.num) ?? ""}
       </div>
       <div
         style={{

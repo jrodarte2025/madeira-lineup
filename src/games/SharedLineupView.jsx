@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
+import { C, fontBase, fontDisplay } from "../shared/constants";
+import { FORMATIONS } from "../shared/formations";
 import { TEAM_NAME } from "../config";
-import { decodeLineup, encodeLineup, abbreviateName } from "../shared/utils";
+import { decodeLineup, encodeLineup, abbreviateName, formatJerseyNum } from "../shared/utils";
 import { loadSharedLineup } from "../firebase";
 import PitchSVG from "../shared/PitchSVG";
 
@@ -101,10 +102,14 @@ export default function SharedLineupView() {
                 boxShadow: player ? "0 2px 8px rgba(0,0,0,0.3)" : "none",
               }}>
                 {player ? (
-                  <>
-                    <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 14, lineHeight: 1, color: C.white }}>{player.num}</span>
-                    <span style={{ fontSize: 6, letterSpacing: "0.5px", color: "rgba(255,255,255,0.7)", lineHeight: 1, marginTop: 1 }}>{pos.label}</span>
-                  </>
+                  formatJerseyNum(player.num) != null ? (
+                    <>
+                      <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 14, lineHeight: 1, color: C.white }}>{formatJerseyNum(player.num)}</span>
+                      <span style={{ fontSize: 6, letterSpacing: "0.5px", color: "rgba(255,255,255,0.7)", lineHeight: 1, marginTop: 1 }}>{pos.label}</span>
+                    </>
+                  ) : (
+                    <span style={{ fontFamily: fontDisplay, fontWeight: 800, fontSize: 10, letterSpacing: "0.5px", color: C.white, lineHeight: 1 }}>{pos.label}</span>
+                  )
                 ) : (
                   <span style={{ fontSize: 8, color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>{pos.label}</span>
                 )}
@@ -139,7 +144,7 @@ export default function SharedLineupView() {
                   width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontFamily: fontDisplay, fontSize: 12, fontWeight: 800,
-                }}>{p.num}</div>
+                }}>{formatJerseyNum(p.num) ?? ""}</div>
                 <span style={{ fontSize: 13, fontWeight: 500 }}>{p.name}</span>
               </div>
             ))}
@@ -165,7 +170,7 @@ export default function SharedLineupView() {
                   width: 24, height: 24, borderRadius: "50%", background: "rgba(255,255,255,0.08)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontFamily: fontDisplay, fontSize: 11, fontWeight: 800,
-                }}>{p.num}</div>
+                }}>{formatJerseyNum(p.num) ?? ""}</div>
                 <span style={{ fontSize: 12, fontWeight: 500, textDecoration: "line-through" }}>{p.name}</span>
               </div>
             ))}

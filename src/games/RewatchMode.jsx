@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { C, fontBase, fontDisplay, FORMATIONS } from "../shared/constants";
-import { abbreviateName, getPositionGroup } from "../shared/utils";
+import { C, fontBase, fontDisplay } from "../shared/constants";
+import { FORMATIONS } from "../shared/formations";
+import { abbreviateName, getPositionGroup, formatJerseyNum } from "../shared/utils";
 import FieldPosition from "../shared/FieldPosition";
 import PitchSVG from "../shared/PitchSVG";
 import StatBar from "./StatBar";
@@ -47,7 +48,7 @@ function BenchChip({ player, displayName, isSelected, onClick }) {
           color: "rgba(255,255,255,0.8)",
         }}
       >
-        {player.num}
+        {formatJerseyNum(player.num) ?? ""}
       </div>
       <div
         style={{
