@@ -9,7 +9,7 @@ import {
   deleteSavedLineup,
 } from "./firebase";
 import { C, fontBase, fontDisplay } from "./shared/constants";
-import { TEAM_NAME, ROSTER, ALLOWED_FORMATIONS } from "./config";
+import { TEAM_NAME, ROSTER, ALLOWED_FORMATIONS, LOGO_SRC } from "./config";
 import { abbreviateName, useMediaQuery, encodeLineup, decodeLineup, buildShareUrl, shareLineup, formatJerseyNum } from "./shared/utils";
 
 // Per-deployment defaults derived from the allowed formation set.
@@ -1083,7 +1083,7 @@ export default function MadeiraLineupPlanner() {
       <div className="print-view">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingBottom: 6, borderBottom: `2px solid ${C.navy}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src="/madeira-fc-logo.png" alt={`${TEAM_NAME} FC`} style={{ width: 32, height: "auto" }} />
+            {LOGO_SRC && <img src={LOGO_SRC} alt={`${TEAM_NAME} FC`} style={{ width: 32, height: "auto" }} />}
             <div>
               <div style={{ fontFamily: fontDisplay, fontSize: 18, fontWeight: 800, color: C.navy, letterSpacing: "-0.3px", lineHeight: 1.1 }}>{TEAM_NAME.toUpperCase()} FC</div>
               <div style={{ fontFamily: fontBase, fontSize: 7, fontWeight: 600, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginTop: 1 }}>Game Day Lineup Card</div>
@@ -1136,7 +1136,7 @@ export default function MadeiraLineupPlanner() {
         }}>
           {/* Logo + Title */}
           <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
-            <img src="/madeira-fc-logo.png" alt={`${TEAM_NAME} FC`} style={{ width: isMobile ? 36 : 48, height: "auto" }} />
+            {LOGO_SRC && <img src={LOGO_SRC} alt={`${TEAM_NAME} FC`} style={{ width: isMobile ? 36 : 48, height: "auto" }} />}
             <div>
               <h1 style={{ fontFamily: fontDisplay, fontSize: isMobile ? 16 : 21, fontWeight: 800, letterSpacing: "-0.3px", lineHeight: 1.1 }}>{TEAM_NAME.toUpperCase()} FC</h1>
               <div style={{ fontSize: isMobile ? 8 : 10, color: "rgba(255,255,255,0.4)", letterSpacing: "2.5px", fontWeight: 700, textTransform: "uppercase", marginTop: 1 }}>Lineup Planner</div>

@@ -136,6 +136,9 @@ const DEPLOYMENT_ID = resolveDeploymentId();
 const activeDeployment = DEPLOYMENTS[DEPLOYMENT_ID];
 
 export const ROSTER = activeDeployment.ROSTER;
+// Optional per-deployment logo path. null = no logo rendered.
+// Deployments that don't export LOGO_SRC default to null for back-compat.
+export const LOGO_SRC = activeDeployment.LOGO_SRC ?? null;
 
 function buildAllowedFormations(keys) {
   const out = {};

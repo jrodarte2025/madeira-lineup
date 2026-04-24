@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 import { FORMATIONS } from "../shared/formations";
-import { TEAM_NAME } from "../config";
+import { TEAM_NAME, LOGO_SRC } from "../config";
 import { decodeLineup, encodeLineup, abbreviateName, formatJerseyNum } from "../shared/utils";
 import { loadSharedLineup } from "../firebase";
 import PitchSVG from "../shared/PitchSVG";
@@ -60,7 +60,7 @@ export default function SharedLineupView() {
     }}>
       {/* Logo + title */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, marginTop: 8 }}>
-        <img src="/madeira-fc-logo.png" alt={`${TEAM_NAME} FC`} style={{ width: 36, height: "auto" }} />
+        {LOGO_SRC && <img src={LOGO_SRC} alt={`${TEAM_NAME} FC`} style={{ width: 36, height: "auto" }} />}
         <div style={{ fontFamily: fontDisplay, fontSize: 20, fontWeight: 800, letterSpacing: "-0.3px" }}>{TEAM_NAME.toUpperCase()} FC</div>
       </div>
 

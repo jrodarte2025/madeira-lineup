@@ -10,6 +10,11 @@
 // pointing at a real second Firebase project.
 // =============================================
 
+// No custom logo yet — header shows team name text only.
+// To add one: drop the file into /public and set this to its path
+// (e.g., "/kevins-logo.png"), then rebuild + redeploy.
+export const LOGO_SRC = null;
+
 export const ROSTER = [
   { id: 101, name: "Bodhi",     num: null },
   { id: 102, name: "Kurry",     num: null },

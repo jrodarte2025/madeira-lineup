@@ -4,6 +4,10 @@
 // Loaded by src/config.js when VITE_DEPLOYMENT_ID=madeira.
 // =============================================
 
+// Logo shown in the header, shared-lineup view, and print header.
+// null = no logo rendered (friend uses text-only until a custom logo ships).
+export const LOGO_SRC = "/madeira-fc-logo.png";
+
 export const ROSTER = [
   { id: 1, name: "Alex Rodarte", num: 2 },
   { id: 2, name: "Avery Paulin", num: 6 },
