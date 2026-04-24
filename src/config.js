@@ -26,13 +26,18 @@
  *   VITE_GAME_STRUCTURE             — "halves" | "quarters" (default: "halves")
  *                                     Controls Phase-10 game-flow branching.
  *
+ *   VITE_TEAM_NAME                  — Team name rendered anywhere the app
+ *                                     previously said "Madeira FC" (header,
+ *                                     print, share, summary). Required —
+ *                                     missing value throws at config load.
+ *
  * ---------------------------------------------------------------------------
  * DEPLOYMENT shape (consumers should destructure, not reach into internals):
  * ---------------------------------------------------------------------------
  *   DEPLOYMENT = {
  *     firebase:      FIREBASE_CONFIG,   // populated in Plan 08-01
  *     gameStructure: GAME_STRUCTURE,    // populated in Plan 08-01
- *     teamName:      undefined,         // filled by Plan 08-02
+ *     teamName:      TEAM_NAME,         // populated in Plan 08-02
  *     roster:        undefined,         // filled by Plan 08-03
  *     formations:    undefined,         // filled by Plan 08-03
  *   }
@@ -79,16 +84,32 @@ function resolveGameStructure() {
 export const GAME_STRUCTURE = resolveGameStructure();
 
 // ---------------------------------------------------------------------------
+// Team name
+// ---------------------------------------------------------------------------
+
+function resolveTeamName() {
+  const raw = import.meta.env.VITE_TEAM_NAME;
+  if (raw === undefined || raw === null || raw === "") {
+    throw new Error(
+      "VITE_TEAM_NAME is required — set it in .env.local or the deployment env file"
+    );
+  }
+  return String(raw);
+}
+
+export const TEAM_NAME = resolveTeamName();
+
+// ---------------------------------------------------------------------------
 // Umbrella deployment object
 // ---------------------------------------------------------------------------
-// Later Phase-8 plans (08-02 team name, 08-03 roster + formations) plug into
-// this same object so downstream consumers never have to restructure imports.
+// Later Phase-8 plans (08-03 roster + formations) plug into this same object
+// so downstream consumers never have to restructure imports.
 
 export const DEPLOYMENT = {
   firebase: FIREBASE_CONFIG,
   gameStructure: GAME_STRUCTURE,
-  teamName: undefined,  // filled by 08-02
-  roster: undefined,    // filled by 08-03
+  teamName: TEAM_NAME,   // filled by 08-02
+  roster: undefined,     // filled by 08-03
   formations: undefined, // filled by 08-03
 };
 

@@ -9,6 +9,7 @@ import {
   deleteSavedLineup,
 } from "./firebase";
 import { C, fontBase, fontDisplay, FORMATIONS, INITIAL_ROSTER } from "./shared/constants";
+import { TEAM_NAME } from "./config";
 import { abbreviateName, useMediaQuery, encodeLineup, decodeLineup, buildShareUrl, shareLineup } from "./shared/utils";
 import PitchSVG from "./shared/PitchSVG";
 import FieldPosition from "./shared/FieldPosition";
@@ -1008,7 +1009,7 @@ export default function MadeiraLineupPlanner() {
     const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
     let styleHTML = '';
     styles.forEach((s) => { styleHTML += s.outerHTML; });
-    printWindow.document.write(`<!DOCTYPE html><html><head><title>Madeira FC Lineup</title>${styleHTML}
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>${TEAM_NAME} FC Lineup</title>${styleHTML}
       <style>.print-view { display: flex !important; flex-direction: column; width: 100%; padding: 12px 18px; background: white !important; font-family: ${fontBase}; }
       .screen-view { display: none !important; } @page { size: portrait; margin: 0.3in; }</style>
       </head><body>${printContent.outerHTML}</body></html>`);
@@ -1054,9 +1055,9 @@ export default function MadeiraLineupPlanner() {
       <div className="print-view">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingBottom: 6, borderBottom: `2px solid ${C.navy}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src="/madeira-fc-logo.png" alt="Madeira FC" style={{ width: 32, height: "auto" }} />
+            <img src="/madeira-fc-logo.png" alt={`${TEAM_NAME} FC`} style={{ width: 32, height: "auto" }} />
             <div>
-              <div style={{ fontFamily: fontDisplay, fontSize: 18, fontWeight: 800, color: C.navy, letterSpacing: "-0.3px", lineHeight: 1.1 }}>MADEIRA FC</div>
+              <div style={{ fontFamily: fontDisplay, fontSize: 18, fontWeight: 800, color: C.navy, letterSpacing: "-0.3px", lineHeight: 1.1 }}>{TEAM_NAME.toUpperCase()} FC</div>
               <div style={{ fontFamily: fontBase, fontSize: 7, fontWeight: 600, letterSpacing: "1.5px", color: "#999", textTransform: "uppercase", marginTop: 1 }}>Game Day Lineup Card</div>
             </div>
           </div>
@@ -1082,7 +1083,7 @@ export default function MadeiraLineupPlanner() {
         </div>
 
         <div style={{ marginTop: 8, paddingTop: 5, borderTop: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 6.5, color: "#ccc", letterSpacing: "1px", textTransform: "uppercase" }}>Madeira FC Lineup Planner</div>
+          <div style={{ fontSize: 6.5, color: "#ccc", letterSpacing: "1px", textTransform: "uppercase" }}>{TEAM_NAME} FC Lineup Planner</div>
           <div style={{ display: "flex", gap: 12 }}>
             {["Score", "Notes"].map((label) => (
               <div key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -1107,9 +1108,9 @@ export default function MadeiraLineupPlanner() {
         }}>
           {/* Logo + Title */}
           <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12 }}>
-            <img src="/madeira-fc-logo.png" alt="Madeira FC" style={{ width: isMobile ? 36 : 48, height: "auto" }} />
+            <img src="/madeira-fc-logo.png" alt={`${TEAM_NAME} FC`} style={{ width: isMobile ? 36 : 48, height: "auto" }} />
             <div>
-              <h1 style={{ fontFamily: fontDisplay, fontSize: isMobile ? 16 : 21, fontWeight: 800, letterSpacing: "-0.3px", lineHeight: 1.1 }}>MADEIRA FC</h1>
+              <h1 style={{ fontFamily: fontDisplay, fontSize: isMobile ? 16 : 21, fontWeight: 800, letterSpacing: "-0.3px", lineHeight: 1.1 }}>{TEAM_NAME.toUpperCase()} FC</h1>
               <div style={{ fontSize: isMobile ? 8 : 10, color: "rgba(255,255,255,0.4)", letterSpacing: "2.5px", fontWeight: 700, textTransform: "uppercase", marginTop: 1 }}>Lineup Planner</div>
             </div>
           </div>

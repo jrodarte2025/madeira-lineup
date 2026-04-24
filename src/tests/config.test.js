@@ -37,6 +37,7 @@ describe("FIREBASE_CONFIG", () => {
   it("exposes all 7 Firebase keys as non-empty strings when VITE_FIREBASE_* vars are set", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     const { FIREBASE_CONFIG } = await import("../config.js");
 
@@ -68,6 +69,7 @@ describe("GAME_STRUCTURE", () => {
   it("equals 'halves' when VITE_GAME_STRUCTURE is 'halves'", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     const { GAME_STRUCTURE } = await import("../config.js");
 
@@ -77,6 +79,7 @@ describe("GAME_STRUCTURE", () => {
   it("equals 'quarters' when VITE_GAME_STRUCTURE is 'quarters'", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "quarters");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     const { GAME_STRUCTURE } = await import("../config.js");
 
@@ -86,6 +89,7 @@ describe("GAME_STRUCTURE", () => {
   it("normalizes mixed-case values to lowercase ('Halves' → 'halves')", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "Halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     const { GAME_STRUCTURE } = await import("../config.js");
 
@@ -94,6 +98,7 @@ describe("GAME_STRUCTURE", () => {
 
   it("falls back to 'halves' when VITE_GAME_STRUCTURE is unset", async () => {
     stubFirebaseEnv();
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
     // Do not stub VITE_GAME_STRUCTURE — it should be undefined.
 
     const { GAME_STRUCTURE } = await import("../config.js");
@@ -104,6 +109,7 @@ describe("GAME_STRUCTURE", () => {
   it("falls back to 'halves' when VITE_GAME_STRUCTURE is an empty string", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     const { GAME_STRUCTURE } = await import("../config.js");
 
@@ -113,6 +119,7 @@ describe("GAME_STRUCTURE", () => {
   it("throws an informative error on explicit invalid value ('thirds')", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "thirds");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     await expect(import("../config.js")).rejects.toThrow(
       /Invalid VITE_GAME_STRUCTURE.*halves.*quarters.*thirds/
@@ -120,25 +127,69 @@ describe("GAME_STRUCTURE", () => {
   });
 });
 
-describe("DEPLOYMENT", () => {
-  it("is the umbrella object with firebase + gameStructure populated and teamName/roster/formations as reserved placeholders", async () => {
+describe("TEAM_NAME", () => {
+  it("equals the string set in VITE_TEAM_NAME", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
-    const { DEPLOYMENT, FIREBASE_CONFIG, GAME_STRUCTURE } = await import(
+    const { TEAM_NAME } = await import("../config.js");
+
+    expect(TEAM_NAME).toBe("Madeira");
+  });
+
+  it("supports multi-word team names verbatim (e.g., 'Friend FC')", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Friend FC");
+
+    const { TEAM_NAME } = await import("../config.js");
+
+    expect(TEAM_NAME).toBe("Friend FC");
+  });
+
+  it("throws when VITE_TEAM_NAME is unset", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    // Note: Vite loads .env.local as baseline during tests, so we stub
+    // explicitly to undefined to simulate a missing env var.
+    vi.stubEnv("VITE_TEAM_NAME", undefined);
+
+    await expect(import("../config.js")).rejects.toThrow(
+      /VITE_TEAM_NAME is required/
+    );
+  });
+
+  it("throws when VITE_TEAM_NAME is an empty string", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "");
+
+    await expect(import("../config.js")).rejects.toThrow(
+      /VITE_TEAM_NAME is required/
+    );
+  });
+});
+
+describe("DEPLOYMENT", () => {
+  it("is the umbrella object with firebase + gameStructure + teamName populated and roster/formations as reserved placeholders", async () => {
+    stubFirebaseEnv();
+    vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
+
+    const { DEPLOYMENT, FIREBASE_CONFIG, GAME_STRUCTURE, TEAM_NAME } = await import(
       "../config.js"
     );
 
     expect(DEPLOYMENT).toBeTypeOf("object");
     expect(DEPLOYMENT.firebase).toBe(FIREBASE_CONFIG);
     expect(DEPLOYMENT.gameStructure).toBe(GAME_STRUCTURE);
+    expect(DEPLOYMENT.teamName).toBe(TEAM_NAME);
 
-    // Reserved placeholder slots — filled by 08-02 (teamName) and 08-03
-    // (roster, formations). Keys MUST exist so later plans don't restructure imports.
-    expect("teamName" in DEPLOYMENT).toBe(true);
+    // Reserved placeholder slots — filled by 08-03 (roster, formations).
+    // Keys MUST exist so later plans don't restructure imports.
     expect("roster" in DEPLOYMENT).toBe(true);
     expect("formations" in DEPLOYMENT).toBe(true);
-    expect(DEPLOYMENT.teamName).toBeUndefined();
     expect(DEPLOYMENT.roster).toBeUndefined();
     expect(DEPLOYMENT.formations).toBeUndefined();
   });
@@ -146,6 +197,7 @@ describe("DEPLOYMENT", () => {
   it("is also exposed as the default export", async () => {
     stubFirebaseEnv();
     vi.stubEnv("VITE_GAME_STRUCTURE", "halves");
+    vi.stubEnv("VITE_TEAM_NAME", "Madeira");
 
     const mod = await import("../config.js");
     expect(mod.default).toBe(mod.DEPLOYMENT);
