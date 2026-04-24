@@ -11,7 +11,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:friend": "vite preview --mode friend",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy": "npm run build && firebase deploy --only hosting",
+    "deploy:friend": "npm run build:friend && firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules"
   },
   "dependencies": {
     "firebase": "^12.10.0",

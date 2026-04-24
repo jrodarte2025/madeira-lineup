@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "madeira-fc-lineups"
+    "default": "madeira-fc-lineups",
+    "madeira": "madeira-fc-lineups",
+    "friend": "YOUR-FRIEND-PROJECT-ID"
   }
 }

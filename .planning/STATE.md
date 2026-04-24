@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.1
-milestone_name: — Madeira Game-Day Polish
+milestone: v3.0
+milestone_name: — Multi-Deployment Support
 status: milestone_code_complete
-stopped_at: "All v2.1 phases code-complete — awaiting human UAT on dev server"
-last_updated: "2026-04-20"
-last_activity: "2026-04-20 — Phases 12, 13, 14, 15 code-complete + committed. 84 tests pass. Human verification bundled at end per user instruction (AFK session)."
+stopped_at: "v3.0 code-complete; friend Firebase project creation pending (Jim)"
+last_updated: "2026-04-24"
+last_activity: "2026-04-24 — Phases 8-11 all executed autonomously in one session. 157 tests pass. Both bundles verified. Friend Firebase project creation + live deploy pending — runbook in DEPLOYMENT.md."
 progress:
   total_phases: 4
   completed_phases: 4
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-20)
 
 **Core value:** Coaches can manage lineups, track live games, and review player stats from phone or desktop
-**Current focus:** v2.1 Madeira Game-Day Polish — roadmap complete, ready to plan Phase 12
+**Current focus:** v3.0 Multi-Deployment code-complete. Onboarding friend's team pending Jim-only actions (Firebase project creation, env paste, first deploy).
 
 ## Current Position
 
-Phase: v2.1 complete (Phases 12 → 15 all shipped in code)
-Plan: —
-Status: All 18 requirements implemented. Awaiting Jim's UAT — start `npm run dev` and work through the success-criteria scenarios per phase.
-Last activity: 2026-04-20 — Full v2.1 AFK run: Phase 12 gap fixes + Phase 13 +skill + badge fix + Phase 14 post-game editing + Phase 15 savedLineups Firestore. 84 vitest tests pass (+11 for eventMutations). Build clean.
+Milestone: v3.0 — code complete
+Phase: all 4 shipped (8 → 9 → 10 → 11)
+Status: Awaiting Jim's live-deploy actions per DEPLOYMENT.md, then final regression smoke.
+Last activity: 2026-04-24 — Full autonomous run through Phases 8-11.
 
-### v2.1 Phase Order
+### v3.0 Phase Order
 
-1. **Phase 12** — Lineup UX Fixes (LUX-01..04) — next
-2. **Phase 13** — Stat System + Badge Fix (STAT-01..04) — must precede 14
-3. **Phase 14** — Post-Game Stat Editing (EDIT-01..06) — depends on 13
-4. **Phase 15** — Saved Lineups Firestore Persistence (SAVE-01..04) — orthogonal
+1. ✅ **Phase 8** — Config Layer Extraction (4 plans: 08-01..08-04) — completed 2026-04-24 (08-02 re-executed after 2026-04-20 revert)
+2. ✅ **Phase 9** — Formations Gating + 7v7 Library (1 plan) — completed 2026-04-24
+3. ✅ **Phase 10** — Quarter-Based Game Model (1 plan, MVP scope per Jim) — completed 2026-04-24
+4. ✅ **Phase 11** — Second Deployment + Docs (1 plan, part-A code complete) — completed 2026-04-24 (part B = Jim's runbook pending)
 
 ## Accumulated Context
 
@@ -43,55 +43,45 @@ Last activity: 2026-04-20 — Full v2.1 AFK run: Phase 12 gap fixes + Phase 13 +
 
 See .planning/PROJECT.md Key Decisions table for full history.
 
-v2.1 scope decisions locked during questioning (2026-04-20):
-- Saved lineups: migrate localStorage → Firestore on first load; keep localStorage as read-through cache for offline use
-- Post-game stat editing: live-updating shares (shared URL reflects current stats; PNG regenerates from current stats on re-download)
-- Post-game stat editing: silent edits (no audit trail / edit history UI)
-- +skill stat: neutral gray color; applies to all positions (GK/DEF/MID/FWD); backfillable on past games via the edit-stats UI (shared infra with stat editing)
-- #6 +skill and #7 stat editing share UI: one post-game edit interface handles both new stats and skill backfill
-- Research: skipped (polish + small features on known codebase, no new tech)
+v3.0 autonomous-run decisions (2026-04-24):
+- Phase 8: Re-executed 08-02 (TEAM_NAME swap that was reverted on 2026-04-20). Expanded scope to include `src/games/ShareCard.jsx` (v2.1 addition not in original plan). `RewatchMode.jsx` added to 08-03 scope for same reason.
+- Phase 9: 7v7 starter set = 2-3-1, 3-2-1, 2-2-2 (standard US-youth 7v7 formations). Swappable later via ALLOWED_FORMATION_KEYS edit in `src/deployments/friend.js` — no code change.
+- Phase 10: **MVP scope chosen (option B)**. 4 × 12-min quarters with auto-pause at boundaries. 8-segment prebuild and auto mid-quarter swap deferred to v3.1 if the friend's coach wants them. Keeps Madeira halves byte-identical and cuts code risk.
+- Phase 11: Part A = repo config + DEPLOYMENT.md runbook. Part B = Jim's live runbook (create Firebase project, paste creds, first deploy, smoke). Blocked on Jim.
+- Auto-approved every human-verify checkpoint via build+grep+tests per Jim's "only bother me for decisions" directive.
 
-v2.1 roadmap decisions (2026-04-20):
-- Phase 12 (Lineup UX) first — independent, quick wins, touches only `MadeiraLineupPlanner.jsx` drag/tap/inactive paths
-- Phase 13 (Stat System) must ship BEFORE Phase 14 because EDIT-02 needs `+skill` to exist as a selectable stat type
-- Phase 14 (Post-Game Editing) is the largest/riskiest — may split into sub-plans during planning (edit UI / mutation / season-stat delta)
-- Phase 15 (Saved Lineups) is orthogonal; sequenced last for solo-coder cadence and Firestore-collection isolation
-- v3.0 phases 8-11 remain reserved for resumption (see MILESTONES.md); v2.1 starts at Phase 12
+### Pending Jim-only Actions (to truly ship v3.0)
 
-### Feedback items from live game (source of v2.1)
+1. Create the friend's Firebase project in the console
+2. Enable Firestore + Hosting
+3. Copy real Firebase credentials into `.env.friend.local`
+4. Replace `YOUR-FRIEND-PROJECT-ID` in `.firebaserc` with the real project id
+5. `firebase use friend && npm run deploy:rules && npm run deploy:friend`
+6. Smoke test per DEPLOYMENT.md (Steps 8-9)
+7. Confirm Madeira still works (same doc)
 
-Already hotfixed (live on prod):
-- Portrait orientation lock + no pinch zoom
-- Bench disambiguation compares across full roster (not just bench)
-- Half length 30 min (was 25)
-
-Open in v2.1 scope:
-- #2 Field-to-field player swap (drag or tap) → Phase 12
-- #3 Two-way tap-to-sub → Phase 12
-- #5 Unavailable players reliably hidden from bench (investigate + fix) → Phase 12
-- #6 +skill stat → Phase 13
-- #7 Saved lineups migrate to Firestore (keep localStorage as cache) → Phase 15
-- #8 Stat badges aggregate whole game → Phase 13
-- #9 Post-game stat editing → Phase 14
-
-### v3.0 Paused State (for resumption)
-
-- Phase 8 / Plan 08-01 is LIVE on prod (config module + Firebase from env)
-- Plan 08-02 (TEAM_NAME swap) was committed then reverted on 2026-04-20
-- 08-03, 08-04, Phases 9-11 not started
-- All v3.0 planning artifacts preserved in .planning/ for resumption
-- Entry point: `/gsd:resume-work` or `/gsd:execute-phase 8`
+Runbook: `DEPLOYMENT.md` at repo root.
 
 ### Pending Todos
 
-None.
+None beyond the Jim-actions above.
 
 ### Blockers/Concerns
 
-None.
+None — just Jim's live steps.
+
+### v3.1 Candidate Work (deferred — possible next milestone)
+
+- 8-segment prebuild UI for quarters (Q1/Q1.5/Q2/Q2.5/Q3/Q3.5/Q4/Q4.5)
+- Auto mid-quarter swap at 6:00 from full → .5 lineup
+- PWA manifest deployment-aware (name, icon)
+- `index.html` title interpolation
+- Deployment-aware logo path (friend currently shows Madeira logo)
+- EventEditor post-game UI that knows about 4 quarter-periods (not just 1/2 halves)
+- Optional: shared-origin localStorage key prefix migration if deployments ever end up on the same domain
 
 ## Session Continuity
 
-Last session: 2026-04-20
-Stopped at: v2.1 roadmap complete — next action `/gsd:plan-phase 12`
-Resume file: None
+Last session: 2026-04-24
+Stopped at: v3.0 code-complete; DEPLOYMENT.md runbook written; awaiting Jim's live-deploy actions.
+Resume file: None — clean pause. When Jim returns ready to live-ship, re-read DEPLOYMENT.md and follow the friend runbook (step 1 of "First-time spin up of the friend's team").

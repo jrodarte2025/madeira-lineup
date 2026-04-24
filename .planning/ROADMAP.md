@@ -4,8 +4,8 @@
 
 - ✅ **v1.0 — UX Improvements** - Phases 1-3 (shipped 2026-03-16)
 - ✅ **v2.0 — Live Game Tracking & Stats** - Phases 4-7 (shipped 2026-03-17)
-- ⏸️ **v3.0 — Multi-Deployment Support** - Phases 8-11 (paused — see MILESTONES.md for resume instructions)
-- 🚧 **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (code complete 2026-04-20 — human verification pending)
+- 🚧 **v3.0 — Multi-Deployment Support** - Phases 8-11 (code complete 2026-04-24 — awaiting Jim's live Firebase-project creation + deploy)
+- ✅ **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (code complete 2026-04-20)
 
 ## Phases
 
@@ -32,9 +32,9 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 
 </details>
 
-### ⏸️ v3.0 — Multi-Deployment Support (Paused 2026-04-20)
+### 🚧 v3.0 — Multi-Deployment Support (Code complete 2026-04-24)
 
-**Status:** Paused mid-Phase 8 to prioritize Madeira polish (v2.1). See `.planning/MILESTONES.md` for shipped/reverted state and resume instructions. Entry point on resumption: `/gsd:resume-work` or `/gsd:execute-phase 8` (picks up at 08-02).
+**Status:** All 4 phases code-complete in a single autonomous run on 2026-04-24. Awaiting Jim's live Firebase-project creation for the friend's team + first deploy. Runbook: `DEPLOYMENT.md` at repo root.
 
 **Milestone Goal:** Make the app deployable as an isolated instance for a second coach (7v7, quarter-based, different team) without sharing data with Madeira and without changing Madeira's behavior. Ship a second Firebase project + hosting URL driven by per-deployment config, built from the same single repo.
 
@@ -42,10 +42,10 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - Integer phases (8, 9, 10, 11): Planned v3.0 work
 - Decimal phases (e.g., 10.1): Reserved for urgent insertions if needed
 
-- [~] **Phase 8: Config Layer Extraction** - Partial (08-01 complete, 08-02 reverted, 08-03/04 not started)
-- [ ] **Phase 9: Formations Gating + 7v7 Library** - Add 7v7 formations and gate the selectable formation set by deployment config
-- [ ] **Phase 10: Quarter-Based Game Model** - Add 4×12-min quarter game flow with 8 pre-built segment lineups, rolling mid-quarter subs, and coach-triggered quarter restarts
-- [ ] **Phase 11: Second Deployment + Docs** - Stand up the friend's Firebase project and ship the documented spin-up workflow
+- [x] **Phase 8: Config Layer Extraction** - Complete (08-01 → 08-04) — 2026-04-24
+- [x] **Phase 9: Formations Gating + 7v7 Library** - Complete — 2026-04-24
+- [x] **Phase 10: Quarter-Based Game Model** - Complete (MVP scope per decision) — 2026-04-24
+- [x] **Phase 11: Second Deployment + Docs** - Code complete — 2026-04-24 (live deploy pending Jim)
 
 ### 🚧 v2.1 — Madeira Game-Day Polish (In Progress)
 
