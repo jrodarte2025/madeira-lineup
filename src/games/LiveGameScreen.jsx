@@ -4,6 +4,16 @@ import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGa
 import { getSeasonId, computeSeasonDeltas } from "../shared/seasonUtils";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 import { FORMATIONS } from "../shared/formations";
+import { GAME_STRUCTURE } from "../config";
+import {
+  INITIAL_ACTIVE_STATUS,
+  isActiveStatus,
+  isBreakStatus,
+  getBreakStatusAfter,
+  getNextActiveStatus,
+  getNextActiveStatusFromHalftime,
+  getPeriodNumber,
+} from "../shared/gameStructure";
 import { calcMinutes, abbreviateName, getPositionGroup, formatJerseyNum } from "../shared/utils";
 import PitchSVG from "../shared/PitchSVG";
 import FieldPosition from "../shared/FieldPosition";
@@ -191,7 +201,7 @@ export default function LiveGameScreen() {
     const handleVisibility = () => {
       if (
         document.visibilityState === "visible" &&
-        (gameStatus === "1st-half" || gameStatus === "2nd-half")
+        isActiveStatus(gameStatus)
       ) {
         acquireWakeLock();
       }
@@ -274,9 +284,9 @@ export default function LiveGameScreen() {
       setPlayerIntervals(storedPlayerIntervals);
       setHalfStartTs(storedHalfStartTs);
 
-      // Restart timer if in active half
+      // Restart timer if in an active period (1st-half/2nd-half/q1/q2/q3/q4)
       if (
-        (status === "1st-half" || status === "2nd-half") &&
+        isActiveStatus(status) &&
         storedHalfStartTs
       ) {
         startHalf(storedHalfStartTs);
@@ -339,10 +349,10 @@ export default function LiveGameScreen() {
         setFieldPositions(resolvedFieldPositions);
         setBenchPlayers(resolvedBenchPlayers);
 
-        // Restart timer if game is in active half (Firestore has the halfStartTs)
+        // Restart timer if game is in an active period (Firestore has the halfStartTs)
         const resolvedHalfStartTs = firestoreHalfStartTs || null;
         if (
-          (resolvedStatus === "1st-half" || resolvedStatus === "2nd-half") &&
+          isActiveStatus(resolvedStatus) &&
           resolvedHalfStartTs
         ) {
           setHalfStartTs(resolvedHalfStartTs);
@@ -398,8 +408,7 @@ export default function LiveGameScreen() {
   // intervals, or players placed on field without going through sub handler.
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    const isActive = gameStatus === "1st-half" || gameStatus === "2nd-half";
-    if (!isActive) return;
+    if (!isActiveStatus(gameStatus)) return;
 
     const needsUpdate = [];
     fieldPositions.forEach(({ player }) => {
@@ -424,10 +433,9 @@ export default function LiveGameScreen() {
     });
   }, [gameStatus, fieldPositions, playerIntervals]);
 
-  // Ensure halfIntervals has an open interval during active halves
+  // Ensure halfIntervals has an open interval during any active period
   useEffect(() => {
-    const isActive = gameStatus === "1st-half" || gameStatus === "2nd-half";
-    if (!isActive) return;
+    if (!isActiveStatus(gameStatus)) return;
     const hasOpenHalf = halfIntervals.length > 0 && halfIntervals[halfIntervals.length - 1].endAt === null;
     if (!hasOpenHalf) {
       const now = Date.now();
@@ -441,6 +449,7 @@ export default function LiveGameScreen() {
 
   const handleStartGame = useCallback(() => {
     const now = Date.now();
+    const initialStatus = INITIAL_ACTIVE_STATUS[GAME_STRUCTURE];
     const newIntervals = [{ startAt: now, endAt: null }];
     const newPlayerIntervals = {};
     fieldPositions.forEach(({ player }) => {
@@ -449,7 +458,7 @@ export default function LiveGameScreen() {
       }
     });
 
-    setGameStatus("1st-half");
+    setGameStatus(initialStatus);
     setHalfStartTs(now);
     setHalfIntervals(newIntervals);
     setPlayerIntervals(newPlayerIntervals);
@@ -458,15 +467,27 @@ export default function LiveGameScreen() {
 
     startHalf(now);
     acquireWakeLock();
-    updateGameStatus(gameId, "1st-half", now);
+    updateGameStatus(gameId, initialStatus, now);
   }, [gameId, fieldPositions, startHalf, acquireWakeLock]);
 
-  const handleEndHalf = useCallback(() => {
+  // Close the current active period: stop clock, close intervals, transition
+  // to the next break status (halftime / break-q1 / break-q3). For the final
+  // active period (2nd-half / q4), the button label is "Full Time!" and the
+  // direct handleEndGame path runs instead — this handler is only invoked
+  // while getBreakStatusAfter returns a non-null next status.
+  const handleEndPeriod = useCallback(() => {
     const now = Date.now();
+    const nextBreakStatus = getBreakStatusAfter(gameStatus, GAME_STRUCTURE);
+    if (!nextBreakStatus) {
+      // Shouldn't happen in normal flow — the "Full Time!" button wires
+      // directly to handleEndGame. Defensive no-op.
+      return;
+    }
+
     stopTimer();
     releaseWakeLock();
 
-    // Close current half interval
+    // Close current period interval
     setHalfIntervals((prev) =>
       prev.map((interval, i) =>
         i === prev.length - 1 ? { ...interval, endAt: now } : interval
@@ -486,17 +507,27 @@ export default function LiveGameScreen() {
       return updated;
     });
 
-    setGameStatus("halftime");
+    setGameStatus(nextBreakStatus);
     setSelectedPlayerId(null);
     setSubSource(null);
     setDisplaySeconds(0);
-    updateGameStatus(gameId, "halftime");
-  }, [gameId, stopTimer, releaseWakeLock]);
+    updateGameStatus(gameId, nextBreakStatus);
+  }, [gameId, gameStatus, stopTimer, releaseWakeLock]);
 
-  const handleStartSecondHalf = useCallback(() => {
+  // Start the next active period from a break. Handles halves' halftime →
+  // 2nd-half, and quarters' break-q1 → q2, halftime → q3, break-q3 → q4.
+  const handleStartNextPeriod = useCallback(() => {
     const now = Date.now();
+    let nextActiveStatus = getNextActiveStatus(gameStatus);
+    if (!nextActiveStatus && gameStatus === "halftime") {
+      nextActiveStatus = getNextActiveStatusFromHalftime(GAME_STRUCTURE);
+    }
+    if (!nextActiveStatus) {
+      // Shouldn't happen — break states always have a next active.
+      return;
+    }
 
-    // Open a new half interval
+    // Open a new period interval
     setHalfIntervals((prev) => [...prev, { startAt: now, endAt: null }]);
 
     // Re-open player intervals for all on-field players
@@ -511,14 +542,26 @@ export default function LiveGameScreen() {
       return updated;
     });
 
-    setGameStatus("2nd-half");
+    setGameStatus(nextActiveStatus);
     setHalfStartTs(now);
     saveStored("halfStartTs", now);
 
     startHalf(now);
     acquireWakeLock();
-    updateGameStatus(gameId, "2nd-half", now);
-  }, [gameId, fieldPositions, startHalf, acquireWakeLock]);
+    updateGameStatus(gameId, nextActiveStatus, now);
+  }, [gameId, gameStatus, fieldPositions, startHalf, acquireWakeLock]);
+
+  // Primary action button dispatcher — GameHeader shows one button whose
+  // action depends on status. Active → endPeriod; break → startNextPeriod.
+  // (The final active period's button says "Full Time!" and wires directly
+  // to handleEndGame; see GameHeader. This handler never runs for that case.)
+  const handlePrimaryAction = useCallback(() => {
+    if (isActiveStatus(gameStatus)) {
+      handleEndPeriod();
+    } else if (isBreakStatus(gameStatus)) {
+      handleStartNextPeriod();
+    }
+  }, [gameStatus, handleEndPeriod, handleStartNextPeriod]);
 
   const handleEndGame = useCallback(async () => {
     const now = Date.now();
@@ -590,7 +633,7 @@ export default function LiveGameScreen() {
     (source, targetFieldIdx) => {
       // source: { type: "field"|"bench", idx: number|null, player: object }
       // targetFieldIdx: the field slot index being dropped on
-      const isActiveHalf = gameStatus === "1st-half" || gameStatus === "2nd-half";
+      const isActiveHalf = isActiveStatus(gameStatus);
 
       if (source.type === "field" && source.idx !== undefined && source.idx !== null) {
         // Field-to-field swap: no sub event, just reposition
@@ -628,7 +671,7 @@ export default function LiveGameScreen() {
         // Only log sub event and update intervals during active halves
         if (isActiveHalf) {
           const now = Date.now();
-          const currentHalf = gameStatus === "1st-half" ? 1 : 2;
+          const currentHalf = getPeriodNumber(gameStatus) ?? 1;
 
           // Build sub event
           const subEvent = {
@@ -673,7 +716,7 @@ export default function LiveGameScreen() {
   const handleBenchDrop = useCallback(
     (sourceFieldIdx) => {
       // Field-to-bench: remove player from field, add to bench
-      const isActiveHalf = gameStatus === "1st-half" || gameStatus === "2nd-half";
+      const isActiveHalf = isActiveStatus(gameStatus);
       const leavingPlayer = fieldPositions[sourceFieldIdx]?.player;
       if (!leavingPlayer) return;
 
@@ -687,7 +730,7 @@ export default function LiveGameScreen() {
 
       if (isActiveHalf) {
         const now = Date.now();
-        const currentHalf = gameStatus === "1st-half" ? 1 : 2;
+        const currentHalf = getPeriodNumber(gameStatus) ?? 1;
 
         const subEvent = {
           id: crypto.randomUUID(),
@@ -718,14 +761,14 @@ export default function LiveGameScreen() {
   );
 
   // ---------------------------------------------------------------------------
-  const isInteractive = gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime";
+  const isInteractive = isActiveStatus(gameStatus) || isBreakStatus(gameStatus);
 
   // ---------------------------------------------------------------------------
   // Live minute calculations — recompute every 15 seconds via tick counter
   // ---------------------------------------------------------------------------
   const [minuteTick, setMinuteTick] = useState(0);
   useEffect(() => {
-    if (gameStatus !== "1st-half" && gameStatus !== "2nd-half") return;
+    if (!isActiveStatus(gameStatus)) return;
     const id = setInterval(() => setMinuteTick((t) => t + 1), 15000);
     return () => clearInterval(id);
   }, [gameStatus]);
@@ -771,7 +814,7 @@ export default function LiveGameScreen() {
   // ---------------------------------------------------------------------------
   // Stat recording handlers
   // ---------------------------------------------------------------------------
-  const isActiveHalfForStats = gameStatus === "1st-half" || gameStatus === "2nd-half";
+  const isActiveHalfForStats = isActiveStatus(gameStatus);
 
   // Tap a bench player to select them for substitution
   const handleBenchTap = useCallback((player) => {
@@ -843,7 +886,7 @@ export default function LiveGameScreen() {
     const slot = fieldPositions.find(({ player }) => player?.id === selectedPlayerId);
     if (!slot?.player) return;
 
-    const currentHalf = gameStatus === "1st-half" ? 1 : 2;
+    const currentHalf = getPeriodNumber(gameStatus) ?? 1;
     const event = {
       id: crypto.randomUUID(),
       type: "stat",
@@ -948,8 +991,7 @@ export default function LiveGameScreen() {
         displaySeconds={displaySeconds}
         gameStatus={gameStatus}
         onScoreChange={handleScoreChange}
-        onEndHalf={handleEndHalf}
-        onStartSecondHalf={handleStartSecondHalf}
+        onPrimaryAction={handlePrimaryAction}
         onEndGame={handleEndGame}
         onBack={() => { window.location.hash = "#/games"; }}
       />
@@ -1128,7 +1170,7 @@ export default function LiveGameScreen() {
                 isHighlighted={isInteractive && !player}
                 compact={false}
                 minuteDisplay={
-                  (gameStatus === "1st-half" || gameStatus === "2nd-half" || gameStatus === "halftime" || gameStatus === "completed") && player
+                  (isActiveStatus(gameStatus) || isBreakStatus(gameStatus) || gameStatus === "completed") && player
                     ? String(playerMinutes[player.id] ?? 0)
                     : null
                 }

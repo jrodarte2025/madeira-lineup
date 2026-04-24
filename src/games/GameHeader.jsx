@@ -1,8 +1,18 @@
 import { useRef, useCallback } from "react";
 import { C, fontBase, fontDisplay } from "../shared/constants";
+import { GAME_STRUCTURE, TEAM_NAME } from "../config";
+import {
+  PERIOD_LENGTH_SECONDS,
+  isActiveStatus,
+  isBreakStatus,
+  getActionButtonLabel,
+  getHomeTeamCode,
+} from "../shared/gameStructure";
 
 // =============================================
 // GAME HEADER — fixed top bar with score + timer
+// Period length and action labels are driven by GAME_STRUCTURE so
+// both halves (Madeira) and quarters (friend) share one component.
 // =============================================
 
 function ScoreColumn({ value, side, label, onScoreChange }) {
@@ -101,27 +111,37 @@ function ScoreColumn({ value, side, label, onScoreChange }) {
   );
 }
 
-const HALF_SECONDS = 1800;
+const PERIOD_SECONDS = PERIOD_LENGTH_SECONDS[GAME_STRUCTURE];
+const HOME_CODE = getHomeTeamCode(TEAM_NAME);
 
 function formatCountdown(elapsed) {
-  const remaining = Math.max(0, HALF_SECONDS - elapsed);
+  const remaining = Math.max(0, PERIOD_SECONDS - elapsed);
   const m = Math.floor(remaining / 60);
   const s = remaining % 60;
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 function formatStoppage(elapsed) {
-  const extra = elapsed - HALF_SECONDS;
+  const extra = elapsed - PERIOD_SECONDS;
   const m = Math.floor(extra / 60);
   const s = extra % 60;
   return `+${m}:${String(s).padStart(2, "0")}`;
 }
 
+// Short period code shown next to the clock when the clock is paused
+// on a break (so coach sees "HT" for halftime, "Q2" for break-q1, etc.)
+function getBreakLabel(status, gameStructure) {
+  if (status === "halftime") return "HT";
+  if (status === "break-q1") return "Q1"; // just ended Q1, about to start Q2
+  if (status === "break-q3") return "Q3"; // just ended Q3, about to start Q4
+  return "HT";
+}
+
 function getTimerDisplay(gameStatus, displaySeconds) {
-  if (gameStatus === "setup") return "30:00";
-  if (gameStatus === "halftime") return "HT";
+  if (gameStatus === "setup") return formatCountdown(0);
+  if (isBreakStatus(gameStatus)) return getBreakLabel(gameStatus);
   if (gameStatus === "completed") return "FT";
-  if (displaySeconds < HALF_SECONDS) return formatCountdown(displaySeconds);
+  if (displaySeconds < PERIOD_SECONDS) return formatCountdown(displaySeconds);
   return formatStoppage(displaySeconds);
 }
 
@@ -131,22 +151,32 @@ export default function GameHeader({
   displaySeconds,
   gameStatus,
   onScoreChange,
-  onEndHalf,
-  onStartSecondHalf,
+  onPrimaryAction,
   onEndGame,
   onBack,
 }) {
   const timerStr = getTimerDisplay(gameStatus, displaySeconds);
-  const isStoppage =
-    (gameStatus === "1st-half" || gameStatus === "2nd-half") &&
-    displaySeconds >= HALF_SECONDS;
-  const showEndHalf = gameStatus === "1st-half";
-  const showStartSecondHalf = gameStatus === "halftime";
-  const showEndGame = gameStatus === "2nd-half";
-  const showActionButton = showEndHalf || showStartSecondHalf || showEndGame;
+  const isStoppage = isActiveStatus(gameStatus) && displaySeconds >= PERIOD_SECONDS;
+
+  const buttonLabel = getActionButtonLabel(gameStatus, GAME_STRUCTURE);
+  const showActionButton = buttonLabel !== "";
+  const isFullTimeLabel = buttonLabel === "Full Time!";
+
+  // Color scheme for the action button:
+  //   - active period (End ...)       → orange (primary attention)
+  //   - break (Start ...)             → teal (different context)
+  //   - full time (game over button)  → muted/outline (terminal)
+  const actionBg = isFullTimeLabel
+    ? "rgba(255,255,255,0.15)"
+    : isActiveStatus(gameStatus)
+    ? C.orange
+    : "#4CAFB6";
+  const actionBorder = isFullTimeLabel ? "1px solid rgba(255,255,255,0.3)" : "none";
+
+  const onActionClick = isFullTimeLabel ? onEndGame : onPrimaryAction;
 
   const timerColor =
-    gameStatus === "halftime"
+    isBreakStatus(gameStatus)
       ? "#4CAFB6"
       : gameStatus === "completed"
       ? "rgba(255,255,255,0.5)"
@@ -204,7 +234,7 @@ export default function GameHeader({
         <ScoreColumn
           value={score.home}
           side="home"
-          label="MFC"
+          label={HOME_CODE}
           onScoreChange={onScoreChange}
         />
 
@@ -240,75 +270,36 @@ export default function GameHeader({
         />
       </div>
 
-      {/* Action button row — only when needed (stoppage/halftime) */}
+      {/* Action button row — shown whenever there's a transition available */}
       {showActionButton && (
         <div
           style={{
             display: "flex",
             justifyContent: "center",
             padding: "0 16px 6px",
+            gap: 8,
           }}
         >
-          {showEndHalf && (
-            <button
-              onClick={onEndHalf}
-              style={{
-                background: C.orange,
-                border: "none",
-                borderRadius: 8,
-                color: C.white,
-                fontFamily: fontBase,
-                fontSize: 13,
-                fontWeight: 700,
-                padding: "6px 14px",
-                cursor: "pointer",
-                letterSpacing: "0.3px",
-              }}
-            >
-              End Half
-            </button>
-          )}
-
-          {showStartSecondHalf && (
-            <button
-              onClick={onStartSecondHalf}
-              style={{
-                background: "#4CAFB6",
-                border: "none",
-                borderRadius: 8,
-                color: C.white,
-                fontFamily: fontBase,
-                fontSize: 13,
-                fontWeight: 700,
-                padding: "6px 14px",
-                cursor: "pointer",
-                letterSpacing: "0.3px",
-              }}
-            >
-              Start 2nd Half
-            </button>
-          )}
-
-          {showEndGame && (
-            <button
-              onClick={onEndGame}
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: 8,
-                color: C.white,
-                fontFamily: fontBase,
-                fontSize: 13,
-                fontWeight: 700,
-                padding: "6px 14px",
-                cursor: "pointer",
-                letterSpacing: "0.3px",
-                marginLeft: 8,
-              }}
-            >
-              Full Time!
-            </button>
-          )}
+          <button
+            onClick={onActionClick}
+            style={{
+              background: actionBg,
+              border: actionBorder,
+              borderRadius: 8,
+              color: C.white,
+              fontFamily: fontBase,
+              fontSize: 13,
+              fontWeight: 700,
+              padding: "6px 14px",
+              cursor: "pointer",
+              letterSpacing: "0.3px",
+            }}
+          >
+            {buttonLabel}
+          </button>
+          {/* For the final active period (2nd-half / q4), the primary action IS "Full Time!"
+              — but some coaches historically tapped "End 2nd Half" then confirmed.
+              Keeping single-button flow: the label + handler above IS the end-game action. */}
         </div>
       )}
     </div>
