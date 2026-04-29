@@ -15,6 +15,7 @@ import {
   getPeriodNumber,
 } from "../shared/gameStructure";
 import { calcMinutes, abbreviateName, getPositionGroup, formatJerseyNum } from "../shared/utils";
+import { computeBench } from "./lineupUtils";
 import PitchSVG from "../shared/PitchSVG";
 import FieldPosition from "../shared/FieldPosition";
 import GameHeader from "./GameHeader";
@@ -314,7 +315,7 @@ export default function LiveGameScreen() {
         let resolvedBenchPlayers = [];
 
         if (lineup) {
-          const { formation, lineup: lineupData, lineups, roster } = lineup;
+          const { formation, lineup: lineupData, lineups, roster, inactiveIds } = lineup;
           const positionDefs = FORMATIONS[formation] || [];
           // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
           const lineupArray = Array.isArray(lineupData)
@@ -335,9 +336,7 @@ export default function LiveGameScreen() {
             return { pos, player };
           });
 
-          resolvedBenchPlayers = (roster || []).filter(
-            (p) => !assignedIds.includes(p.id)
-          );
+          resolvedBenchPlayers = computeBench(roster, assignedIds, inactiveIds);
         }
 
         // Store game metadata needed for season stats computation

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants.js";
-import { createGame, listGames, loadPublishedLineup, deleteGame, updateGame } from "../firebase.js";
+import { createGame, listGames, loadPublishedLineup, deleteGame, updateGame, updateGameInactives } from "../firebase.js";
+import GameDayRosterScreen from "../games/GameDayRosterScreen.jsx";
 
 // ---------------------------------------------------------------------------
 // Status badge helpers
@@ -180,11 +181,13 @@ function GameSetupModal({ onClose, onGameCreated }) {
   const today = new Date().toISOString().split("T")[0];
   const [opponent, setOpponent] = useState("");
   const [date, setDate] = useState(today);
-  const [step, setStep] = useState("details"); // "details" | "actions" | "pickLineup"
+  const [step, setStep] = useState("details"); // "details" | "actions" | "pickLineup" | "gameDayRoster"
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [savedLineups, setSavedLineups] = useState([]);
   const [selectedLineup, setSelectedLineup] = useState(null); // null = use published
+  const [createdGameId, setCreatedGameId] = useState(null);
+  const [rosterForScreen, setRosterForScreen] = useState([]);
 
   // Load saved lineups from localStorage when entering lineup picker
   const loadSavedLineups = () => {
@@ -223,9 +226,19 @@ function GameSetupModal({ onClose, onGameCreated }) {
       return;
     }
     if (andStart) {
-      navigate(`/games/${gameId}`);
+      // Intercept: show Game-Day Roster before navigating to live game
+      setCreatedGameId(gameId);
+      setRosterForScreen(lineup?.roster || []);
+      setStep("gameDayRoster");
     } else {
       onGameCreated();
+    }
+  }
+
+  async function handleConfirmInactives(ids) {
+    if (createdGameId) {
+      await updateGameInactives(createdGameId, ids);
+      navigate(`/games/${createdGameId}`);
     }
   }
 
@@ -397,6 +410,18 @@ function GameSetupModal({ onClose, onGameCreated }) {
             )}
           </>
         )}
+
+        {/* ---- Step 4: Game-Day Roster ---- */}
+        {step === "gameDayRoster" && (
+          <GameDayRosterScreen
+            roster={rosterForScreen}
+            opponent={opponent.trim()}
+            date={date}
+            initialInactiveIds={[]}
+            onBack={() => setStep("actions")}
+            onConfirm={handleConfirmInactives}
+          />
+        )}
       </div>
     </div>
   );
@@ -407,7 +432,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
 // ---------------------------------------------------------------------------
 function GameDetailModal({ game, onClose, onUpdated }) {
   const navigate = useNavigate();
-  const [step, setStep] = useState("actions"); // "actions" | "pickLineup" | "edit"
+  const [step, setStep] = useState("actions"); // "actions" | "pickLineup" | "edit" | "gameDayRoster"
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [savedLineups, setSavedLineups] = useState([]);
@@ -452,6 +477,11 @@ function GameDetailModal({ game, onClose, onUpdated }) {
     } else {
       setError("Failed to save changes.");
     }
+  }
+
+  async function handleConfirmInactives(ids) {
+    await updateGameInactives(game.id, ids);
+    navigate(`/games/${game.id}`);
   }
 
   const dateStr = date
@@ -514,7 +544,7 @@ function GameDetailModal({ game, onClose, onUpdated }) {
             {error && <p style={{ color: "#F15F5E", fontSize: 13, margin: "0 0 16px", fontWeight: 600 }}>{error}</p>}
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button onClick={() => navigate(`/games/${game.id}`)} style={actionBtnStyle(C.orange)}>
+              <button onClick={() => setStep("gameDayRoster")} style={actionBtnStyle(C.orange)}>
                 Start Game
               </button>
               <button onClick={() => { setSavedLineups(loadSavedLineups()); setStep("pickLineup"); }} style={actionBtnStyle(C.navyLight)}>
@@ -608,6 +638,18 @@ function GameDetailModal({ game, onClose, onUpdated }) {
               </button>
             </div>
           </>
+        )}
+
+        {/* ---- Game-Day Roster ---- */}
+        {step === "gameDayRoster" && (
+          <GameDayRosterScreen
+            roster={game.lineup?.roster || []}
+            opponent={game.opponent}
+            date={game.date}
+            initialInactiveIds={game.lineup?.inactiveIds || []}
+            onBack={() => setStep("actions")}
+            onConfirm={handleConfirmInactives}
+          />
         )}
       </div>
     </div>
