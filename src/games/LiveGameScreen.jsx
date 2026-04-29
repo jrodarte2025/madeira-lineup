@@ -866,7 +866,8 @@ export default function LiveGameScreen() {
   // Tap a field position — priority order:
   //   1. pending field-to-field swap → swap the two positions
   //   2. pending bench sub → sub bench player in
-  //   3. otherwise → select for stats (active half only)
+  //   3. active half → select for stats
+  //   4. setup or halftime/break → park tapped field player as swap source
   const handleFieldTap = useCallback((idx) => {
     if (pendingSwapIdx !== null) {
       if (pendingSwapIdx === idx) {
@@ -890,8 +891,15 @@ export default function LiveGameScreen() {
       return;
     }
     const player = fieldPositions[idx]?.player;
-    if (!player || !isActiveHalfForStats) return;
-    setSelectedPlayerId((prev) => (prev === player.id ? null : player.id));
+    if (!player) return;
+    if (isActiveHalfForStats) {
+      setSelectedPlayerId((prev) => (prev === player.id ? null : player.id));
+      return;
+    }
+    // Setup or halftime/break — park as field-to-field swap source.
+    // Existing pendingSwapIdx visuals (highlighted slot + swap-prompt banner) apply.
+    setSelectedPlayerId(null);
+    setPendingSwapIdx(idx);
   }, [pendingSwapIdx, subSource, fieldPositions, isActiveHalfForStats, handleSubstitution]);
 
   // Swap button in StatBar — park the currently-selected field player as the
