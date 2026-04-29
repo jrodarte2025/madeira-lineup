@@ -60,8 +60,8 @@ Inactives shift from a global roster flag (set in Roster Management or in the li
 
 The "Ready to kick off" screen today blurs the lineup; the coach uses this moment to call out the lineup to players, so the lineup needs to be readable.
 
-- [ ] **KICK-01**: The "Ready to kick off" pre-kickoff screen displays the full lineup (field positions and bench) unblurred and readable so the coach can walk through the lineup with players before the game starts
-- [ ] **KICK-02**: The "Start Game" CTA on the pre-kickoff screen is positioned at the bottom of the screen (thumb-reach), so the coach can complete the walkthrough then tap to start
+- [x] **KICK-01**: The "Ready to kick off" pre-kickoff screen displays the full lineup (field positions and bench) unblurred and readable so the coach can walk through the lineup with players before the game starts
+- [x] **KICK-02**: The "Start Game" CTA on the pre-kickoff screen is positioned at the bottom of the screen (thumb-reach), so the coach can complete the walkthrough then tap to start
 
 ### Roster Management Cleanup
 

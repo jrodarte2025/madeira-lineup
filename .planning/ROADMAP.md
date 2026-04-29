@@ -208,7 +208,7 @@ Plans:
 Plans:
 - [x] 16-01-PLAN.md — Game-Day Roster screen + insert into both Start Game flows; persist `inactiveIds` per-game (INACT-01, INACT-02, INACT-03) — completed 2026-04-29
 - [ ] 16-02-PLAN.md — Saved-lineup-as-template load behavior: sat-player positions empty, bench excludes inactives, ignore saved `inactiveIds` (INACT-04)
-- [ ] 16-03-PLAN.md — Pre-kickoff walkthrough screen: un-blur lineup, move "Start Game" CTA to bottom (KICK-01, KICK-02)
+- [x] 16-03-PLAN.md — Pre-kickoff walkthrough screen: un-blur lineup, move "Start Game" CTA to bottom (KICK-01, KICK-02) — completed 2026-04-29
 - [ ] 16-04-PLAN.md — Simplify Roster Management UI: remove sit-player toggle, keep add/delete only (ROSTER-01)
 
 ## Progress

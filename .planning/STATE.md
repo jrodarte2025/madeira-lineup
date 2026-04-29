@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — Multi-Deployment Support
-current_plan: "16-04 checkpoint:human-verify"
-status: verifying
-stopped_at: Checkpoint 16-02 task 3 — awaiting human verification of saved-lineup template behavior
-last_updated: "2026-04-29T17:39:58.583Z"
-last_activity: 2026-04-29 — Plan 16-04 Tasks 1+2 complete; SIT button and inactive drop zone removed; build+tests pass; awaiting checkpoint approval.
+current_plan: "Phase 16 complete — v2.2 milestone complete"
+status: complete
+stopped_at: Phase 16 plan 04 complete — all v2.2 Game-Day Roster Flow plans shipped
+last_updated: "2026-04-29T18:00:00Z"
+last_activity: 2026-04-29 — Plan 16-04 human-verify approved. All 4 Phase 16 plans complete. v2.2 milestone complete.
 progress:
   total_phases: 9
   completed_phases: 9
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-20)
 
 ## Current Position
 
-Milestone: v2.2 — active
-Phase: 16 (Game-Day Roster Flow) — in progress (3/4 plans code-complete, awaiting 16-04 human-verify)
-Current Plan: 16-04 checkpoint:human-verify
-Status: Plans 16-01, 16-02, 16-03 complete. 16-04 Tasks 1+2 done — SIT button + inactive drop zone removed; awaiting human-verify.
-Last activity: 2026-04-29 — Plan 16-04 Tasks 1+2 complete; SIT button and inactive drop zone removed; build+tests pass; awaiting checkpoint approval.
+Milestone: v2.2 — complete
+Phase: 16 (Game-Day Roster Flow) — complete (4/4 plans done)
+Current Plan: Phase 16 complete
+Status: All plans complete — 16-01, 16-02, 16-03, 16-04 all shipped. v2.2 milestone done.
+Last activity: 2026-04-29 — Plan 16-04 human-verify approved. Phase 16 + v2.2 milestone complete.
 
 ### v3.0 Phase Order
 
@@ -53,6 +53,7 @@ v3.0 autonomous-run decisions (2026-04-24):
 - [Phase 16 plan 01]: computeBench extracted to lineupUtils.js for clean unit testability; gameDayRoster step inserted after createGame in both modal flows; inactiveIds lives on game.lineup.inactiveIds
 - [Phase 16-game-day-roster-flow]: 16-03: Deleted blur overlay entirely (not opacity-reduced) — coach needs full name readability; fixed-bottom CTA uses zIndex 90 so swap banner always wins
 - [Phase 16-game-day-roster-flow]: resolveLineupForGame strips saved inactiveIds at load time (template pattern); isEmptySlot prop on FieldPosition for inactive-assigned slots; setup-state fills persist to Firestore fire-and-forget
+- [Phase 16-game-day-roster-flow]: 16-03 human-verify approved: blur overlay fully removed (not reduced opacity) — coach needs full name readability; fixed-bottom CTA zIndex 90 stays below swap banner at 100
 
 ### Pending Jim-only Actions (to truly ship v3.0)
 
@@ -86,6 +87,6 @@ None — just Jim's live steps.
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:39:55.053Z
-Stopped at: Checkpoint 16-02 task 3 — awaiting human verification of saved-lineup template behavior
+Last session: 2026-04-29T17:41:58.604Z
+Stopped at: 16-03 human-verify approved — plan complete; continuing with 16-04 human-verify
 Resume file: None
