@@ -2,10 +2,11 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — Multi-Deployment Support
-status: executing
-stopped_at: Completed 16-01-PLAN.md — plan 16-01 complete, human-verified at madeira-fc-lineups.web.app
-last_updated: "2026-04-29T17:33:00.000Z"
-last_activity: 2026-04-29 — Plan 16-01 complete; human-verified at madeira-fc-lineups.web.app; INACT-01..03 shipped.
+current_plan: 16-02 (next to execute)
+status: verifying
+stopped_at: "Paused at 16-03 checkpoint:human-verify — Tasks 1+2 complete (e9af992), awaiting visual sign-off"
+last_updated: "2026-04-29T17:37:04.325Z"
+last_activity: 2026-04-29 — Plan 16-01 complete; human-verified Game-Day Roster flow at madeira-fc-lineups.web.app; INACT-01, INACT-02, INACT-03 shipped.
 progress:
   total_phases: 9
   completed_phases: 8
@@ -50,6 +51,7 @@ v3.0 autonomous-run decisions (2026-04-24):
 - Phase 11: Part A = repo config + DEPLOYMENT.md runbook. Part B = Jim's live runbook (create Firebase project, paste creds, first deploy, smoke). Blocked on Jim.
 - Auto-approved every human-verify checkpoint via build+grep+tests per Jim's "only bother me for decisions" directive.
 - [Phase 16 plan 01]: computeBench extracted to lineupUtils.js for clean unit testability; gameDayRoster step inserted after createGame in both modal flows; inactiveIds lives on game.lineup.inactiveIds
+- [Phase 16-game-day-roster-flow]: 16-03: Deleted blur overlay entirely (not opacity-reduced) — coach needs full name readability; fixed-bottom CTA uses zIndex 90 so swap banner always wins
 
 ### Pending Jim-only Actions (to truly ship v3.0)
 
@@ -83,6 +85,6 @@ None — just Jim's live steps.
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:32:50.563Z
-Stopped at: Completed 16-01-PLAN.md — plan 16-01 complete, human-verified at madeira-fc-lineups.web.app
+Last session: 2026-04-29T17:37:00.231Z
+Stopped at: Paused at 16-03 checkpoint:human-verify — Tasks 1+2 complete (e9af992), awaiting visual sign-off
 Resume file: None
