@@ -70,7 +70,7 @@ Each task was committed atomically:
 
 3. **Task 3: Human verification** - approved by user on 2026-04-29
 
-**Plan metadata:** `[final commit hash]`
+**Plan metadata:** `62c677f`
 
 ## Files Created/Modified
 - `src/MadeiraLineupPlanner.jsx` — deleted SIT button, inactive drop zone, related handlers, toggleInactive function, inactive drop branch; reset inactiveIds init; updated rosterProps callsite
