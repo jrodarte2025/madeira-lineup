@@ -1,8 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants.js";
-import { createGame, listGames, loadPublishedLineup, deleteGame, updateGame, updateGameInactives } from "../firebase.js";
+import { createGame, listGames, loadPublishedLineup, deleteGame, updateGame, updateGameInactives, loadBestLineup } from "../firebase.js";
 import { resolveLineupForGame } from "../games/lineupUtils.js";
+import { ALLOWED_FORMATIONS, ROSTER } from "../config.js";
+
+// Build a lineup-data object for game.lineup from a saved best (or empty).
+// Inactives are intentionally not carried — game-time availability is set on
+// the Game-Day Roster screen.
+function buildLineupFromBest(formation, bestData) {
+  const positionCount = ALLOWED_FORMATIONS[formation]?.length ?? 0;
+  const lineup = (bestData && Array.isArray(bestData.lineup))
+    ? [...bestData.lineup]
+    : Array(positionCount).fill(null);
+  return {
+    formation,
+    lineup,
+    roster: ROSTER.map((p) => ({ ...p })),
+  };
+}
 import GameDayRosterScreen from "../games/GameDayRosterScreen.jsx";
 
 // ---------------------------------------------------------------------------
@@ -185,18 +201,12 @@ function GameSetupModal({ onClose, onGameCreated }) {
   const [step, setStep] = useState("details"); // "details" | "actions" | "pickLineup" | "gameDayRoster"
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [savedLineups, setSavedLineups] = useState([]);
   const [selectedLineup, setSelectedLineup] = useState(null); // null = use published
   const [createdGameId, setCreatedGameId] = useState(null);
   const [rosterForScreen, setRosterForScreen] = useState([]);
-
-  // Load saved lineups from localStorage when entering lineup picker
-  const loadSavedLineups = () => {
-    try {
-      const stored = localStorage.getItem("madeira_savedLineups");
-      return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
-  };
+  // Map of formationKey → best-lineup doc (or null if none saved). Loaded
+  // when entering the pickLineup step so the picker can show "Empty" badges.
+  const [bestsByFormation, setBestsByFormation] = useState({});
 
   function handleNext() {
     if (!opponent.trim()) {
@@ -204,9 +214,23 @@ function GameSetupModal({ onClose, onGameCreated }) {
       return;
     }
     setError(null);
-    setSavedLineups(loadSavedLineups());
     setStep("actions");
   }
+
+  // Pre-fetch saved best for every allowed formation so the picker can
+  // indicate which formations have a save (vs starting empty).
+  useEffect(() => {
+    if (step !== "pickLineup") return;
+    let cancelled = false;
+    const keys = Object.keys(ALLOWED_FORMATIONS);
+    Promise.all(keys.map((k) => loadBestLineup(k))).then((results) => {
+      if (cancelled) return;
+      const map = {};
+      keys.forEach((k, i) => { map[k] = results[i]; });
+      setBestsByFormation(map);
+    });
+    return () => { cancelled = true; };
+  }, [step]);
 
   async function doCreate(andStart) {
     setSaving(true);
@@ -355,7 +379,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
                 {saving ? "Creating..." : "Start Game Now"}
               </button>
               <button onClick={() => setStep("pickLineup")} disabled={saving} style={{ ...actionBtnStyle(C.navyLight), width: "100%" }}>
-                Load Lineup
+                {selectedLineup ? "Change Formation" : "Select Formation"}
               </button>
               <button onClick={() => doCreate(false)} disabled={saving} style={{ ...actionBtnStyle("transparent"), width: "100%" }}>
                 {saving ? "Saving..." : "Save for Later"}
@@ -364,7 +388,7 @@ function GameSetupModal({ onClose, onGameCreated }) {
           </>
         )}
 
-        {/* ---- Step 3: Pick a lineup ---- */}
+        {/* ---- Step 3: Pick a formation ---- */}
         {step === "pickLineup" && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
@@ -373,27 +397,17 @@ function GameSetupModal({ onClose, onGameCreated }) {
                 cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0,
               }}>&larr;</button>
               <h2 style={{ color: C.white, fontFamily: fontDisplay, fontSize: 20, fontWeight: 700, margin: 0 }}>
-                Load Lineup
+                Select Formation
               </h2>
             </div>
 
-            {savedLineups.length === 0 ? (
-              <div style={{ textAlign: "center", padding: 30, color: "rgba(255,255,255,0.3)", fontSize: 13, fontStyle: "italic" }}>
-                No saved lineups. Save one from the Lineup tab first.
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {savedLineups.map((s, i) => (
-                  <div key={i} onClick={() => {
-                    // Saved lineups are templates — ignore baked-in inactiveIds.
-                    // Per-game inactives come from the Game-Day Roster screen (Phase 16, INACT-04).
-                    setSelectedLineup(resolveLineupForGame({
-                      formation: s.formation,
-                      lineup: s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null),
-                      inactiveIds: s.inactiveIds,
-                      roster: s.roster,
-                      name: s.name,
-                    }));
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {Object.keys(ALLOWED_FORMATIONS).map((f) => {
+                const best = bestsByFormation[f];
+                const hasSave = !!(best && Array.isArray(best.lineup));
+                return (
+                  <div key={f} onClick={() => {
+                    setSelectedLineup(buildLineupFromBest(f, best));
                     setStep("actions");
                   }} style={{
                     display: "flex", alignItems: "center", padding: "12px 14px", borderRadius: 8,
@@ -401,16 +415,16 @@ function GameSetupModal({ onClose, onGameCreated }) {
                     cursor: "pointer",
                   }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: C.white }}>{s.name}</div>
-                      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-                        {s.formation} · {s.date}
+                      <div style={{ fontSize: 14, fontWeight: 600, color: C.white, fontFamily: fontDisplay }}>{f}</div>
+                      <div style={{ fontSize: 11, color: hasSave ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.25)", marginTop: 2, fontStyle: hasSave ? "normal" : "italic" }}>
+                        {hasSave ? "Saved best" : "No save yet — starts empty"}
                       </div>
                     </div>
                     <span style={{ color: C.orange, fontSize: 12, fontWeight: 700 }}>Select</span>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </>
         )}
 
@@ -438,17 +452,26 @@ function GameDetailModal({ game, onClose, onUpdated }) {
   const [step, setStep] = useState("actions"); // "actions" | "pickLineup" | "edit" | "gameDayRoster"
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [savedLineups, setSavedLineups] = useState([]);
   const [selectedLineup, setSelectedLineup] = useState(null);
   const [opponent, setOpponent] = useState(game.opponent || "");
   const [date, setDate] = useState(game.date || "");
+  // Map of formationKey → best-lineup doc (or null). Loaded on entering pickLineup.
+  const [bestsByFormation, setBestsByFormation] = useState({});
 
-  const loadSavedLineups = () => {
-    try {
-      const stored = localStorage.getItem("madeira_savedLineups");
-      return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
-  };
+  // Pre-fetch saved best for every allowed formation when the formation
+  // picker opens.
+  useEffect(() => {
+    if (step !== "pickLineup") return;
+    let cancelled = false;
+    const keys = Object.keys(ALLOWED_FORMATIONS);
+    Promise.all(keys.map((k) => loadBestLineup(k))).then((results) => {
+      if (cancelled) return;
+      const map = {};
+      keys.forEach((k, i) => { map[k] = results[i]; });
+      setBestsByFormation(map);
+    });
+    return () => { cancelled = true; };
+  }, [step]);
 
   const currentLineupName = selectedLineup
     ? (selectedLineup.name || selectedLineup.formation)
@@ -550,8 +573,8 @@ function GameDetailModal({ game, onClose, onUpdated }) {
               <button onClick={() => setStep("gameDayRoster")} style={actionBtnStyle(C.orange)}>
                 Start Game
               </button>
-              <button onClick={() => { setSavedLineups(loadSavedLineups()); setStep("pickLineup"); }} style={actionBtnStyle(C.navyLight)}>
-                {currentLineupName ? "Change Lineup" : "Load Lineup"}
+              <button onClick={() => setStep("pickLineup")} style={actionBtnStyle(C.navyLight)}>
+                {currentLineupName ? "Change Formation" : "Select Formation"}
               </button>
               <button onClick={() => { setError(null); setStep("edit"); }} style={actionBtnStyle("transparent")}>
                 Edit Details
@@ -560,7 +583,7 @@ function GameDetailModal({ game, onClose, onUpdated }) {
           </>
         )}
 
-        {/* ---- Pick lineup ---- */}
+        {/* ---- Pick formation ---- */}
         {step === "pickLineup" && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
@@ -569,43 +592,32 @@ function GameDetailModal({ game, onClose, onUpdated }) {
                 cursor: "pointer", fontSize: 18, lineHeight: 1, padding: 0,
               }}>&larr;</button>
               <h2 style={{ color: C.white, fontFamily: fontDisplay, fontSize: 20, fontWeight: 700, margin: 0 }}>
-                Load Lineup
+                Select Formation
               </h2>
             </div>
 
-            {savedLineups.length === 0 ? (
-              <div style={{ textAlign: "center", padding: 30, color: "rgba(255,255,255,0.3)", fontSize: 13, fontStyle: "italic" }}>
-                No saved lineups. Save one from the Lineup tab first.
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {savedLineups.map((s, i) => (
-                  <div key={i} onClick={() => {
-                    // Saved lineups are templates — ignore baked-in inactiveIds.
-                    // Per-game inactives come from the Game-Day Roster screen (Phase 16, INACT-04).
-                    handleLoadLineup(resolveLineupForGame({
-                      formation: s.formation,
-                      lineup: s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null),
-                      inactiveIds: s.inactiveIds,
-                      roster: s.roster,
-                      name: s.name,
-                    }));
-                  }} style={{
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {Object.keys(ALLOWED_FORMATIONS).map((f) => {
+                const best = bestsByFormation[f];
+                const hasSave = !!(best && Array.isArray(best.lineup));
+                return (
+                  <div key={f} onClick={() => { if (!saving) handleLoadLineup(buildLineupFromBest(f, best)); }} style={{
                     display: "flex", alignItems: "center", padding: "12px 14px", borderRadius: 8,
                     background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                    cursor: "pointer",
+                    cursor: saving ? "not-allowed" : "pointer",
+                    opacity: saving ? 0.5 : 1,
                   }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: C.white }}>{s.name}</div>
-                      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-                        {s.formation} · {s.date}
+                      <div style={{ fontSize: 14, fontWeight: 600, color: C.white, fontFamily: fontDisplay }}>{f}</div>
+                      <div style={{ fontSize: 11, color: hasSave ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.25)", marginTop: 2, fontStyle: hasSave ? "normal" : "italic" }}>
+                        {hasSave ? "Saved best" : "No save yet — starts empty"}
                       </div>
                     </div>
                     <span style={{ color: C.orange, fontSize: 12, fontWeight: 700 }}>Select</span>
                   </div>
-                ))}
-              </div>
-            )}
+                );
+              })}
+            </div>
           </>
         )}
 
