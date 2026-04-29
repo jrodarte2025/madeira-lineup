@@ -1,22 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.2
-milestone_name: — Game-Day Roster Flow
-status: milestone_active
-stopped_at: "v2.2 starting; Phase 16 ready for /gsd:plan-phase"
-last_updated: "2026-04-29"
-last_activity: "2026-04-29 — v2.2 milestone opened; Phase 16 (Game-Day Roster Flow) added to ROADMAP with 4 plans (16-01..16-04); 7 new requirements (INACT-01..04, KICK-01..02, ROSTER-01) added to REQUIREMENTS.md."
+milestone: v3.0
+milestone_name: — Multi-Deployment Support
+status: planning
+stopped_at: "16-01: Tasks 1+2 complete; at checkpoint:human-verify Task 3"
+last_updated: "2026-04-29T17:23:48.924Z"
+last_activity: 2026-04-29 — Opened v2.2 milestone; Phase 16 added with 4 plans (16-01..16-04); 7 reqs added (INACT-01..04, KICK-01..02, ROSTER-01).
 progress:
-  total_phases: 1
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 0
-  percent: 0
-paused_milestones:
-  - id: v3.0
-    name: Multi-Deployment Support
-    status: code_complete_pending_jim_deploy
-    notes: "All 4 phases (8-11) code-complete 2026-04-24. Awaiting Jim's Firebase project creation + first deploy per DEPLOYMENT.md."
+  total_phases: 9
+  completed_phases: 8
+  total_plans: 17
+  completed_plans: 14
 ---
 
 # Project State
@@ -54,6 +48,7 @@ v3.0 autonomous-run decisions (2026-04-24):
 - Phase 10: **MVP scope chosen (option B)**. 4 × 12-min quarters with auto-pause at boundaries. 8-segment prebuild and auto mid-quarter swap deferred to v3.1 if the friend's coach wants them. Keeps Madeira halves byte-identical and cuts code risk.
 - Phase 11: Part A = repo config + DEPLOYMENT.md runbook. Part B = Jim's live runbook (create Firebase project, paste creds, first deploy, smoke). Blocked on Jim.
 - Auto-approved every human-verify checkpoint via build+grep+tests per Jim's "only bother me for decisions" directive.
+- [Phase 16-game-day-roster-flow]: computeBench extracted to lineupUtils.js for clean unit testability; gameDayRoster step inserted after createGame in both modal flows; inactiveIds lives on game.lineup.inactiveIds
 
 ### Pending Jim-only Actions (to truly ship v3.0)
 
@@ -87,6 +82,6 @@ None — just Jim's live steps.
 
 ## Session Continuity
 
-Last session: 2026-04-24
-Stopped at: v3.0 code-complete; DEPLOYMENT.md runbook written; awaiting Jim's live-deploy actions.
-Resume file: None — clean pause. When Jim returns ready to live-ship, re-read DEPLOYMENT.md and follow the friend runbook (step 1 of "First-time spin up of the friend's team").
+Last session: 2026-04-29T17:23:45.489Z
+Stopped at: 16-01: Tasks 1+2 complete; at checkpoint:human-verify Task 3
+Resume file: None

@@ -236,4 +236,4 @@ Plans:
 | 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
 | 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
 | 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |
-| 16. Game-Day Roster Flow | v2.2 | 0/4 | Plans written (ready for /gsd:execute-phase 16) | - |
+| 16. Game-Day Roster Flow | 1/4 | In Progress|  | - |
