@@ -24,4 +24,4 @@ export const ROSTER = [
   { id: 13, name: "Violet Guttman", num: 42 },
 ];
 
-export const ALLOWED_FORMATION_KEYS = ["3-3-2", "3-2-3", "2-3-3", "4-3-1"];
+export const ALLOWED_FORMATION_KEYS = ["3-3-2", "3-2-3", "2-3-3", "2-4-2"];

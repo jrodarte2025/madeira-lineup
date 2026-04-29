@@ -53,7 +53,7 @@ describe("deployment resolver — VITE_DEPLOYMENT_ID=madeira", () => {
     const { ALLOWED_FORMATIONS } = await import("../config.js");
 
     expect(Object.keys(ALLOWED_FORMATIONS).sort()).toEqual(
-      ["2-3-3", "3-2-3", "3-3-2", "4-3-1"].sort()
+      ["2-3-3", "3-2-3", "3-3-2", "2-4-2"].sort()
     );
   });
 
@@ -111,7 +111,7 @@ describe("deployment resolver — VITE_DEPLOYMENT_ID=friend", () => {
 
     const { ALLOWED_FORMATIONS } = await import("../config.js");
     const keys = Object.keys(ALLOWED_FORMATIONS);
-    for (const nineV9 of ["3-3-2", "3-2-3", "2-3-3", "4-3-1"]) {
+    for (const nineV9 of ["3-3-2", "3-2-3", "2-3-3", "2-4-2"]) {
       expect(keys).not.toContain(nineV9);
     }
   });

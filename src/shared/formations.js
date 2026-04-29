@@ -25,10 +25,10 @@ export const FORMATIONS = {
     { label: "LM", x: 20, y: 51 }, { label: "CM", x: 50, y: 54 }, { label: "RM", x: 80, y: 51 },
     { label: "LW", x: 20, y: 30 }, { label: "CF", x: 50, y: 27 }, { label: "RW", x: 80, y: 30 },
   ],
-  "4-3-1": [
-    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 16, y: 72 }, { label: "LCB", x: 39, y: 76 },
-    { label: "RCB", x: 61, y: 76 }, { label: "RB", x: 84, y: 72 }, { label: "LM", x: 22, y: 51 },
-    { label: "CM", x: 50, y: 54 }, { label: "RM", x: 78, y: 51 }, { label: "ST", x: 50, y: 30 },
+  "2-4-2": [
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 28, y: 72 }, { label: "RB", x: 72, y: 72 },
+    { label: "LM", x: 16, y: 51 }, { label: "LCM", x: 39, y: 54 }, { label: "RCM", x: 61, y: 54 },
+    { label: "RM", x: 84, y: 51 }, { label: "LS", x: 36, y: 30 }, { label: "RS", x: 64, y: 30 },
   ],
 
   // ---- 7v7 (Phase 9) ----
