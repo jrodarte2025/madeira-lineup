@@ -1093,65 +1093,26 @@ export default function LiveGameScreen() {
           </div>
         </div>
 
+        {/* Pre-kickoff header — small confirmation banner, no blur */}
+        {gameStatus === "setup" && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "6px 12px 8px",
+              fontFamily: fontDisplay,
+              fontSize: 14,
+              fontWeight: 800,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.55)",
+            }}
+          >
+            Ready to kick off · vs {opponent}
+          </div>
+        )}
+
         {/* Pitch area */}
         <div style={{ position: "relative", padding: "6px 10px 0" }}>
-          {/* "Start Game" overlay — shown when status is setup */}
-          {gameStatus === "setup" && (
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 50,
-                gap: 16,
-                background: "rgba(17,27,58,0.75)",
-                backdropFilter: "blur(2px)",
-                borderRadius: 8,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: fontDisplay,
-                  fontSize: 20,
-                  fontWeight: 800,
-                  color: C.white,
-                }}
-              >
-                Ready to kick off
-              </div>
-              <button
-                onClick={handleStartGame}
-                style={{
-                  background: C.orange,
-                  border: "none",
-                  borderRadius: 12,
-                  color: C.white,
-                  fontFamily: fontBase,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  padding: "14px 36px",
-                  cursor: "pointer",
-                  boxShadow: `0 4px 20px ${C.orangeGlow}`,
-                  letterSpacing: "0.3px",
-                }}
-              >
-                Start Game
-              </button>
-              <div
-                style={{
-                  fontFamily: fontBase,
-                  fontSize: 12,
-                  color: "rgba(255,255,255,0.35)",
-                }}
-              >
-                vs {opponent}
-              </div>
-            </div>
-          )}
-
           {/* Pitch */}
           <div style={{ position: "relative", width: "100%", aspectRatio: "3 / 3.5", borderRadius: 8, overflow: "visible" }}>
             {/* Green pitch background */}
@@ -1200,9 +1161,49 @@ export default function LiveGameScreen() {
         {/* Stat bar spacer — only when a player is selected and stat bar visible */}
         {isActiveHalfForStats && selectedPlayerId && <div style={{ height: 110 }} />}
 
+        {/* Start Game CTA spacer — prevents fixed-bottom button from covering bench/events */}
+        {gameStatus === "setup" && <div style={{ height: 80 }} />}
+
         {/* Bottom safe area padding */}
         <div style={{ height: 8, flexShrink: 0 }} />
       </div>
+
+      {/* Start Game CTA — fixed at bottom, shown only during setup state */}
+      {gameStatus === "setup" && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: "12px 16px calc(12px + env(safe-area-inset-bottom, 0px))",
+            background: C.navyDark,
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            zIndex: 90,
+            boxShadow: "0 -4px 16px rgba(0,0,0,0.3)",
+          }}
+        >
+          <button
+            onClick={handleStartGame}
+            style={{
+              width: "100%",
+              background: C.orange,
+              border: "none",
+              borderRadius: 12,
+              color: C.white,
+              fontFamily: fontBase,
+              fontSize: 16,
+              fontWeight: 700,
+              padding: "16px 0",
+              cursor: "pointer",
+              boxShadow: `0 4px 20px ${C.orangeGlow}`,
+              letterSpacing: "0.3px",
+            }}
+          >
+            Start Game
+          </button>
+        </div>
+      )}
 
       {/* Stat bar — fixed at bottom, visible during active halves */}
       {isActiveHalfForStats && (
