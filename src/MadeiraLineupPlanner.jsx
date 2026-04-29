@@ -30,7 +30,7 @@ import FieldPosition from "./shared/FieldPosition";
 // =============================================
 // ROSTER PLAYER CHIP
 // =============================================
-function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onDragEnd, onClick, onRemove, onToggleInactive, showRemove, showEdit, isMobile }) {
+function PlayerChip({ player, isSelected, isDimmed, onDragStart, onDragEnd, onClick, onRemove, showRemove, showEdit, isMobile }) {
   const canInteract = !isDimmed;
   return (
     <div draggable={canInteract} onDragStart={canInteract ? onDragStart : undefined} onDragEnd={onDragEnd}
@@ -52,11 +52,6 @@ function PlayerChip({ player, isSelected, isDimmed, isInactive, onDragStart, onD
       <div style={{ fontSize: isDimmed ? 12 : 13, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 }}>
         {player.name}
       </div>
-      {(showEdit || isMobile) && !isDimmed && onToggleInactive && (
-        <button onClick={(e) => { e.stopPropagation(); onToggleInactive(); }}
-          aria-label={`Sit out ${player.name}`}
-          style={{ background: "rgba(255,120,80,0.15)", border: "none", color: "rgba(255,120,80,0.7)", borderRadius: 4, cursor: "pointer", fontSize: isMobile ? 12 : 10, padding: isMobile ? "10px 14px" : "2px 6px", flexShrink: 0, lineHeight: 1, fontWeight: 700, minHeight: isMobile ? 44 : "auto", minWidth: isMobile ? 44 : "auto" }}>SIT</button>
-      )}
       {showRemove && !isDimmed && (
         <button onClick={(e) => { e.stopPropagation(); onRemove(); }}
           style={{ background: "rgba(255,80,80,0.15)", border: "none", color: "#ff7b7b", borderRadius: 4, cursor: "pointer", fontSize: 12, padding: "2px 6px", flexShrink: 0, lineHeight: 1 }}>×</button>
@@ -288,22 +283,9 @@ function SaveLoadModal({ isOpen, mode, savedLineups, currentSavedLineup, onSave,
 // =============================================
 // ROSTER SIDEBAR CONTENT (shared between sidebar and mobile drawer)
 // =============================================
-function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
-  handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive, newName, setNewName, newNum, setNewNum,
-  addPlayer, clearAll, inactiveHover, setInactiveHover, isMobile }) {
-
-  const handleInactiveDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setInactiveHover(true); };
-  const handleInactiveDragLeave = () => setInactiveHover(false);
-  const handleInactiveDrop = (e) => {
-    e.preventDefault();
-    setInactiveHover(false);
-    try {
-      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-      if (data.playerId && data.source !== "inactive") {
-        toggleInactive(data.playerId);
-      }
-    } catch {}
-  };
+function RosterContent({ roster, availablePlayers, onFieldPlayers, selectedPlayer, showEdit, setShowEdit,
+  handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, newName, setNewName, newNum, setNewNum,
+  addPlayer, clearAll, isMobile }) {
 
   return (
     <>
@@ -320,9 +302,9 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
 
       <div style={{ flex: 1, overflowY: "auto", padding: "0 10px 10px" }}>
         {availablePlayers.map((p) => (
-          <PlayerChip key={p.id} player={p} isSelected={selectedPlayer === p.id} isDimmed={false} isInactive={false}
+          <PlayerChip key={p.id} player={p} isSelected={selectedPlayer === p.id} isDimmed={false}
             onDragStart={(e) => handleDragStart(e, p.id, "roster")} onDragEnd={handleDragEnd}
-            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} onToggleInactive={() => toggleInactive(p.id)} showRemove={showEdit} showEdit={showEdit} isMobile={isMobile} />
+            onClick={() => handlePlayerClick(p.id)} onRemove={() => removePlayer(p.id)} showRemove={showEdit} showEdit={showEdit} isMobile={isMobile} />
         ))}
 
         {onFieldPlayers.length > 0 && (
@@ -331,7 +313,7 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
               On Field · {onFieldPlayers.length}
             </div>
             {onFieldPlayers.map((p) => (
-              <PlayerChip key={p.id} player={p} isSelected={false} isDimmed={true} isInactive={false} showRemove={false} />
+              <PlayerChip key={p.id} player={p} isSelected={false} isDimmed={true} showRemove={false} />
             ))}
           </>
         )}
@@ -348,60 +330,6 @@ function RosterContent({ roster, availablePlayers, onFieldPlayers, inactivePlaye
             </div>
           </div>
         )}
-      </div>
-
-      {/* INACTIVE DROP ZONE */}
-      <div
-        onDragOver={handleInactiveDragOver}
-        onDragLeave={handleInactiveDragLeave}
-        onDrop={handleInactiveDrop}
-        style={{
-          margin: "0 10px", padding: inactivePlayers.length > 0 ? "8px 10px" : "10px",
-          borderRadius: 8, minHeight: inactivePlayers.length > 0 ? "auto" : 44,
-          background: inactiveHover ? "rgba(255,120,80,0.15)" : "rgba(255,255,255,0.03)",
-          border: inactiveHover ? `2px dashed ${C.orange}` : inactivePlayers.length > 0 ? "1px solid rgba(255,120,80,0.15)" : "2px dashed rgba(255,255,255,0.08)",
-          transition: "all 0.2s ease",
-          display: "flex", flexDirection: "column", gap: 3,
-        }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: inactivePlayers.length > 0 ? 4 : 0 }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={inactiveHover ? C.orange : "rgba(255,120,80,0.5)"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-          </svg>
-          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "1.5px", color: inactiveHover ? C.orange : "rgba(255,120,80,0.5)", textTransform: "uppercase" }}>
-            {inactivePlayers.length > 0 ? `Inactive · ${inactivePlayers.length}` : "Drag here to sit out"}
-          </span>
-        </div>
-        {inactivePlayers.map((p) => (
-          <div key={p.id} draggable={!isMobile}
-            onDragStart={!isMobile ? (e) => handleDragStart(e, p.id, "inactive") : undefined}
-            onDragEnd={!isMobile ? handleDragEnd : undefined}
-            onClick={() => toggleInactive(p.id)}
-            style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: isMobile ? "8px 10px" : "5px 8px", borderRadius: 6,
-              cursor: "pointer", opacity: 0.55,
-              background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
-              textDecoration: "line-through", textDecorationColor: "rgba(255,255,255,0.2)",
-              transition: "all 0.15s ease", userSelect: "none",
-              minHeight: isMobile ? 44 : "auto",
-            }}>
-            <div style={{
-              width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.08)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: fontDisplay, fontSize: 9, fontWeight: 800, flexShrink: 0, color: C.white,
-            }}>{formatJerseyNum(p.num) ?? ""}</div>
-            <div style={{ fontSize: 11, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, color: "rgba(255,255,255,0.5)" }}>
-              {p.name}
-            </div>
-            {isMobile && (
-              <span style={{ fontSize: 10, fontWeight: 700, color: C.statDefensive, flexShrink: 0 }}>ACTIVATE</span>
-            )}
-            {showEdit && (
-              <button onClick={(e) => { e.stopPropagation(); removePlayer(p.id); }}
-                style={{ background: "rgba(255,80,80,0.15)", border: "none", color: "#ff7b7b", borderRadius: 4, cursor: "pointer", fontSize: 12, padding: "2px 6px", flexShrink: 0, lineHeight: 1 }}>×</button>
-            )}
-          </div>
-        ))}
       </div>
 
       <div style={{ padding: 10, borderTop: `1px solid ${C.whiteAlpha}`, display: "flex", flexDirection: "column", gap: 5 }}>
@@ -610,7 +538,7 @@ export default function MadeiraLineupPlanner() {
   };
 
   const [roster, setRoster] = useState(() => loadStored("roster", ROSTER));
-  const [inactiveIds, setInactiveIds] = useState(() => loadStored("inactiveIds", []));
+  const [inactiveIds, setInactiveIds] = useState([]);
   const [formation, setFormation] = useState(() => {
     const stored = loadStored("formation", null);
     // Reject stored values that aren't in this deployment's allowlist
@@ -636,7 +564,6 @@ export default function MadeiraLineupPlanner() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("save");
   const [rosterOpen, setRosterOpen] = useState(false);
-  const [inactiveHover, setInactiveHover] = useState(false);
   const [rosterHover, setRosterHover] = useState(false);
   const [toast, setToast] = useState(null);
   const [sharedName, setSharedName] = useState(null);
@@ -680,7 +607,7 @@ export default function MadeiraLineupPlanner() {
         if (data.roster) setRoster(data.roster);
         setFormation(data.formation);
         setLineup([...data.lineup]);
-        setInactiveIds(data.inactiveIds ? [...data.inactiveIds] : []);
+        setInactiveIds([]);
         if (data.name) setSharedName(data.name);
         window.history.replaceState({}, "", window.location.pathname);
         setCloudLoaded(true);
@@ -695,9 +622,10 @@ export default function MadeiraLineupPlanner() {
         // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
         if (data.lineup) setLineup([...data.lineup]);
         else if (data.lineups) setLineup([...(data.lineups["1"] || emptyLineup())]);
-        // Always set inactiveIds — treat missing field as empty so a stale
-        // localStorage value never leaks inactives back onto the bench (LUX-04).
-        setInactiveIds(data.inactiveIds ? [...data.inactiveIds] : []);
+        // Always reset inactiveIds to [] — the builder no longer carries template
+        // inactives. Legacy published lineups with non-empty inactiveIds are
+        // gracefully forgotten on load (ROSTER-01).
+        setInactiveIds([]);
       }
       setCloudLoaded(true);
     });
@@ -795,19 +723,6 @@ export default function MadeiraLineupPlanner() {
     setInactiveIds([]);
     setSelectedPlayer(null);
     setCurrentSavedLineupId(null);
-  };
-
-  // --- INACTIVE ---
-  const toggleInactive = (playerId) => {
-    setInactiveIds((prev) => {
-      if (prev.includes(playerId)) {
-        return prev.filter((id) => id !== playerId);
-      } else {
-        setLineup((prevL) => prevL.map((id) => (id === playerId ? null : id)));
-        return [...prev, playerId];
-      }
-    });
-    setSelectedPlayer(null);
   };
 
   // --- ROSTER ---
@@ -909,11 +824,10 @@ export default function MadeiraLineupPlanner() {
       // Support both new shape (lineup: [...]) and legacy saved (lineups: {"1": [...]})
       if (Array.isArray(s.lineup)) setLineup([...s.lineup]);
       else if (s.lineups) setLineup([...(s.lineups["1"] || emptyLineup())]);
-      // Defensive: older saves (or a Firestore doc that dropped the field)
-      // may be missing inactiveIds. Treat missing as empty to avoid a
-      // "[...undefined]" throw that would leave the modal stuck open and
-      // give the impression the entry disappeared.
-      setInactiveIds(Array.isArray(s.inactiveIds) ? [...s.inactiveIds] : []);
+      // Always reset inactiveIds to [] — the builder no longer carries template
+      // inactives. Legacy saved lineups with non-empty inactiveIds are
+      // gracefully forgotten on load (ROSTER-01).
+      setInactiveIds([]);
       setSelectedPlayer(null);
       // Track the loaded lineup so Save can offer an "Update" option.
       setCurrentSavedLineupId(s.id || null);
@@ -959,12 +873,7 @@ export default function MadeiraLineupPlanner() {
     e.preventDefault();
     try {
       const data = JSON.parse(e.dataTransfer.getData("text/plain"));
-      if (data.source === "inactive") {
-        // Reactivate and assign to position
-        toggleInactive(data.playerId);
-        // Use setTimeout so the inactive state clears before assigning
-        setTimeout(() => assignPlayer(data.playerId, posIndex), 0);
-      } else if (data.source === "roster") {
+      if (data.source === "roster") {
         assignPlayer(data.playerId, posIndex);
       } else if (typeof data.source === "number") {
         swapPositions(data.source, posIndex);
@@ -1050,10 +959,9 @@ export default function MadeiraLineupPlanner() {
 
   // Shared roster props
   const rosterProps = {
-    roster, availablePlayers, onFieldPlayers, inactivePlayers, selectedPlayer, showEdit, setShowEdit,
-    handleDragStart, handleDragEnd, handlePlayerClick, removePlayer, toggleInactive,
+    roster, availablePlayers, onFieldPlayers, selectedPlayer, showEdit, setShowEdit,
+    handleDragStart, handleDragEnd, handlePlayerClick, removePlayer,
     newName, setNewName, newNum, setNewNum, addPlayer, clearAll,
-    inactiveHover, setInactiveHover,
     rosterHover, isMobile,
   };
 
