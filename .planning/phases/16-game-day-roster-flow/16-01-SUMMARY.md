@@ -60,7 +60,7 @@ completed: 2026-04-29
 - **Duration:** ~3 min (automated)
 - **Started:** 2026-04-29T17:20:10Z
 - **Completed:** 2026-04-29T17:23:00Z
-- **Tasks:** 2 of 3 complete (Task 3 is a human-verify checkpoint)
+- **Tasks:** 3 of 3 complete
 - **Files modified:** 6
 
 ## Accomplishments
@@ -78,6 +78,7 @@ Each task was committed atomically:
 1. **Task 1: GameDayRosterScreen + updateGameInactives** - `742d55d` (feat)
 2. **Task 2 RED: failing computeBench tests** - `7b33c73` (test)
 3. **Task 2 GREEN: lineupUtils + modal wiring + bench filter** - `6350343` (feat)
+4. **Task 3: Human verification checkpoint** - approved by Jim at https://madeira-fc-lineups.web.app
 
 ## Files Created/Modified
 - `src/games/GameDayRosterScreen.jsx` - Player roster list with Active/Inactive toggle; handles empty-roster error state
@@ -108,7 +109,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 - Plan 16-02 (saved-lineup-as-template loader) can now use `computeBench` from `lineupUtils.js` and the established `inactiveIds` write path
 - The `gameDayRoster` step pattern is established in both modals; plan 16-02 can extend it further if needed
-- Human verification checkpoint (Task 3) must be approved before marking plan complete
+- Human verification approved at https://madeira-fc-lineups.web.app — plan 16-01 complete, ready for 16-02
 
 ## Self-Check
 - [x] `src/games/GameDayRosterScreen.jsx` exists

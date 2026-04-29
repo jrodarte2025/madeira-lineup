@@ -206,7 +206,7 @@ Plans:
 **Plans**: 4 plans (Wave 1: 16-01 alone; Wave 2: 16-02, 16-03, 16-04 in parallel — 16-01 must precede 16-02 because the inactive-aware loader needs the per-game `inactiveIds` write path to exist; 16-03 and 16-04 are independent of 16-02 and of each other)
 
 Plans:
-- [ ] 16-01-PLAN.md — Game-Day Roster screen + insert into both Start Game flows; persist `inactiveIds` per-game (INACT-01, INACT-02, INACT-03)
+- [x] 16-01-PLAN.md — Game-Day Roster screen + insert into both Start Game flows; persist `inactiveIds` per-game (INACT-01, INACT-02, INACT-03) — completed 2026-04-29
 - [ ] 16-02-PLAN.md — Saved-lineup-as-template load behavior: sat-player positions empty, bench excludes inactives, ignore saved `inactiveIds` (INACT-04)
 - [ ] 16-03-PLAN.md — Pre-kickoff walkthrough screen: un-blur lineup, move "Start Game" CTA to bottom (KICK-01, KICK-02)
 - [ ] 16-04-PLAN.md — Simplify Roster Management UI: remove sit-player toggle, keep add/delete only (ROSTER-01)
@@ -236,4 +236,4 @@ Plans:
 | 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
 | 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
 | 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |
-| 16. Game-Day Roster Flow | 1/4 | In Progress|  | - |
+| 16. Game-Day Roster Flow | v2.2 | 1/4 | In Progress | - |

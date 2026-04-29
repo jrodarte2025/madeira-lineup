@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — Multi-Deployment Support
-status: planning
-stopped_at: "16-01: Tasks 1+2 complete; at checkpoint:human-verify Task 3"
-last_updated: "2026-04-29T17:23:48.924Z"
-last_activity: 2026-04-29 — Opened v2.2 milestone; Phase 16 added with 4 plans (16-01..16-04); 7 reqs added (INACT-01..04, KICK-01..02, ROSTER-01).
+status: executing
+stopped_at: Completed 16-01-PLAN.md — plan 16-01 complete, human-verified at madeira-fc-lineups.web.app
+last_updated: "2026-04-29T17:33:00.000Z"
+last_activity: 2026-04-29 — Plan 16-01 complete; human-verified at madeira-fc-lineups.web.app; INACT-01..03 shipped.
 progress:
   total_phases: 9
   completed_phases: 8
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -25,9 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-20)
 ## Current Position
 
 Milestone: v2.2 — active
-Phase: 16 (Game-Day Roster Flow) — ready for /gsd:plan-phase 16
-Status: Roadmap + requirements written 2026-04-29; planning next.
-Last activity: 2026-04-29 — Opened v2.2 milestone; Phase 16 added with 4 plans (16-01..16-04); 7 reqs added (INACT-01..04, KICK-01..02, ROSTER-01).
+Phase: 16 (Game-Day Roster Flow) — in progress (1/4 plans complete)
+Current Plan: 16-02 (next to execute)
+Status: Plan 16-01 complete and human-verified 2026-04-29. Wave 2 plans (16-02, 16-03, 16-04) ready to execute.
+Last activity: 2026-04-29 — Plan 16-01 complete; human-verified Game-Day Roster flow at madeira-fc-lineups.web.app; INACT-01, INACT-02, INACT-03 shipped.
 
 ### v3.0 Phase Order
 
@@ -48,7 +49,7 @@ v3.0 autonomous-run decisions (2026-04-24):
 - Phase 10: **MVP scope chosen (option B)**. 4 × 12-min quarters with auto-pause at boundaries. 8-segment prebuild and auto mid-quarter swap deferred to v3.1 if the friend's coach wants them. Keeps Madeira halves byte-identical and cuts code risk.
 - Phase 11: Part A = repo config + DEPLOYMENT.md runbook. Part B = Jim's live runbook (create Firebase project, paste creds, first deploy, smoke). Blocked on Jim.
 - Auto-approved every human-verify checkpoint via build+grep+tests per Jim's "only bother me for decisions" directive.
-- [Phase 16-game-day-roster-flow]: computeBench extracted to lineupUtils.js for clean unit testability; gameDayRoster step inserted after createGame in both modal flows; inactiveIds lives on game.lineup.inactiveIds
+- [Phase 16 plan 01]: computeBench extracted to lineupUtils.js for clean unit testability; gameDayRoster step inserted after createGame in both modal flows; inactiveIds lives on game.lineup.inactiveIds
 
 ### Pending Jim-only Actions (to truly ship v3.0)
 
@@ -82,6 +83,6 @@ None — just Jim's live steps.
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:23:45.489Z
-Stopped at: 16-01: Tasks 1+2 complete; at checkpoint:human-verify Task 3
+Last session: 2026-04-29T17:32:50.563Z
+Stopped at: Completed 16-01-PLAN.md — plan 16-01 complete, human-verified at madeira-fc-lineups.web.app
 Resume file: None

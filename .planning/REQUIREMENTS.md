@@ -128,9 +128,9 @@ Explicitly excluded. Documented to prevent scope creep.
 | SAVE-02 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
 | SAVE-03 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
 | SAVE-04 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
-| INACT-01 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
-| INACT-02 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
-| INACT-03 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| INACT-01 | Phase 16 — Game-Day Roster Flow | Shipped (code) 2026-04-29 |
+| INACT-02 | Phase 16 — Game-Day Roster Flow | Shipped (code) 2026-04-29 |
+| INACT-03 | Phase 16 — Game-Day Roster Flow | Shipped (code) 2026-04-29 |
 | INACT-04 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
 | KICK-01 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
 | KICK-02 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
