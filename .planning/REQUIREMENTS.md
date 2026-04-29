@@ -67,7 +67,7 @@ The "Ready to kick off" screen today blurs the lineup; the coach uses this momen
 
 With per-game inactives, the global "sit player" toggle in Roster Management becomes redundant. Roster Management is for roster composition only.
 
-- [ ] **ROSTER-01**: The Roster Management screen no longer offers a "sit player" / "make inactive" toggle — only add player and delete player operations remain
+- [x] **ROSTER-01**: The Roster Management screen no longer offers a "sit player" / "make inactive" toggle — only add player and delete player operations remain
 
 ## Deferred / Future (not v2.1)
 

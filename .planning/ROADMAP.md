@@ -6,7 +6,7 @@
 - ✅ **v2.0 — Live Game Tracking & Stats** - Phases 4-7 (shipped 2026-03-17)
 - 🚧 **v3.0 — Multi-Deployment Support** - Phases 8-11 (code complete 2026-04-24 — awaiting Jim's live Firebase-project creation + deploy)
 - ✅ **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (code complete 2026-04-20)
-- 🚧 **v2.2 — Game-Day Roster Flow** - Phase 16 (active 2026-04-29)
+- ✅ **v2.2 — Game-Day Roster Flow** - Phase 16 (code complete 2026-04-29)
 
 ## Phases
 
@@ -61,7 +61,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - [x] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute — completed 2026-04-20
 - [x] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration — completed 2026-04-20
 
-### 🚧 v2.2 — Game-Day Roster Flow (Active)
+### ✅ v2.2 — Game-Day Roster Flow (Code Complete 2026-04-29)
 
 **Milestone Goal:** Make "inactive" a per-game decision instead of a global roster flag. The coach sets game-day inactives on a new screen between game creation and live-game-start. Saved lineups become reusable templates (no baked-in inactives). The "Ready to kick off" screen becomes a readable lineup walkthrough for coach-to-player call-out, with the Start Game CTA moved to the bottom. Roster Management UI drops the "sit player" toggle and keeps only add/delete. All changes scoped to Madeira's `halves` flow; multi-deploy code paths untouched.
 
@@ -207,9 +207,9 @@ Plans:
 
 Plans:
 - [x] 16-01-PLAN.md — Game-Day Roster screen + insert into both Start Game flows; persist `inactiveIds` per-game (INACT-01, INACT-02, INACT-03) — completed 2026-04-29
-- [ ] 16-02-PLAN.md — Saved-lineup-as-template load behavior: sat-player positions empty, bench excludes inactives, ignore saved `inactiveIds` (INACT-04)
+- [x] 16-02-PLAN.md — Saved-lineup-as-template load behavior: sat-player positions empty, bench excludes inactives, ignore saved `inactiveIds` (INACT-04) — completed 2026-04-29
 - [x] 16-03-PLAN.md — Pre-kickoff walkthrough screen: un-blur lineup, move "Start Game" CTA to bottom (KICK-01, KICK-02) — completed 2026-04-29
-- [ ] 16-04-PLAN.md — Simplify Roster Management UI: remove sit-player toggle, keep add/delete only (ROSTER-01)
+- [x] 16-04-PLAN.md — Simplify Roster Management UI: remove sit-player toggle, keep add/delete only (ROSTER-01) — completed 2026-04-29
 
 ## Progress
 
@@ -236,4 +236,4 @@ Plans:
 | 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
 | 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
 | 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |
-| 16. Game-Day Roster Flow | 4/4 | Complete   | 2026-04-29 | - |
+| 16. Game-Day Roster Flow | v2.2 | 4/4 | Complete | 2026-04-29 |

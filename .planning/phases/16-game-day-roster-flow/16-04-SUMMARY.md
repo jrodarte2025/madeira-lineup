@@ -46,7 +46,7 @@ completed: 2026-04-29
 - **Duration:** ~12 min
 - **Started:** 2026-04-29T17:34:39Z
 - **Completed:** 2026-04-29T17:47:00Z
-- **Tasks:** 2 of 2 auto-tasks complete (Task 3 is checkpoint:human-verify, pending)
+- **Tasks:** 3 of 3 complete (Task 3 human-verify approved by user)
 - **Files modified:** 1
 
 ## Accomplishments
@@ -68,7 +68,9 @@ Each task was committed atomically:
 1. **Task 1: Confirm Roster Management screen location + enumerate callsites** - no commit (read-only audit)
 2. **Task 2: Remove SIT chip button + inactive drop zone + neutralize state** - `73e2d4c` (feat)
 
-**Plan metadata:** pending final commit
+3. **Task 3: Human verification** - approved by user on 2026-04-29
+
+**Plan metadata:** `[final commit hash]`
 
 ## Files Created/Modified
 - `src/MadeiraLineupPlanner.jsx` — deleted SIT button, inactive drop zone, related handlers, toggleInactive function, inactive drop branch; reset inactiveIds init; updated rosterProps callsite
@@ -89,8 +91,9 @@ None — build and tests passed on first attempt after all edits were applied.
 None — no external service configuration required.
 
 ## Next Phase Readiness
-- Checkpoint human-verify (Task 3) pending — user needs to confirm sit-out UI is gone, add/delete still works, legacy lineup loads gracefully, per-game inactives from 16-01 still work
-- After approval: Phase 16 plans complete (16-01 through 16-04)
+- Human-verify (Task 3) approved by user — all 3 tasks complete
+- Phase 16 fully complete (16-01 through 16-04 all done)
+- v2.2 milestone complete — per-game inactives, saved-lineup templates, pre-kickoff walkthrough, and Roster Management cleanup all shipped
 
 ---
 *Phase: 16-game-day-roster-flow*

@@ -60,7 +60,7 @@ completed: 2026-04-29
 - **Duration:** ~12 min
 - **Started:** 2026-04-29T17:35:02Z
 - **Completed:** 2026-04-29T17:47:00Z
-- **Tasks:** 2 auto tasks complete (Task 3 is checkpoint:human-verify — awaiting coach verification)
+- **Tasks:** 3/3 complete (Task 3 checkpoint:human-verify — approved by coach 2026-04-29)
 - **Files modified:** 4
 
 ## Accomplishments
@@ -74,7 +74,7 @@ completed: 2026-04-29
 
 ## Task Commits
 
-1. **Task 1: resolveLineupForGame + computeEmptySlotIndices helpers + tests** - `e9af992` (feat)
+1. **Task 1: resolveLineupForGame + computeEmptySlotIndices helpers + tests** - `0a7d279` (feat)
 2. **Task 2: Wire GamesTab strip + empty-slot render + setup-state persistence** - `a43abae` (feat)
 
 ## Files Created/Modified
@@ -132,5 +132,21 @@ All three: fire-and-forget, `game?.lineup` fallback to `{}` if game state not ye
 - All 170 tests pass; clean build
 
 ---
+## Human Verification
+
+- **Checkpoint type:** human-verify (blocking)
+- **Outcome:** Approved by coach — 2026-04-29
+- **Verified:** Saved-lineup template behavior, empty slots, setup-state fill persistence
+
+## Self-Check: PASSED
+
+- `0a7d279` — resolveLineupForGame + computeEmptySlotIndices helpers (FOUND)
+- `a43abae` — GamesTab strip + empty-slot render + setup-state persistence (FOUND)
+- `src/games/lineupUtils.js` — resolveLineupForGame and computeEmptySlotIndices exports (FOUND)
+- `src/tests/savedLineupTemplate.test.js` — test file (FOUND)
+- `src/tabs/GamesTab.jsx` — resolveLineupForGame applied at load time (FOUND)
+- `src/games/LiveGameScreen.jsx` — empty-slot computation + isInteractive + persistence (FOUND)
+- `src/shared/FieldPosition.jsx` — isEmptySlot prop (FOUND)
+
 *Phase: 16-game-day-roster-flow*
 *Completed: 2026-04-29*
