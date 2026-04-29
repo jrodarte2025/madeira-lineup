@@ -263,6 +263,27 @@ export async function deleteGame(gameId) {
   }
 }
 
+/**
+ * Merges inactiveIds into the game document's lineup field without overwriting
+ * other lineup fields (formation, lineup array, roster, name).
+ * @param {string} gameId
+ * @param {string[]} inactiveIds  Array of player IDs sitting out this game
+ * @returns {Promise<boolean>}
+ */
+export async function updateGameInactives(gameId, inactiveIds) {
+  try {
+    const game = await loadGame(gameId);
+    const existingLineup = game?.lineup || null;
+    const nextLineup = existingLineup
+      ? { ...existingLineup, inactiveIds }
+      : { inactiveIds };
+    return await updateGame(gameId, { lineup: nextLineup });
+  } catch (err) {
+    console.error("Failed to update game inactives:", err);
+    return false;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Season Stats
 // ---------------------------------------------------------------------------
