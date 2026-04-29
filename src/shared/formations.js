@@ -30,6 +30,14 @@ export const FORMATIONS = {
     { label: "LM", x: 16, y: 51 }, { label: "LCM", x: 39, y: 54 }, { label: "RCM", x: 61, y: 54 },
     { label: "RM", x: 84, y: 51 }, { label: "LS", x: 36, y: 30 }, { label: "RS", x: 64, y: 30 },
   ],
+  // Retained in the library (not in any deployment's picker allowlist) so older
+  // saved lineups / share links that reference "4-3-1" still render — see the
+  // file-header comment about render sites reading FORMATIONS directly.
+  "4-3-1": [
+    { label: "GK", x: 50, y: 89 }, { label: "LB", x: 16, y: 72 }, { label: "LCB", x: 39, y: 76 },
+    { label: "RCB", x: 61, y: 76 }, { label: "RB", x: 84, y: 72 }, { label: "LM", x: 22, y: 51 },
+    { label: "CM", x: 50, y: 54 }, { label: "RM", x: 78, y: 51 }, { label: "ST", x: 50, y: 30 },
+  ],
 
   // ---- 7v7 (Phase 9) ----
   "2-3-1": [
