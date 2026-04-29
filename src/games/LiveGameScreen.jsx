@@ -4,7 +4,7 @@ import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGa
 import { getSeasonId, computeSeasonDeltas } from "../shared/seasonUtils";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 import { FORMATIONS } from "../shared/formations";
-import { GAME_STRUCTURE } from "../config";
+import { GAME_STRUCTURE, ALLOWED_FORMATIONS } from "../config";
 import {
   INITIAL_ACTIVE_STATUS,
   isActiveStatus,
@@ -799,9 +799,47 @@ export default function LiveGameScreen() {
   );
 
   // ---------------------------------------------------------------------------
+  // Formation change — pre-kickoff or halftime/break only. Index-preserving:
+  // each player stays at their current slot index; positions get the new
+  // formation's labels + coordinates. Coach uses field-to-field swap to
+  // fine-tune. Slot count is constant within a deployment's allowlist
+  // (Madeira: all 9-slot, friend: all 7-slot).
+  // ---------------------------------------------------------------------------
+  const handleFormationChange = useCallback((newKey) => {
+    const currentFormation = game?.lineup?.formation;
+    if (!newKey || newKey === currentFormation) return;
+    const newPositionDefs = FORMATIONS[newKey];
+    if (!newPositionDefs) return;
+
+    setFieldPositions((prev) =>
+      newPositionDefs.map((pos, idx) => ({
+        pos,
+        player: prev[idx]?.player ?? null,
+        isEmptySlot: !!prev[idx]?.isEmptySlot,
+      }))
+    );
+
+    setPendingSwapIdx(null);
+    setSubSource(null);
+
+    setGame((prev) => {
+      if (!prev) return prev;
+      return { ...prev, lineup: { ...(prev.lineup || {}), formation: newKey } };
+    });
+
+    updateGame(gameId, {
+      lineup: { ...(game?.lineup || {}), formation: newKey },
+    }).catch((err) => console.error("Failed to persist formation change:", err));
+  }, [gameId, game]);
+
+  // ---------------------------------------------------------------------------
   // Setup state is interactive so coaches can manually fill empty slots pre-kickoff.
   // Active/break states remain interactive for substitutions during the game.
   const isInteractive = isActiveStatus(gameStatus) || isBreakStatus(gameStatus) || gameStatus === "setup";
+
+  // Formation picker is only shown when the clock isn't running.
+  const isFormationPickerVisible = gameStatus === "setup" || isBreakStatus(gameStatus);
+  const currentFormation = game?.lineup?.formation || null;
 
   // ---------------------------------------------------------------------------
   // Live minute calculations — recompute every 15 seconds via tick counter
@@ -1156,6 +1194,44 @@ export default function LiveGameScreen() {
             }}
           >
             Ready to kick off · vs {opponent}
+          </div>
+        )}
+
+        {/* Formation picker — visible during setup and halftime/breaks only.
+            Index-preserving: changing formation re-labels each slot but keeps
+            the same player at each slot index. */}
+        {isFormationPickerVisible && currentFormation && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "0 12px 8px" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 3,
+                background: "rgba(0,0,0,0.3)",
+                borderRadius: 10,
+                padding: 3,
+              }}
+            >
+              {Object.keys(ALLOWED_FORMATIONS).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => handleFormationChange(f)}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: 7,
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: fontDisplay,
+                    fontWeight: 700,
+                    fontSize: 12,
+                    background: currentFormation === f ? C.orange : "transparent",
+                    color: currentFormation === f ? C.white : "rgba(255,255,255,0.45)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
