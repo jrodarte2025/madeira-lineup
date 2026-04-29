@@ -32,6 +32,7 @@ const PUBLISHED_DOC = doc(db, "lineups", "published");
 const gamesCol = collection(db, "games");
 const sharedCol = collection(db, "sharedLineups");
 const savedLineupsCol = collection(db, "savedLineups");
+const bestLineupsCol = collection(db, "bestLineups");
 
 export async function loadPublishedLineup() {
   try {
@@ -57,6 +58,40 @@ export async function savePublishedLineup({ formation, lineup, inactiveIds, rost
     return true;
   } catch (err) {
     console.error("Failed to publish lineup:", err);
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Best Lineups — exactly one canonical "best" lineup per formation key.
+// Doc id = formation key (e.g. "3-3-2"). Inactives are intentionally not
+// stored here — the saved best represents the platonic ideal "everyone
+// available" lineup. Game-time availability is a separate concern.
+// ---------------------------------------------------------------------------
+
+export async function loadBestLineup(formation) {
+  if (!formation) return null;
+  try {
+    const snap = await getDoc(doc(db, "bestLineups", formation));
+    if (snap.exists()) return snap.data();
+    return null;
+  } catch (err) {
+    console.warn("Failed to load best lineup:", err);
+    return null;
+  }
+}
+
+export async function saveBestLineup(formation, lineup) {
+  if (!formation || !Array.isArray(lineup)) return false;
+  try {
+    await setDoc(doc(db, "bestLineups", formation), {
+      formation,
+      lineup,
+      savedAt: new Date().toISOString(),
+    });
+    return true;
+  } catch (err) {
+    console.error("Failed to save best lineup:", err);
     return false;
   }
 }

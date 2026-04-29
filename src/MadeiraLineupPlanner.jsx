@@ -3,10 +3,8 @@ import { createPortal } from "react-dom";
 import {
   loadPublishedLineup,
   savePublishedLineup,
-  listSavedLineups,
-  createSavedLineup,
-  updateSavedLineup,
-  deleteSavedLineup,
+  loadBestLineup,
+  saveBestLineup,
 } from "./firebase";
 import { C, fontBase, fontDisplay } from "./shared/constants";
 import { TEAM_NAME, ROSTER, ALLOWED_FORMATIONS, LOGO_SRC } from "./config";
@@ -166,118 +164,16 @@ function PrintPitch({ halfLabel, lineup, positions, roster, formation, inactiveI
 }
 
 // =============================================
-// SAVE / LOAD MODAL
+// Lineup-array equality — used for the dirty flag against the saved best.
+// Both arrays are aligned by index; entries are player-id strings or null.
 // =============================================
-function SaveLoadModal({ isOpen, mode, savedLineups, currentSavedLineup, onSave, onUpdate, onLoad, onDelete, onShare, onClose, isMobile }) {
-  const [name, setName] = useState("");
-  const [saveAsNewMode, setSaveAsNewMode] = useState(false);
-  if (!isOpen) return null;
-  const canUpdate = mode === "save" && !!currentSavedLineup && !saveAsNewMode;
-
-  return (
-    <div style={{
-      position: "fixed", inset: 0, background: isMobile ? C.navyLight : "rgba(0,0,0,0.6)", backdropFilter: isMobile ? "none" : "blur(4px)",
-      display: "flex", alignItems: isMobile ? "stretch" : "center", justifyContent: "center", zIndex: 100,
-    }} onClick={isMobile ? undefined : onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        background: C.navyLight, borderRadius: isMobile ? 0 : 14,
-        padding: isMobile ? "16px 16px calc(20px + env(safe-area-inset-bottom, 0px))" : 24,
-        paddingTop: isMobile ? "env(safe-area-inset-top, 16px)" : undefined,
-        width: isMobile ? "100%" : 360, maxHeight: isMobile ? "100%" : "80vh",
-        height: isMobile ? "100%" : undefined,
-        border: isMobile ? "none" : `1px solid rgba(255,255,255,0.12)`, boxShadow: isMobile ? "none" : "0 20px 60px rgba(0,0,0,0.5)",
-        display: "flex", flexDirection: "column",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isMobile ? 12 : 16 }}>
-          <div style={{ fontFamily: fontDisplay, fontSize: 16, fontWeight: 800, color: C.white }}>
-            {mode === "save" ? "Save Lineup" : "Load Lineup"}
-          </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
-        </div>
-
-        {mode === "save" && canUpdate && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: isMobile ? "center" : "flex-start", gap: 10 }}>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontFamily: fontBase, marginBottom: 2 }}>
-              Currently editing: <span style={{ color: C.orange, fontWeight: 600 }}>{currentSavedLineup.name}</span>
-            </div>
-            <button onClick={() => onUpdate()}
-              style={{
-                width: "100%", padding: isMobile ? 12 : 10, background: C.orange, border: "none", borderRadius: 8,
-                color: C.white, fontSize: isMobile ? 14 : 14, fontWeight: 700, cursor: "pointer", fontFamily: fontBase,
-              }}>
-              Update "{currentSavedLineup.name}"
-            </button>
-            <button onClick={() => setSaveAsNewMode(true)}
-              style={{
-                width: "100%", padding: isMobile ? 10 : 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8,
-                color: C.white, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: fontBase,
-              }}>
-              Save as new…
-            </button>
-          </div>
-        )}
-
-        {mode === "save" && !canUpdate && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: isMobile ? "center" : "flex-start" }}>
-            <input placeholder="Lineup name (e.g. vs. Anderson Twp)" value={name} onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onSave(name.trim()); setName(""); setSaveAsNewMode(false); } }}
-              style={{
-                width: "100%", padding: isMobile ? "8px 10px" : "10px 12px", background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, color: C.white,
-                fontSize: isMobile ? 16 : 14, fontFamily: fontBase, outline: "none", marginBottom: 8,
-              }} autoFocus />
-            <button onClick={() => { if (name.trim()) { onSave(name.trim()); setName(""); setSaveAsNewMode(false); } }}
-              style={{
-                width: "100%", padding: isMobile ? 8 : 10, background: C.orange, border: "none", borderRadius: 8,
-                color: C.white, fontSize: isMobile ? 13 : 14, fontWeight: 700, cursor: "pointer", fontFamily: fontBase,
-                opacity: name.trim() ? 1 : 0.4,
-              }}>Save</button>
-            {currentSavedLineup && saveAsNewMode && (
-              <button onClick={() => setSaveAsNewMode(false)}
-                style={{
-                  width: "100%", padding: isMobile ? 8 : 6, background: "transparent", border: "none",
-                  color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer", fontFamily: fontBase, marginTop: 6,
-                }}>
-                ← Back to update "{currentSavedLineup.name}"
-              </button>
-            )}
-          </div>
-        )}
-
-        {mode === "load" && (
-          <div style={{ overflowY: "auto", flex: 1 }}>
-            {savedLineups.length === 0 ? (
-              <div style={{ textAlign: "center", padding: 30, color: "rgba(255,255,255,0.3)", fontSize: 13, fontStyle: "italic" }}>No saved lineups yet</div>
-            ) : (
-              savedLineups.map((s, i) => (
-                <div key={i} style={{
-                  display: "flex", alignItems: "center", padding: "10px 12px", marginBottom: 4, borderRadius: 8,
-                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)",
-                  cursor: "pointer", transition: "all 0.15s ease",
-                }} onClick={() => onLoad(i)}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.white }}>{s.name}</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>
-                      {s.formation} · {s.date}
-                    </div>
-                  </div>
-                  <button onClick={(e) => { e.stopPropagation(); onShare(i); }} title="Share lineup"
-                    style={{ background: "rgba(232,100,32,0.1)", border: "none", color: C.orange, borderRadius: 4, cursor: "pointer", fontSize: 11, padding: "3px 7px", marginLeft: 8, display: "flex", alignItems: "center", gap: 3 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    Share
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); onDelete(i); }}
-                    style={{ background: "rgba(255,60,60,0.1)", border: "none", color: "rgba(255,100,100,0.6)", borderRadius: 4, cursor: "pointer", fontSize: 11, padding: "3px 7px" }}>
-                    Del
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+function lineupsEqual(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if ((a[i] ?? null) !== (b[i] ?? null)) return false;
+  }
+  return true;
 }
 
 // =============================================
@@ -557,12 +453,10 @@ export default function MadeiraLineupPlanner() {
   const [showEdit, setShowEdit] = useState(false);
   const [newName, setNewName] = useState("");
   const [newNum, setNewNum] = useState("");
-  const [savedLineups, setSavedLineups] = useState(() => loadStored("savedLineups", []));
-  // Tracks which saved lineup the working state came from (null = brand new).
-  // Drives the Save modal's "Update existing" vs "Save as new" choice.
-  const [currentSavedLineupId, setCurrentSavedLineupId] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("save");
+  // Saved-best snapshot for the *current* formation. Drives the Save button's
+  // dirty flag (current lineup ≠ snapshot → dirty → save enabled).
+  // null = no saved best on file for this formation yet.
+  const [bestSnapshot, setBestSnapshot] = useState(null);
   const [rosterOpen, setRosterOpen] = useState(false);
   const [rosterHover, setRosterHover] = useState(false);
   const [toast, setToast] = useState(null);
@@ -578,7 +472,6 @@ export default function MadeiraLineupPlanner() {
   useEffect(() => saveStored("inactiveIds", inactiveIds), [inactiveIds]);
   useEffect(() => saveStored("formation", formation), [formation]);
   useEffect(() => saveStored("lineup", lineup), [lineup]);
-  useEffect(() => saveStored("savedLineups", savedLineups), [savedLineups]);
 
   // --- Auto-sync working state to Firestore after cloud load ---
   const cloudSyncTimer = useRef(null);
@@ -597,69 +490,60 @@ export default function MadeiraLineupPlanner() {
     toastTimer.current = setTimeout(() => setToast(null), 2500);
   };
 
-  // Load shared lineup from URL on mount, or load published lineup from Firestore
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
-    const encoded = params.get("lineup");
-    if (encoded) {
-      const data = decodeLineup(encoded);
-      if (data) {
-        if (data.roster) setRoster(data.roster);
-        setFormation(data.formation);
-        setLineup([...data.lineup]);
-        setInactiveIds([]);
-        if (data.name) setSharedName(data.name);
-        window.history.replaceState({}, "", window.location.pathname);
-        setCloudLoaded(true);
-        return;
-      }
-    }
-    // No URL share — load published lineup from Firestore (no banner needed)
-    loadPublishedLineup().then((data) => {
-      if (data) {
-        if (data.roster) setRoster(data.roster);
-        if (data.formation) setFormation(data.formation);
-        // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
-        if (data.lineup) setLineup([...data.lineup]);
-        else if (data.lineups) setLineup([...(data.lineups["1"] || emptyLineup())]);
-        // Always reset inactiveIds to [] — the builder no longer carries template
-        // inactives. Legacy published lineups with non-empty inactiveIds are
-        // gracefully forgotten on load (ROSTER-01).
-        setInactiveIds([]);
-      }
-      setCloudLoaded(true);
-    });
-  }, []);
-
-  // Saved lineups: load from Firestore, migrate any local-only entries once
+  // Load shared lineup from URL on mount, or load published lineup from Firestore.
+  // Either way, fetch the saved-best for whichever formation we end up on so the
+  // Save button's dirty flag is correct.
   useEffect(() => {
     let cancelled = false;
-    async function reconcileSavedLineups() {
-      try {
-        const local = loadStored("savedLineups", []);
-        const alreadyMigrated = loadStored("savedLineups_migrated", false);
-        // Migration: push local-only entries (without a Firestore id) once.
-        if (!alreadyMigrated && local.length > 0) {
-          const localOnly = local.filter((l) => !l.id);
-          for (const entry of localOnly) {
-            const id = await createSavedLineup(entry);
-            if (id) entry.id = id;
-          }
-          saveStored("savedLineups_migrated", true);
+    async function loadInitial() {
+      let activeFormation = formation;
+
+      const params = new URLSearchParams(window.location.hash.split("?")[1] || "");
+      const encoded = params.get("lineup");
+      if (encoded) {
+        const data = decodeLineup(encoded);
+        if (data) {
+          if (cancelled) return;
+          if (data.roster) setRoster(data.roster);
+          setFormation(data.formation);
+          setLineup([...data.lineup]);
+          setInactiveIds([]);
+          if (data.name) setSharedName(data.name);
+          window.history.replaceState({}, "", window.location.pathname);
+          activeFormation = data.formation;
         }
-        const remote = await listSavedLineups();
+      } else {
+        // No URL share — load published lineup from Firestore (no banner needed)
+        const data = await loadPublishedLineup();
         if (cancelled) return;
-        if (remote !== null) {
-          // Treat remote as source of truth post-migration.
-          setSavedLineups(remote);
-          saveStored("savedLineups", remote);
+        if (data) {
+          if (data.roster) setRoster(data.roster);
+          if (data.formation) {
+            setFormation(data.formation);
+            activeFormation = data.formation;
+          }
+          // Support both new shape (lineup: [...]) and legacy (lineups: {"1": [...]})
+          if (data.lineup) setLineup([...data.lineup]);
+          else if (data.lineups) setLineup([...(data.lineups["1"] || emptyLineup())]);
+          // Always reset inactiveIds to [] — the builder no longer carries template
+          // inactives. Legacy published lineups with non-empty inactiveIds are
+          // gracefully forgotten on load (ROSTER-01).
+          setInactiveIds([]);
         }
-      } catch (err) {
-        console.warn("Saved lineups reconcile failed, keeping local cache:", err);
       }
+
+      // Independent of which path we took, fetch the saved-best for the
+      // formation we ended up on. Drives the Save button's dirty flag.
+      const best = await loadBestLineup(activeFormation);
+      if (cancelled) return;
+      if (best && Array.isArray(best.lineup)) setBestSnapshot([...best.lineup]);
+      else setBestSnapshot(null);
+
+      setCloudLoaded(true);
     }
-    reconcileSavedLineups();
+    loadInitial();
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const positions = ALLOWED_FORMATIONS[formation];
@@ -722,8 +606,23 @@ export default function MadeiraLineupPlanner() {
     setLineup(emptyLineup());
     setInactiveIds([]);
     setSelectedPlayer(null);
-    setCurrentSavedLineupId(null);
   };
+
+  // Switch formation. If a saved best exists for the target formation, load it.
+  // Otherwise start clear (per Jim's spec — no carry-over from previous formation).
+  const handleFormationChange = useCallback(async (newKey) => {
+    if (!newKey || newKey === formation) return;
+    setFormation(newKey);
+    setSelectedPlayer(null);
+    const best = await loadBestLineup(newKey);
+    if (best && Array.isArray(best.lineup)) {
+      setLineup([...best.lineup]);
+      setBestSnapshot([...best.lineup]);
+    } else {
+      setLineup(emptyLineup());
+      setBestSnapshot(null);
+    }
+  }, [formation]);
 
   // --- ROSTER ---
   const addPlayer = () => {
@@ -741,122 +640,25 @@ export default function MadeiraLineupPlanner() {
     setLineup((prev) => prev.map((id) => (id === playerId ? null : id)));
   };
 
-  // --- SAVE / LOAD ---
-  const saveLineup = async (name) => {
-    const snapshot = {
-      name,
-      formation,
-      lineup: [...lineup],
-      inactiveIds: [...inactiveIds],
-      roster: roster.map((p) => ({ ...p })),
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    };
-    setModalOpen(false);
-
-    // Write to Firestore (SAVE-01). Fall back to local-only if offline — the
-    // reconcile effect will migrate it on the next successful load.
-    let id = null;
-    try {
-      id = await createSavedLineup(snapshot);
-    } catch (err) {
-      console.error("[savedLineups] createSavedLineup threw:", err);
-    }
-    if (id) {
-      console.log("[savedLineups] saved to Firestore:", id, name);
-    } else {
-      console.warn("[savedLineups] write failed — entry is local-only:", name);
-    }
-    const entry = id ? { ...snapshot, id } : snapshot;
-    setSavedLineups((prev) => [...prev, entry]);
-    // The new entry is now the "current" one — future Save actions target it.
-    if (id) setCurrentSavedLineupId(id);
-
-    // Also publish the currently-edited lineup to lineups/published so other
-    // devices see the same working state — separate concern from savedLineups.
-    const publishedOk = await savePublishedLineup(snapshot);
-
-    if (id && publishedOk) showToast("Lineup saved & published!");
-    else if (id) showToast("Saved (publish failed)");
-    else if (publishedOk) showToast("Saved locally — cloud save failed");
-    else showToast("Saved locally only");
-  };
-
-  // Overwrite the currently-loaded saved lineup with the working state.
-  const updateLineup = async () => {
-    if (!currentSavedLineupId) return;
-    const existing = savedLineups.find((s) => s.id === currentSavedLineupId);
-    if (!existing) {
-      showToast("Couldn't find that lineup to update");
-      return;
-    }
-    const snapshot = {
-      name: existing.name,
-      formation,
-      lineup: [...lineup],
-      inactiveIds: [...inactiveIds],
-      roster: roster.map((p) => ({ ...p })),
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    };
-    setModalOpen(false);
-
-    const ok = await updateSavedLineup(currentSavedLineupId, snapshot);
+  // --- SAVE BEST ---
+  // Single Save action: overwrites the saved best for the current formation.
+  // Inactives are intentionally not stored on the best — it represents the
+  // platonic "everyone available" lineup. Game-time availability is handled
+  // separately at game-start.
+  const saveBest = async () => {
+    const lineupCopy = [...lineup];
+    const ok = await saveBestLineup(formation, lineupCopy);
     if (ok) {
-      setSavedLineups((prev) =>
-        prev.map((s) =>
-          s.id === currentSavedLineupId ? { ...snapshot, id: currentSavedLineupId } : s
-        )
-      );
-      const publishedOk = await savePublishedLineup(snapshot);
-      showToast(publishedOk ? `Updated "${existing.name}"` : `Updated (publish failed)`);
+      setBestSnapshot(lineupCopy);
+      showToast(`Saved best for ${formation}`);
     } else {
-      showToast("Update failed — try again");
+      showToast("Save failed — try again");
     }
   };
-  const loadLineup = (index) => {
-    const s = savedLineups[index];
-    if (!s) {
-      console.warn("[savedLineups] loadLineup called with invalid index", index);
-      return;
-    }
-    try {
-      if (Array.isArray(s.roster)) setRoster(s.roster.map((p) => ({ ...p })));
-      if (s.formation) setFormation(s.formation);
-      // Support both new shape (lineup: [...]) and legacy saved (lineups: {"1": [...]})
-      if (Array.isArray(s.lineup)) setLineup([...s.lineup]);
-      else if (s.lineups) setLineup([...(s.lineups["1"] || emptyLineup())]);
-      // Always reset inactiveIds to [] — the builder no longer carries template
-      // inactives. Legacy saved lineups with non-empty inactiveIds are
-      // gracefully forgotten on load (ROSTER-01).
-      setInactiveIds([]);
-      setSelectedPlayer(null);
-      // Track the loaded lineup so Save can offer an "Update" option.
-      setCurrentSavedLineupId(s.id || null);
-      setModalOpen(false);
-    } catch (err) {
-      console.error("[savedLineups] loadLineup failed:", err, s);
-      showToast("Couldn't load that lineup");
-    }
-  };
-  const deleteLineup = (index) => {
-    const entry = savedLineups[index];
-    setSavedLineups((prev) => prev.filter((_, i) => i !== index));
-    if (entry?.id === currentSavedLineupId) setCurrentSavedLineupId(null);
-    if (entry?.id) {
-      deleteSavedLineup(entry.id).catch((err) =>
-        console.warn("Firestore delete failed (will retry on next reconcile):", err)
-      );
-    }
-  };
+
+  const isDirty = !lineupsEqual(lineup, bestSnapshot ?? emptyLineup());
 
   // --- SHARE ---
-  const handleShareSaved = async (index) => {
-    const s = savedLineups[index];
-    // Support both new shape and legacy saved lineups
-    const shareData = s.lineup || (s.lineups && s.lineups["1"]) || emptyLineup();
-    const result = await shareLineup({ formation: s.formation, lineup: shareData, inactiveIds: s.inactiveIds, roster: s.roster || roster, name: s.name });
-    if (result === "copied") showToast("Link copied to clipboard!");
-    else if (result === "shared") showToast("Lineup shared!");
-  };
   const handleShareCurrent = async () => {
     const result = await shareLineup({ formation, lineup, inactiveIds, roster, name: "" });
     if (result === "copied") showToast("Link copied to clipboard!");
@@ -1055,7 +857,7 @@ export default function MadeiraLineupPlanner() {
           {!isMobile && (
             <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 3 }}>
               {Object.keys(ALLOWED_FORMATIONS).map((f) => (
-                <button key={f} onClick={() => setFormation(f)} style={{
+                <button key={f} onClick={() => handleFormationChange(f)} style={{
                   padding: "7px 16px", borderRadius: 7, border: "none", cursor: "pointer",
                   fontFamily: fontDisplay, fontWeight: 700, fontSize: 13,
                   background: formation === f ? C.orange : "transparent",
@@ -1068,29 +870,23 @@ export default function MadeiraLineupPlanner() {
           {/* Controls — desktop only in header */}
           {!isMobile && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ display: "flex", gap: 3 }}>
-                <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
-                  padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
-                  background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                  fontFamily: fontBase, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
-                }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                  Save
-                </button>
-                <button onClick={() => { setModalMode("load"); setModalOpen(true); }} style={{
-                  padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
-                  background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                  fontFamily: fontBase, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
-                }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                  Load
-                  {savedLineups.length > 0 && (
-                    <span style={{ background: C.orange, borderRadius: 10, padding: "1px 5px", fontSize: 9, fontWeight: 800, color: C.white }}>
-                      {savedLineups.length}
-                    </span>
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={isDirty ? saveBest : undefined}
+                disabled={!isDirty}
+                title={isDirty ? `Save best for ${formation}` : `Best for ${formation} is up to date`}
+                style={{
+                  padding: "7px 12px", borderRadius: 7,
+                  border: isDirty ? `1px solid ${C.orange}` : "1px solid rgba(255,255,255,0.12)",
+                  background: isDirty ? "rgba(232,100,32,0.1)" : "transparent",
+                  color: isDirty ? C.orange : "rgba(255,255,255,0.3)",
+                  cursor: isDirty ? "pointer" : "default",
+                  fontFamily: fontBase, fontSize: 12, fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 4,
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
 
               <button onClick={handlePrint} style={{
                 padding: "7px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.18)",
@@ -1133,7 +929,7 @@ export default function MadeiraLineupPlanner() {
               </button>
               <div style={{ display: "flex", gap: 3, background: "rgba(0,0,0,0.3)", borderRadius: 7, padding: 3, flex: 1 }}>
                 {Object.keys(ALLOWED_FORMATIONS).map((f) => (
-                  <button key={f} onClick={() => setFormation(f)} style={{
+                  <button key={f} onClick={() => handleFormationChange(f)} style={{
                     padding: "5px 0", borderRadius: 5, border: "none", cursor: "pointer",
                     fontFamily: fontDisplay, fontWeight: 700, fontSize: 12, flex: 1,
                     background: formation === f ? C.orange : "transparent",
@@ -1144,28 +940,23 @@ export default function MadeiraLineupPlanner() {
               </div>
             </div>
 
-            {/* Row 2: Save, Load, Print, Share */}
+            {/* Row 2: Save (best for current formation), Print, Share */}
             <div style={{ display: "flex", gap: 4 }}>
-              <button onClick={() => { setModalMode("save"); setModalOpen(true); }} style={{
-                flex: 1, padding: "5px 0", borderRadius: 7, border: "1px solid rgba(255,255,255,0.15)",
-                background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
-              }}>
+              <button
+                onClick={isDirty ? saveBest : undefined}
+                disabled={!isDirty}
+                style={{
+                  flex: 1, padding: "5px 0", borderRadius: 7,
+                  border: isDirty ? `1px solid ${C.orange}` : "1px solid rgba(255,255,255,0.12)",
+                  background: isDirty ? "rgba(232,100,32,0.1)" : "transparent",
+                  color: isDirty ? C.orange : "rgba(255,255,255,0.3)",
+                  cursor: isDirty ? "pointer" : "default",
+                  fontFamily: fontBase, fontSize: 11, fontWeight: 600,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
+                }}
+              >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save
-              </button>
-              <button onClick={() => { setModalMode("load"); setModalOpen(true); }} style={{
-                flex: 1, padding: "5px 0", borderRadius: 7, border: "1px solid rgba(255,255,255,0.15)",
-                background: "transparent", color: "rgba(255,255,255,0.6)", cursor: "pointer",
-                fontFamily: fontBase, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, minHeight: 34,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                Load
-                {savedLineups.length > 0 && (
-                  <span style={{ background: C.orange, borderRadius: 10, padding: "1px 5px", fontSize: 8, fontWeight: 800, color: C.white, marginLeft: 2 }}>
-                    {savedLineups.length}
-                  </span>
-                )}
               </button>
               <button onClick={handlePrint} style={{
                 flex: 1, padding: "5px 0", borderRadius: 7, border: "1px solid rgba(255,255,255,0.15)",
@@ -1490,11 +1281,6 @@ export default function MadeiraLineupPlanner() {
           </div>
         </>
       )}
-
-      {/* SAVE/LOAD MODAL */}
-      <SaveLoadModal isOpen={modalOpen} mode={modalMode} savedLineups={savedLineups} isMobile={isMobile}
-        currentSavedLineup={savedLineups.find((s) => s.id === currentSavedLineupId) || null}
-        onSave={saveLineup} onUpdate={updateLineup} onLoad={loadLineup} onDelete={deleteLineup} onShare={handleShareSaved} onClose={() => setModalOpen(false)} />
 
       {/* SHARED LINEUP NOTICE — subtle pill, auto-dismisses */}
       {sharedName && (
