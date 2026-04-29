@@ -69,7 +69,7 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - Integer phases (16): Planned v2.2 work
 - Decimal phases (e.g., 16.1): Reserved for urgent insertions if needed
 
-- [ ] **Phase 16: Game-Day Roster Flow** — Per-game inactives + saved-lineups-as-templates + pre-kickoff walkthrough + Roster Management cleanup
+- [x] **Phase 16: Game-Day Roster Flow** — Per-game inactives + saved-lineups-as-templates + pre-kickoff walkthrough + Roster Management cleanup (completed 2026-04-29)
 
 ## Phase Details
 
@@ -236,4 +236,4 @@ Plans:
 | 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
 | 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
 | 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |
-| 16. Game-Day Roster Flow | 3/4 | In Progress|  | - |
+| 16. Game-Day Roster Flow | 4/4 | Complete   | 2026-04-29 | - |

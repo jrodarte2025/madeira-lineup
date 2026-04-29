@@ -54,7 +54,7 @@ Inactives shift from a global roster flag (set in Roster Management or in the li
 - [x] **INACT-01**: A new "Game-Day Roster" screen exists where the coach selects which players are inactive (unavailable today) for THIS game; the selection persists to the game document's `inactiveIds` field
 - [x] **INACT-02**: The Game-Day Roster screen is reachable from BOTH start-game paths — GameSetupModal's "Start Game Now" choice AND GameDetailModal's "Start Game" button on an existing setup-status game; neither path skips the inactive-selection step
 - [x] **INACT-03**: Players marked inactive for a game are excluded from the bench in that game and do not appear as available substitutes in the live game's sub UI
-- [ ] **INACT-04**: When a saved lineup is loaded into a game with set inactives, positions assigned to inactive players appear as empty slots requiring manual fill (visually distinct), and the saved lineup's stored `inactiveIds` array is ignored on load (saved lineups behave as templates)
+- [x] **INACT-04**: When a saved lineup is loaded into a game with set inactives, positions assigned to inactive players appear as empty slots requiring manual fill (visually distinct), and the saved lineup's stored `inactiveIds` array is ignored on load (saved lineups behave as templates)
 
 ### Pre-Kickoff Walkthrough Screen
 

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — Multi-Deployment Support
-current_plan: 16-04 checkpoint:human-verify
+current_plan: "16-04 checkpoint:human-verify"
 status: verifying
-stopped_at: "Paused at 16-04 checkpoint:human-verify — Tasks 1+2 complete (73e2d4c), awaiting visual sign-off of sit-player UI removal"
-last_updated: "2026-04-29T17:47:00.000Z"
-last_activity: 2026-04-29 — Plan 16-04 Tasks 1+2 complete; SIT button and inactive drop zone removed from MadeiraLineupPlanner; awaiting human-verify checkpoint.
+stopped_at: Checkpoint 16-02 task 3 — awaiting human verification of saved-lineup template behavior
+last_updated: "2026-04-29T17:39:58.583Z"
+last_activity: 2026-04-29 — Plan 16-04 Tasks 1+2 complete; SIT button and inactive drop zone removed; build+tests pass; awaiting checkpoint approval.
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 17
-  completed_plans: 15
+  completed_plans: 17
 ---
 
 # Project State
@@ -52,6 +52,7 @@ v3.0 autonomous-run decisions (2026-04-24):
 - Auto-approved every human-verify checkpoint via build+grep+tests per Jim's "only bother me for decisions" directive.
 - [Phase 16 plan 01]: computeBench extracted to lineupUtils.js for clean unit testability; gameDayRoster step inserted after createGame in both modal flows; inactiveIds lives on game.lineup.inactiveIds
 - [Phase 16-game-day-roster-flow]: 16-03: Deleted blur overlay entirely (not opacity-reduced) — coach needs full name readability; fixed-bottom CTA uses zIndex 90 so swap banner always wins
+- [Phase 16-game-day-roster-flow]: resolveLineupForGame strips saved inactiveIds at load time (template pattern); isEmptySlot prop on FieldPosition for inactive-assigned slots; setup-state fills persist to Firestore fire-and-forget
 
 ### Pending Jim-only Actions (to truly ship v3.0)
 
@@ -85,6 +86,6 @@ None — just Jim's live steps.
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:47:00.000Z
-Stopped at: Paused at 16-04 checkpoint:human-verify — Tasks 1+2 complete (73e2d4c), awaiting visual sign-off of sit-player UI removal
+Last session: 2026-04-29T17:39:55.053Z
+Stopped at: Checkpoint 16-02 task 3 — awaiting human verification of saved-lineup template behavior
 Resume file: None
