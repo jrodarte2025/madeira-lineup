@@ -43,5 +43,10 @@ service cloud.firestore {
     match /savedLineups/{docId} {
       allow read, write: if true;
     }
+
+    // Best lineup per formation (one canonical best per formation key)
+    match /bestLineups/{formationKey} {
+      allow read, write: if true;
+    }
   }
 }
