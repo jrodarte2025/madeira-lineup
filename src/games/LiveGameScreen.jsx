@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
-import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame, updateSeasonStats, updateGame } from "../firebase";
+import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame, updateSeasonStats, updateGame, loadBestLineup } from "../firebase";
 import { getSeasonId, computeSeasonDeltas } from "../shared/seasonUtils";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 import { FORMATIONS } from "../shared/formations";
@@ -799,18 +799,58 @@ export default function LiveGameScreen() {
   );
 
   // ---------------------------------------------------------------------------
-  // Formation change — pre-kickoff or halftime/break only. Index-preserving:
-  // each player stays at their current slot index; positions get the new
-  // formation's labels + coordinates. Coach uses field-to-field swap to
-  // fine-tune. Slot count is constant within a deployment's allowlist
-  // (Madeira: all 9-slot, friend: all 7-slot).
+  // Formation change. Behavior depends on game state:
+  //
+  // - setup (kick-off screen): load the saved best lineup for the chosen
+  //   formation from bestLineups/{formation}. Apply this game's inactives so
+  //   inactive-assigned slots render as empty/FILL. If no best exists, all
+  //   slots clear and the bench gets every active player. Persist the new
+  //   lineup array onto the game doc.
+  //
+  // - active/break: index-preserving — each player stays at the same slot
+  //   index, positions just get the new formation's labels + coordinates.
+  //   Mid-game minutes/intervals are tied to player.id (not slot), so this
+  //   is safe and keeps the coach's in-game arrangement intact.
   // ---------------------------------------------------------------------------
-  const handleFormationChange = useCallback((newKey) => {
+  const handleFormationChange = useCallback(async (newKey) => {
     const currentFormation = game?.lineup?.formation;
     if (!newKey || newKey === currentFormation) return;
     const newPositionDefs = FORMATIONS[newKey];
     if (!newPositionDefs) return;
 
+    setPendingSwapIdx(null);
+    setSubSource(null);
+
+    if (gameStatus === "setup") {
+      const best = await loadBestLineup(newKey);
+      const bestLineupArr = (best && Array.isArray(best.lineup)) ? best.lineup : null;
+      const gameInactives = game?.lineup?.inactiveIds || [];
+      const gameRoster = game?.lineup?.roster || [];
+
+      const nextLineupArray = newPositionDefs.map((_, idx) =>
+        bestLineupArr ? (bestLineupArr[idx] ?? null) : null
+      );
+      const emptySlotSet = new Set(computeEmptySlotIndices(nextLineupArray, gameInactives));
+
+      const newFieldPositions = newPositionDefs.map((pos, idx) => {
+        const playerId = nextLineupArray[idx];
+        const isEmpty = emptySlotSet.has(idx);
+        const player = (playerId && !isEmpty) ? (gameRoster.find((p) => p.id === playerId) || null) : null;
+        return { pos, player, isEmptySlot: isEmpty };
+      });
+      const assignedIds = nextLineupArray.filter(Boolean);
+      const newBench = computeBench(gameRoster, assignedIds, gameInactives);
+
+      setFieldPositions(newFieldPositions);
+      setBenchPlayers(newBench);
+      setGame((prev) => prev ? { ...prev, lineup: { ...(prev.lineup || {}), formation: newKey, lineup: nextLineupArray } } : prev);
+      updateGame(gameId, {
+        lineup: { ...(game?.lineup || {}), formation: newKey, lineup: nextLineupArray },
+      }).catch((err) => console.error("Failed to persist formation change:", err));
+      return;
+    }
+
+    // Active or break state — keep index-preserving (mid-game positional reshuffle).
     setFieldPositions((prev) =>
       newPositionDefs.map((pos, idx) => ({
         pos,
@@ -818,19 +858,11 @@ export default function LiveGameScreen() {
         isEmptySlot: !!prev[idx]?.isEmptySlot,
       }))
     );
-
-    setPendingSwapIdx(null);
-    setSubSource(null);
-
-    setGame((prev) => {
-      if (!prev) return prev;
-      return { ...prev, lineup: { ...(prev.lineup || {}), formation: newKey } };
-    });
-
+    setGame((prev) => prev ? { ...prev, lineup: { ...(prev.lineup || {}), formation: newKey } } : prev);
     updateGame(gameId, {
       lineup: { ...(game?.lineup || {}), formation: newKey },
     }).catch((err) => console.error("Failed to persist formation change:", err));
-  }, [gameId, game]);
+  }, [gameId, game, gameStatus]);
 
   // ---------------------------------------------------------------------------
   // Setup state is interactive so coaches can manually fill empty slots pre-kickoff.
