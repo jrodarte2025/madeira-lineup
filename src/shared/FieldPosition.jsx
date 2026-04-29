@@ -4,7 +4,7 @@ import { abbreviateName, formatJerseyNum } from "./utils";
 // =============================================
 // INTERACTIVE FIELD POSITION — player circle on pitch
 // =============================================
-export default function FieldPosition({ pos, player, isHighlighted, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact, dragSource, idx, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver, minuteDisplay, isSelected, statCount }) {
+export default function FieldPosition({ pos, player, isHighlighted, isEmptySlot, onDragStart, onDragEnd, onDragOver, onDrop, onClick, onDoubleClick, compact, dragSource, idx, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, isTouchDragOver, minuteDisplay, isSelected, statCount }) {
   const has = !!player;
   const circleSize = 50;
   const numSize = has ? 18 : 10;
@@ -12,9 +12,12 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
   const isBeingDragged = dragSource && dragSource.source === idx;
   const shouldGlow = (dragSource && !isBeingDragged) || isTouchDragOver;
 
+  // isEmptySlot: position was assigned to an inactive player — show dashed coral border + "FILL"
   // isSelected: brighter border glow for stat selection (Plan 05-04)
   const borderStyle = has
     ? (isSelected ? `3px solid ${C.orange}` : `2.5px solid ${C.orange}`)
+    : isEmptySlot
+    ? `2px dashed ${C.orange}`
     : isHighlighted
     ? `2px dashed ${C.orange}`
     : "2px dashed rgba(255,255,255,0.3)";
@@ -26,6 +29,14 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
     : has
     ? `0 4px 14px rgba(0,0,0,0.45), 0 0 20px ${C.orangeGlow}`
     : "none";
+
+  const circleBackground = has
+    ? `linear-gradient(145deg, ${C.navy}, ${C.navyLight})`
+    : isEmptySlot
+    ? "rgba(232,100,32,0.12)"
+    : isHighlighted
+    ? "rgba(232,100,32,0.25)"
+    : "rgba(0,0,0,0.2)";
 
   return (
     <div
@@ -39,7 +50,7 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
       style={{
         position: "absolute", left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%, -50%)",
         display: "flex", flexDirection: "column", alignItems: "center", gap: compact ? 1 : 2,
-        cursor: has ? "grab" : isHighlighted ? "pointer" : "default", zIndex: 5,
+        cursor: has ? "grab" : (isEmptySlot || isHighlighted) ? "pointer" : "default", zIndex: 5,
         transition: "left 0.4s cubic-bezier(0.4,0,0.2,1), top 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease",
         userSelect: "none", opacity: isBeingDragged ? 0.35 : 1,
         touchAction: "none",
@@ -48,7 +59,7 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
       <div style={{ position: "relative" }}>
         <div style={{
           width: circleSize, height: circleSize, borderRadius: "50%",
-          background: has ? `linear-gradient(145deg, ${C.navy}, ${C.navyLight})` : isHighlighted ? "rgba(232,100,32,0.25)" : "rgba(0,0,0,0.2)",
+          background: circleBackground,
           border: borderStyle,
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
           fontFamily: fontDisplay, fontWeight: 800,
@@ -65,6 +76,8 @@ export default function FieldPosition({ pos, player, isHighlighted, onDragStart,
             ) : (
               <span style={{ fontSize: 11, letterSpacing: "0.8px", color: "rgba(255,255,255,0.85)", lineHeight: 1 }}>{pos.label}</span>
             )
+          ) : isEmptySlot ? (
+            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: "1px", color: C.orange, lineHeight: 1, textTransform: "uppercase" }}>FILL</span>
           ) : (
             <span style={{ fontSize: numSize }}>{pos.label}</span>
           )}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { C, fontBase, fontDisplay } from "../shared/constants.js";
 import { createGame, listGames, loadPublishedLineup, deleteGame, updateGame, updateGameInactives } from "../firebase.js";
+import { resolveLineupForGame } from "../games/lineupUtils.js";
 import GameDayRosterScreen from "../games/GameDayRosterScreen.jsx";
 
 // ---------------------------------------------------------------------------
@@ -384,13 +385,15 @@ function GameSetupModal({ onClose, onGameCreated }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {savedLineups.map((s, i) => (
                   <div key={i} onClick={() => {
-                    setSelectedLineup({
+                    // Saved lineups are templates — ignore baked-in inactiveIds.
+                    // Per-game inactives come from the Game-Day Roster screen (Phase 16, INACT-04).
+                    setSelectedLineup(resolveLineupForGame({
                       formation: s.formation,
                       lineup: s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null),
                       inactiveIds: s.inactiveIds,
                       roster: s.roster,
                       name: s.name,
-                    });
+                    }));
                     setStep("actions");
                   }} style={{
                     display: "flex", alignItems: "center", padding: "12px 14px", borderRadius: 8,
@@ -578,13 +581,15 @@ function GameDetailModal({ game, onClose, onUpdated }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {savedLineups.map((s, i) => (
                   <div key={i} onClick={() => {
-                    handleLoadLineup({
+                    // Saved lineups are templates — ignore baked-in inactiveIds.
+                    // Per-game inactives come from the Game-Day Roster screen (Phase 16, INACT-04).
+                    handleLoadLineup(resolveLineupForGame({
                       formation: s.formation,
                       lineup: s.lineup || (s.lineups && s.lineups["1"]) || Array(9).fill(null),
                       inactiveIds: s.inactiveIds,
                       roster: s.roster,
                       name: s.name,
-                    });
+                    }));
                   }} style={{
                     display: "flex", alignItems: "center", padding: "12px 14px", borderRadius: 8,
                     background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
-import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame, updateSeasonStats } from "../firebase";
+import { loadGame, updateGameStatus, updateGameScore, appendGameEvent, replaceGameEvents, finalizeGame, updateSeasonStats, updateGame } from "../firebase";
 import { getSeasonId, computeSeasonDeltas } from "../shared/seasonUtils";
 import { C, fontBase, fontDisplay } from "../shared/constants";
 import { FORMATIONS } from "../shared/formations";
@@ -15,7 +15,7 @@ import {
   getPeriodNumber,
 } from "../shared/gameStructure";
 import { calcMinutes, abbreviateName, getPositionGroup, formatJerseyNum } from "../shared/utils";
-import { computeBench } from "./lineupUtils";
+import { computeBench, computeEmptySlotIndices } from "./lineupUtils";
 import PitchSVG from "../shared/PitchSVG";
 import FieldPosition from "../shared/FieldPosition";
 import GameHeader from "./GameHeader";
@@ -328,12 +328,17 @@ export default function LiveGameScreen() {
 
           const assignedIds = lineupArray.filter(Boolean);
 
+          // Positions where a now-inactive player was assigned render as empty slots
+          // (dashed border + "FILL" text) so the coach can fill them before kickoff.
+          const emptySlotSet = new Set(computeEmptySlotIndices(lineupArray, inactiveIds));
+
           resolvedFieldPositions = positionDefs.map((pos, idx) => {
             const playerId = lineupArray[idx];
-            const player = playerId
+            const isInactiveAssigned = emptySlotSet.has(idx);
+            const player = (playerId && !isInactiveAssigned)
               ? (roster || []).find((p) => p.id === playerId)
               : null;
-            return { pos, player };
+            return { pos, player, isEmptySlot: isInactiveAssigned };
           });
 
           resolvedBenchPlayers = computeBench(roster, assignedIds, inactiveIds);
@@ -646,6 +651,18 @@ export default function LiveGameScreen() {
           updated[targetFieldIdx] = { ...updated[targetFieldIdx], player: tmp.player };
           return updated;
         });
+
+        // Pre-kickoff fills must persist to Firestore so reloads preserve them.
+        if (gameStatus === "setup") {
+          const nextPositions = [...fieldPositions];
+          const tmp = nextPositions[fromIdx];
+          nextPositions[fromIdx] = { ...nextPositions[fromIdx], player: nextPositions[targetFieldIdx].player };
+          nextPositions[targetFieldIdx] = { ...nextPositions[targetFieldIdx], player: tmp.player };
+          const nextLineupArray = nextPositions.map(({ player }) => player?.id || null);
+          updateGame(gameId, {
+            lineup: { ...(game?.lineup || {}), lineup: nextLineupArray },
+          }).catch((err) => console.error("Failed to persist setup-state fill:", err));
+        }
       } else if (source.type === "bench") {
         // Bench-to-field: swap the bench player with the field player at targetFieldIdx
         const benchPlayer = source.player;
@@ -656,7 +673,8 @@ export default function LiveGameScreen() {
 
         setFieldPositions((prev) => {
           const updated = [...prev];
-          updated[targetFieldIdx] = { ...updated[targetFieldIdx], player: benchPlayer };
+          // Clear isEmptySlot when a bench player fills the slot
+          updated[targetFieldIdx] = { ...updated[targetFieldIdx], player: benchPlayer, isEmptySlot: false };
           return updated;
         });
 
@@ -667,6 +685,16 @@ export default function LiveGameScreen() {
           }
           return withoutBenchPlayer;
         });
+
+        // Pre-kickoff fills must persist to Firestore so reloads preserve them.
+        if (gameStatus === "setup") {
+          const nextPositions = [...fieldPositions];
+          nextPositions[targetFieldIdx] = { ...nextPositions[targetFieldIdx], player: benchPlayer, isEmptySlot: false };
+          const nextLineupArray = nextPositions.map(({ player }) => player?.id || null);
+          updateGame(gameId, {
+            lineup: { ...(game?.lineup || {}), lineup: nextLineupArray },
+          }).catch((err) => console.error("Failed to persist setup-state fill:", err));
+        }
 
         // Only log sub event and update intervals during active halves
         if (isActiveHalf) {
@@ -710,7 +738,7 @@ export default function LiveGameScreen() {
         // During halftime: allow bench-to-field pre-positioning, no intervals updated
       }
     },
-    [gameId, gameStatus, fieldPositions]
+    [gameId, gameStatus, fieldPositions, game]
   );
 
   const handleBenchDrop = useCallback(
@@ -727,6 +755,16 @@ export default function LiveGameScreen() {
       });
 
       setBenchPlayers((prev) => [...prev, leavingPlayer]);
+
+      // Pre-kickoff field-to-bench moves must persist to Firestore so reloads preserve them.
+      if (gameStatus === "setup") {
+        const nextPositions = [...fieldPositions];
+        nextPositions[sourceFieldIdx] = { ...nextPositions[sourceFieldIdx], player: null };
+        const nextLineupArray = nextPositions.map(({ player }) => player?.id || null);
+        updateGame(gameId, {
+          lineup: { ...(game?.lineup || {}), lineup: nextLineupArray },
+        }).catch((err) => console.error("Failed to persist setup-state bench drop:", err));
+      }
 
       if (isActiveHalf) {
         const now = Date.now();
@@ -757,11 +795,13 @@ export default function LiveGameScreen() {
         });
       }
     },
-    [gameId, gameStatus, fieldPositions]
+    [gameId, gameStatus, fieldPositions, game]
   );
 
   // ---------------------------------------------------------------------------
-  const isInteractive = isActiveStatus(gameStatus) || isBreakStatus(gameStatus);
+  // Setup state is interactive so coaches can manually fill empty slots pre-kickoff.
+  // Active/break states remain interactive for substitutions during the game.
+  const isInteractive = isActiveStatus(gameStatus) || isBreakStatus(gameStatus) || gameStatus === "setup";
 
   // ---------------------------------------------------------------------------
   // Live minute calculations — recompute every 15 seconds via tick counter
@@ -1127,13 +1167,14 @@ export default function LiveGameScreen() {
             <PitchSVG />
 
             {/* Field positions */}
-            {fieldPositions.map(({ pos, player }, idx) => (
+            {fieldPositions.map(({ pos, player, isEmptySlot }, idx) => (
               <FieldPosition
                 key={idx}
                 pos={pos}
                 player={player}
                 idx={idx}
                 isHighlighted={isInteractive && !player}
+                isEmptySlot={!!isEmptySlot}
                 compact={false}
                 minuteDisplay={
                   (isActiveStatus(gameStatus) || isBreakStatus(gameStatus) || gameStatus === "completed") && player
