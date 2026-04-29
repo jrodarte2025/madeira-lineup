@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: — Multi-Deployment Support
-current_plan: 16-02 (next to execute)
+current_plan: 16-04 checkpoint:human-verify
 status: verifying
-stopped_at: "Paused at 16-03 checkpoint:human-verify — Tasks 1+2 complete (e9af992), awaiting visual sign-off"
-last_updated: "2026-04-29T17:37:04.325Z"
-last_activity: 2026-04-29 — Plan 16-01 complete; human-verified Game-Day Roster flow at madeira-fc-lineups.web.app; INACT-01, INACT-02, INACT-03 shipped.
+stopped_at: "Paused at 16-04 checkpoint:human-verify — Tasks 1+2 complete (73e2d4c), awaiting visual sign-off of sit-player UI removal"
+last_updated: "2026-04-29T17:47:00.000Z"
+last_activity: 2026-04-29 — Plan 16-04 Tasks 1+2 complete; SIT button and inactive drop zone removed from MadeiraLineupPlanner; awaiting human-verify checkpoint.
 progress:
   total_phases: 9
   completed_phases: 8
@@ -26,10 +26,10 @@ See: .planning/PROJECT.md (updated 2026-04-20)
 ## Current Position
 
 Milestone: v2.2 — active
-Phase: 16 (Game-Day Roster Flow) — in progress (1/4 plans complete)
-Current Plan: 16-02 (next to execute)
-Status: Plan 16-01 complete and human-verified 2026-04-29. Wave 2 plans (16-02, 16-03, 16-04) ready to execute.
-Last activity: 2026-04-29 — Plan 16-01 complete; human-verified Game-Day Roster flow at madeira-fc-lineups.web.app; INACT-01, INACT-02, INACT-03 shipped.
+Phase: 16 (Game-Day Roster Flow) — in progress (3/4 plans code-complete, awaiting 16-04 human-verify)
+Current Plan: 16-04 checkpoint:human-verify
+Status: Plans 16-01, 16-02, 16-03 complete. 16-04 Tasks 1+2 done — SIT button + inactive drop zone removed; awaiting human-verify.
+Last activity: 2026-04-29 — Plan 16-04 Tasks 1+2 complete; SIT button and inactive drop zone removed; build+tests pass; awaiting checkpoint approval.
 
 ### v3.0 Phase Order
 
@@ -85,6 +85,6 @@ None — just Jim's live steps.
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:37:00.231Z
-Stopped at: Paused at 16-03 checkpoint:human-verify — Tasks 1+2 complete (e9af992), awaiting visual sign-off
+Last session: 2026-04-29T17:47:00.000Z
+Stopped at: Paused at 16-04 checkpoint:human-verify — Tasks 1+2 complete (73e2d4c), awaiting visual sign-off of sit-player UI removal
 Resume file: None
