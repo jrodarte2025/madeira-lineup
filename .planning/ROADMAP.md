@@ -6,6 +6,7 @@
 - ✅ **v2.0 — Live Game Tracking & Stats** - Phases 4-7 (shipped 2026-03-17)
 - 🚧 **v3.0 — Multi-Deployment Support** - Phases 8-11 (code complete 2026-04-24 — awaiting Jim's live Firebase-project creation + deploy)
 - ✅ **v2.1 — Madeira Game-Day Polish** - Phases 12-15 (code complete 2026-04-20)
+- 🚧 **v2.2 — Game-Day Roster Flow** - Phase 16 (active 2026-04-29)
 
 ## Phases
 
@@ -59,6 +60,16 @@ Full details: [milestones/v2.0-ROADMAP.md](milestones/v2.0-ROADMAP.md)
 - [x] **Phase 13: Stat System + Badge Fix** - `+skill` stat (neutral, all positions) end-to-end; stat badges show whole-game totals across halftime — completed 2026-04-20
 - [x] **Phase 14: Post-Game Stat Editing** - Add/delete/reassign events on completed games; live-updating shares; season stats recompute — completed 2026-04-20
 - [x] **Phase 15: Saved Lineups Firestore Persistence** - Durable Firestore collection with localStorage read-through cache + one-shot migration — completed 2026-04-20
+
+### 🚧 v2.2 — Game-Day Roster Flow (Active)
+
+**Milestone Goal:** Make "inactive" a per-game decision instead of a global roster flag. The coach sets game-day inactives on a new screen between game creation and live-game-start. Saved lineups become reusable templates (no baked-in inactives). The "Ready to kick off" screen becomes a readable lineup walkthrough for coach-to-player call-out, with the Start Game CTA moved to the bottom. Roster Management UI drops the "sit player" toggle and keeps only add/delete. All changes scoped to Madeira's `halves` flow; multi-deploy code paths untouched.
+
+**Phase Numbering:**
+- Integer phases (16): Planned v2.2 work
+- Decimal phases (e.g., 16.1): Reserved for urgent insertions if needed
+
+- [ ] **Phase 16: Game-Day Roster Flow** — Per-game inactives + saved-lineups-as-templates + pre-kickoff walkthrough + Roster Management cleanup
 
 ## Phase Details
 
@@ -181,11 +192,31 @@ Plans:
 Plans:
 - [x] 15-01-PLAN.md — Firestore savedLineups CRUD + read-through cache + one-shot migration (SAVE-01..04) — completed 2026-04-20
 
+### Phase 16: Game-Day Roster Flow
+**Goal**: A coach starts a game by going Games → select game → Start Game → set inactives for THIS game on a dedicated Game-Day Roster screen → lineup screen with sat players removed (saved-lineup positions empty for sat players, bench excludes them) → readable pre-kickoff walkthrough screen with Start Game CTA at the bottom → live game. Saved lineups behave as reusable templates without baked-in inactives. Roster Management is for roster composition only (add/delete).
+**Depends on**: Phase 15 (v2.1 code complete) — operates on Madeira `halves` codepaths only
+**Requirements**: INACT-01, INACT-02, INACT-03, INACT-04, KICK-01, KICK-02, ROSTER-01
+**Success Criteria** (what must be TRUE):
+  1. From the Games tab, tapping a game and tapping "Start Game" routes the coach through a new Game-Day Roster screen where they mark players inactive (unavailable today) before reaching the lineup. The same Game-Day Roster step appears on the GameSetupModal "Start Game Now" path. The selection writes to the game document's `inactiveIds` field.
+  2. Loading a saved lineup into a game with set inactives shows positions held by inactive players as empty slots requiring manual fill, and inactive players are excluded from the bench. The empty slots are visually distinct so the coach knows what they need to fill before starting.
+  3. Saved lineups behave as templates: their stored `inactiveIds` array is ignored on load. Existing saved lineups (created before this change) load with full rosters available; per-game inactives drive what's filtered.
+  4. The pre-kickoff "Ready to kick off" screen displays the lineup unblurred and readable (field positions and bench), and the "Start Game" CTA sits at the bottom of the screen so the coach can walk through the lineup with players before tapping to start.
+  5. The Roster Management screen no longer offers a "sit player" / "make inactive" toggle — only add player and delete player operations remain.
+  6. Madeira's full game-day path runs end-to-end with the new flow: select game → set inactives → load saved lineup template → fill empty slots → pre-kickoff walkthrough → live game with timer → halftime → finalize → summary → season dashboard. No regressions in live-game timer, halftime, stat logging, summary, or season dashboard behaviors.
+**Plans**: 4 plans (Waves 1-4, sequenced by file overlap and UX dependency — 16-01 must precede 16-02 because the inactive-aware lineup loader needs the per-game `inactiveIds` to exist)
+
+Plans:
+- [ ] 16-01-PLAN.md — Game-Day Roster screen + insert into both Start Game flows; persist `inactiveIds` per-game (INACT-01, INACT-02, INACT-03)
+- [ ] 16-02-PLAN.md — Saved-lineup-as-template load behavior: sat-player positions empty, bench excludes inactives, ignore saved `inactiveIds` (INACT-04)
+- [ ] 16-03-PLAN.md — Pre-kickoff walkthrough screen: un-blur lineup, move "Start Game" CTA to bottom (KICK-01, KICK-02)
+- [ ] 16-04-PLAN.md — Simplify Roster Management UI: remove sit-player toggle, keep add/delete only (ROSTER-01)
+
 ## Progress
 
 **Execution Order:**
-- v2.1 active path: Phase 12 → 13 → 14 → 15 (13 must precede 14 because EDIT-02 depends on `+skill` existing; 15 is orthogonal and runs last for solo-dev cadence)
-- v3.0 paused: Phases 8-11 resume after v2.1 stable; 8 picks up at 08-02
+- v2.2 active path: Phase 16 (single phase, plans 16-01 → 16-02 → 16-03 → 16-04 in waves)
+- v2.1 complete: Phases 12-15 shipped 2026-04-20
+- v3.0 paused: Phases 8-11 code-complete; live deploy pending Jim
 - Decimal insertions land between their surrounding integers if used
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -205,3 +236,4 @@ Plans:
 | 13. Stat System + Badge Fix | v2.1 | 0/TBD | Not started | - |
 | 14. Post-Game Stat Editing | v2.1 | 0/TBD | Not started | - |
 | 15. Saved Lineups Firestore Persistence | v2.1 | 0/TBD | Not started | - |
+| 16. Game-Day Roster Flow | v2.2 | 0/4 | Planned (ready for /gsd:plan-phase 16) | - |

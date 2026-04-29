@@ -1,17 +1,22 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: — Multi-Deployment Support
-status: milestone_code_complete
-stopped_at: "v3.0 code-complete; friend Firebase project creation pending (Jim)"
-last_updated: "2026-04-24"
-last_activity: "2026-04-24 — Phases 8-11 all executed autonomously in one session. 157 tests pass. Both bundles verified. Friend Firebase project creation + live deploy pending — runbook in DEPLOYMENT.md."
+milestone: v2.2
+milestone_name: — Game-Day Roster Flow
+status: milestone_active
+stopped_at: "v2.2 starting; Phase 16 ready for /gsd:plan-phase"
+last_updated: "2026-04-29"
+last_activity: "2026-04-29 — v2.2 milestone opened; Phase 16 (Game-Day Roster Flow) added to ROADMAP with 4 plans (16-01..16-04); 7 new requirements (INACT-01..04, KICK-01..02, ROSTER-01) added to REQUIREMENTS.md."
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 6
-  completed_plans: 6
-  percent: 100
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 0
+  percent: 0
+paused_milestones:
+  - id: v3.0
+    name: Multi-Deployment Support
+    status: code_complete_pending_jim_deploy
+    notes: "All 4 phases (8-11) code-complete 2026-04-24. Awaiting Jim's Firebase project creation + first deploy per DEPLOYMENT.md."
 ---
 
 # Project State
@@ -21,14 +26,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-20)
 
 **Core value:** Coaches can manage lineups, track live games, and review player stats from phone or desktop
-**Current focus:** v3.0 Multi-Deployment code-complete. Onboarding friend's team pending Jim-only actions (Firebase project creation, env paste, first deploy).
+**Current focus:** v2.2 Game-Day Roster Flow — Phase 16 ready to plan. Per-game inactive selection + saved-lineups-as-templates + pre-kickoff walkthrough + Roster Management cleanup. v3.0 paused awaiting Jim's friend-project deploy.
 
 ## Current Position
 
-Milestone: v3.0 — code complete
-Phase: all 4 shipped (8 → 9 → 10 → 11)
-Status: Awaiting Jim's live-deploy actions per DEPLOYMENT.md, then final regression smoke.
-Last activity: 2026-04-24 — Full autonomous run through Phases 8-11.
+Milestone: v2.2 — active
+Phase: 16 (Game-Day Roster Flow) — ready for /gsd:plan-phase 16
+Status: Roadmap + requirements written 2026-04-29; planning next.
+Last activity: 2026-04-29 — Opened v2.2 milestone; Phase 16 added with 4 plans (16-01..16-04); 7 reqs added (INACT-01..04, KICK-01..02, ROSTER-01).
 
 ### v3.0 Phase Order
 

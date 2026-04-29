@@ -1,9 +1,11 @@
-# Requirements: Madeira FC Lineup Planner — v2.1 Madeira Game-Day Polish
+# Requirements: Madeira FC Lineup Planner — v2.1 Madeira Game-Day Polish + v2.2 Game-Day Roster Flow
 
-**Defined:** 2026-04-20
+**Defined:** 2026-04-20 (v2.1) / 2026-04-29 (v2.2)
 **Core Value:** Coaches can manage lineups, track live games, and review player stats — all from their phone at the field or desktop at home — with one tool that handles the full game-day workflow from kickoff to season review.
 
-**Milestone Goal:** Address feedback from Madeira's first real game use of the app. Fix lineup-builder gaps, add a new stat type, make stat badges consistent across halves, migrate saved lineups to durable storage, and add post-game stat editing so coaches can correct stats after rewatching film.
+**v2.1 Milestone Goal:** Address feedback from Madeira's first real game use of the app. Fix lineup-builder gaps, add a new stat type, make stat badges consistent across halves, migrate saved lineups to durable storage, and add post-game stat editing so coaches can correct stats after rewatching film.
+
+**v2.2 Milestone Goal:** Move "inactive" from a global roster flag to a per-game decision. The coach sets game-day inactives on a new screen between game creation and live-game start. Saved lineups become reusable templates (no baked-in inactives). The pre-kickoff "Ready to kick off" screen becomes a coach's lineup walkthrough tool with the Start Game CTA at the bottom. Roster Management UI drops the "sit player" toggle and keeps only add/delete.
 
 ## v2.1 Requirements
 
@@ -42,6 +44,30 @@ Safari/iOS clears PWA localStorage after ~7 days (ITP). Saved lineups need durab
 - [x] **SAVE-02**: One-shot migration: on first post-upgrade load, any existing localStorage `savedLineups` entries push to Firestore
 - [x] **SAVE-03**: localStorage retained as read-through cache — app loads instantly from local, then reconciles with Firestore in the background for offline resilience
 - [x] **SAVE-04**: Save/edit/delete operations write to Firestore AND update the localStorage cache
+
+## v2.2 Requirements
+
+### Per-Game Inactive Flow
+
+Inactives shift from a global roster flag (set in Roster Management or in the lineup builder) to a per-game decision made on a dedicated Game-Day Roster screen between game creation and live-game start.
+
+- [ ] **INACT-01**: A new "Game-Day Roster" screen exists where the coach selects which players are inactive (unavailable today) for THIS game; the selection persists to the game document's `inactiveIds` field
+- [ ] **INACT-02**: The Game-Day Roster screen is reachable from BOTH start-game paths — GameSetupModal's "Start Game Now" choice AND GameDetailModal's "Start Game" button on an existing setup-status game; neither path skips the inactive-selection step
+- [ ] **INACT-03**: Players marked inactive for a game are excluded from the bench in that game and do not appear as available substitutes in the live game's sub UI
+- [ ] **INACT-04**: When a saved lineup is loaded into a game with set inactives, positions assigned to inactive players appear as empty slots requiring manual fill (visually distinct), and the saved lineup's stored `inactiveIds` array is ignored on load (saved lineups behave as templates)
+
+### Pre-Kickoff Walkthrough Screen
+
+The "Ready to kick off" screen today blurs the lineup; the coach uses this moment to call out the lineup to players, so the lineup needs to be readable.
+
+- [ ] **KICK-01**: The "Ready to kick off" pre-kickoff screen displays the full lineup (field positions and bench) unblurred and readable so the coach can walk through the lineup with players before the game starts
+- [ ] **KICK-02**: The "Start Game" CTA on the pre-kickoff screen is positioned at the bottom of the screen (thumb-reach), so the coach can complete the walkthrough then tap to start
+
+### Roster Management Cleanup
+
+With per-game inactives, the global "sit player" toggle in Roster Management becomes redundant. Roster Management is for roster composition only.
+
+- [ ] **ROSTER-01**: The Roster Management screen no longer offers a "sit player" / "make inactive" toggle — only add player and delete player operations remain
 
 ## Deferred / Future (not v2.1)
 
@@ -102,13 +128,19 @@ Explicitly excluded. Documented to prevent scope creep.
 | SAVE-02 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
 | SAVE-03 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
 | SAVE-04 | Phase 15 — Saved Lineups Firestore Persistence | Shipped (code) 2026-04-20 |
+| INACT-01 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| INACT-02 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| INACT-03 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| INACT-04 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| KICK-01 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| KICK-02 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
+| ROSTER-01 | Phase 16 — Game-Day Roster Flow | Planned (v2.2) |
 
 **Coverage:**
-- v2.1 requirements: 18 total
-- Mapped to phases: 18 ✓
-- Unmapped: 0
-- Coverage: 100%
+- v2.1 requirements: 18 total → mapped to Phases 12-15 (100%)
+- v2.2 requirements: 7 total → mapped to Phase 16 (100%)
+- Combined: 25 requirements, 100% coverage
 
 ---
-*Requirements defined: 2026-04-20*
-*Last updated: 2026-04-20 after roadmap creation — all 18 v2.1 requirements mapped to Phases 12-15*
+*Requirements defined: 2026-04-20 (v2.1) / 2026-04-29 (v2.2)*
+*Last updated: 2026-04-29 — added 7 v2.2 requirements (INACT-01..04, KICK-01..02, ROSTER-01) mapped to Phase 16*
