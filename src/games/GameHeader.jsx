@@ -15,7 +15,7 @@ import {
 // both halves (Madeira) and quarters (friend) share one component.
 // =============================================
 
-function ScoreColumn({ value, side, label, onScoreChange }) {
+export function ScoreColumn({ value, side, label, onScoreChange }) {
   const longPressRef = useRef(null);
   const touchHandledRef = useRef(false);
   const isHome = side === "home";

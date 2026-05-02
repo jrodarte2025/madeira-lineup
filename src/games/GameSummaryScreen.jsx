@@ -1,17 +1,21 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
 import { toBlob } from "html-to-image";
 import { C, fontBase, fontDisplay, STAT_LABELS } from "../shared/constants";
 import { TEAM_NAME } from "../config";
+import { getHomeTeamCode } from "../shared/gameStructure";
 import { abbreviateName } from "../shared/utils";
 import { buildSummaryRows } from "../shared/summaryUtils";
 import { getSeasonId } from "../shared/seasonUtils";
 import { computeSeasonDeltaDiff } from "../shared/eventMutations";
-import { loadGame, replaceGameEvents, updateSeasonStats } from "../firebase";
+import { loadGame, replaceGameEvents, updateGameScore, updateSeasonStats } from "../firebase";
 import ShareCard from "./ShareCard";
 import EventEditor from "./EventEditor";
 import RewatchMode from "./RewatchMode";
 import DeleteGameButton from "./DeleteGameButton";
+import { ScoreColumn } from "./GameHeader";
+
+const HOME_CODE = getHomeTeamCode(TEAM_NAME);
 
 // =============================================
 // GAME SUMMARY SCREEN
@@ -67,6 +71,18 @@ export default function GameSummaryScreen() {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 2000);
   }
+
+  const handleScoreChange = useCallback(
+    (side, delta) => {
+      if (!game || !gameId) return;
+      const prev = game.score || { home: 0, away: 0 };
+      const newVal = Math.max(0, (prev[side] ?? 0) + delta);
+      const newScore = { ...prev, [side]: newVal };
+      setGame((g) => (g ? { ...g, score: newScore } : g));
+      updateGameScore(gameId, newScore);
+    },
+    [game, gameId]
+  );
 
   async function handleEventsChange(newEvents) {
     if (!game) return;
@@ -295,10 +311,59 @@ export default function GameSummaryScreen() {
             ← Back to Games
           </button>
         )}
-        <p style={scoreStyle}>
-          {TEAM_NAME} FC {homeScore} – {awayScore} {game.opponent}
-        </p>
+        {isPublic ? (
+          <p style={scoreStyle}>
+            {TEAM_NAME} FC {homeScore} – {awayScore} {game.opponent}
+          </p>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              margin: "0 0 6px 0",
+            }}
+          >
+            <ScoreColumn
+              value={homeScore}
+              side="home"
+              label={HOME_CODE}
+              onScoreChange={handleScoreChange}
+            />
+            <div
+              style={{
+                fontFamily: fontDisplay,
+                fontSize: 24,
+                fontWeight: 700,
+                color: "rgba(255,255,255,0.5)",
+                lineHeight: 1,
+                padding: "0 4px",
+              }}
+            >
+              –
+            </div>
+            <ScoreColumn
+              value={awayScore}
+              side="away"
+              label={game.opponent || "AWAY"}
+              onScoreChange={handleScoreChange}
+            />
+          </div>
+        )}
         <p style={dateStyle}>{formatDate(game.date)}</p>
+        {!isPublic && (
+          <p
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontSize: 11,
+              margin: "4px 0 0 0",
+              fontFamily: fontBase,
+            }}
+          >
+            Tap score +1 · long-press or right-click -1
+          </p>
+        )}
       </div>
 
       {/* Export buttons — coach mode only */}
